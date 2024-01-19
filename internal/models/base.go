@@ -1,11 +1,12 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"time"
 )
 
 type Base struct {
-	ID        uuid `gorm:"type:uuid,primary_key;default:uuid_generate_v4()"`
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`

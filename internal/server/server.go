@@ -2,11 +2,26 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/robwittman/chushi/internal/models"
 	"github.com/robwittman/chushi/internal/server/config"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"net/http"
 )
 
 func New(conf *config.Config) (*gin.Engine, error) {
+
+	// Load and initialize our database
+	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	if err := models.Setup(database); err != nil {
+		return nil, err
+	}
+
+	factory := &Factory{}
+
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -14,15 +29,28 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		})
 	})
 
+	r.GET("/healthz", func(c *gin.Context) {
+		c.Data(http.StatusOK, "", []byte("OK"))
+	})
+	r.GET("/readyz", func(c *gin.Context) {
+		c.Data(http.StatusOK, "", []byte("OK"))
+	})
+	r.GET("/status", func(c *gin.Context) {
+		c.Data(http.StatusOK, "", []byte("OK"))
+	})
+	r.GET("/metrics", notImplemented)
+
 	// Workspaces
 	workspaces := r.Group("/workspaces")
 	{
-		workspaces.POST("", notImplemented)
-		workspaces.GET("", notImplemented)
-		workspace := r.Group("/:workspace_id")
+		ctrl := factory.NewWorkspaceController()
+		workspaces.POST("", ctrl.CreateWorkspace)
+		workspaces.GET("", ctrl.ListWorkspaces)
+		workspace := workspaces.Group("/:workspace_id")
 		{
-			workspace.GET("", notImplemented)
-			workspace.PATCH("", notImplemented)
+			workspace.GET("", ctrl.GetWorkspace)
+			workspace.PATCH("", ctrl.UpdateWorkspace)
+			workspace.DELETE("", ctrl.DeleteWorkspace)
 			workspace.GET("/variables", notImplemented)
 			workspace.POST("/variables", notImplemented)
 			workspace.PATCH("/variables/:variable_id", notImplemented)

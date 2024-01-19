@@ -19,8 +19,10 @@ var serverCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		srv, _ := server.New(conf)
-
+		srv, err := server.New(conf)
+		if err != nil {
+			log.Fatal(err)
+		}
 		if err := srv.Run(); err != nil {
 			log.Fatal(err)
 		}
