@@ -13,5 +13,6 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			"message": "pong",
 		})
 	})
+
 	return r, nil
 }
