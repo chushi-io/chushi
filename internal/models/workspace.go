@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
+	"time"
+)
 
 type Workspace struct {
 	Base
@@ -19,4 +23,70 @@ type WorkspaceVcsConnection struct {
 	Patterns         []string `json:"patterns" gorm:"serializer:json"`
 	Prefixes         []string `json:"prefixes" gorm:"serializer:json"`
 	WorkingDirectory string   `json:"working_directory"`
+}
+
+type WorkspacesRepository interface {
+	Save(workspace Workspace)
+	Update(workspace Workspace)
+	Delete(workspaceId string)
+	FindById(workspaceId string) (Workspace, error)
+	FindAll() []Workspace
+}
+
+type WorkspacesRepositoryImpl struct {
+	Db *gorm.DB
+}
+
+func NewWorkspacesRepository(db *gorm.DB) WorkspacesRepository {
+	return &WorkspacesRepositoryImpl{Db: db}
+}
+
+func (w WorkspacesRepositoryImpl) Save(workspace Workspace) {
+
+}
+
+func (w WorkspacesRepositoryImpl) Update(workspace Workspace) {
+
+}
+
+func (w WorkspacesRepositoryImpl) Delete(workspaceId string) {
+
+}
+
+func (w WorkspacesRepositoryImpl) FindById(workspaceId string) (Workspace, error) {
+	return Workspace{}, nil
+}
+
+func (w WorkspacesRepositoryImpl) FindAll() []Workspace {
+	return []Workspace{}
+}
+
+type WorkspacesService interface {
+	Create(workspace Workspace)
+	Update(workspace Workspace)
+	Delete(workspaceId string)
+	FindById(workspaceId string) Workspace
+	FindAll() []Workspace
+}
+
+type WorkspacesServiceImpl struct {
+	Repository WorkspacesRepository
+	Validate   *validator.Validate
+}
+
+func NewWorkspacesServiceImpl(repository WorkspacesRepository, validate *validator.Validate) WorkspacesService {
+	return &WorkspacesServiceImpl{
+		Repository: repository,
+		Validate:   validate,
+	}
+}
+
+func (s WorkspacesServiceImpl) Create(workspace Workspace) {
+	err := s.Validate.Struct(workspace)
+}
+
+func (s WorkspacesServiceImpl) FindAll() []Workspace {
+	result := s.Repository.FindAll()
+
+	var workspaces []Workspace
 }
