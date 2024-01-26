@@ -16,9 +16,19 @@ import (
 var runnerCmd = &cobra.Command{
 	Use:   "runner",
 	Short: "Execute a run for an OpenTofu workspace",
+	Long: `
+The Chushi runner is responsible for the actual plan / apply / destroy 
+executions occuring for Chushi workspaces.'
+`,
+	// To keep the runner as small as possible, this should be
+	// the total sum of its functionality. Its responsibility
+	// should only be to install terraform (unless cached),
+	// initialize the workspace, and run the appropriate command
+	// The JSON output should be streamed to the Chushi server (as well
+	// as cached somewhere locally in the event of issues), and then exit.
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			log.Fatal("Please provider a command to terraform")
+			log.Fatal("Please provider a command to run")
 		}
 		ctx := context.Background()
 		terraformVersion, _ := cmd.Flags().GetString("version")
