@@ -12,3 +12,7 @@ services:
     environment:
       POSTGRES_PASSWORD: example
       POSTGRES_DB: chushi_development
+  nats:
+    image: nats
+    ports:
+      - "8222:8222"

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./chushi";
+
+service Terraform {
+  rpc Plan(Workspace) returns (PlanResponse) {}
+  rpc Apply(Workspace) returns (ApplyResponse) {}
+}
+
+message Workspace {
+  string id = 1;
+}
+
+message PlanRequest {
+  int32 id = 1;
+  google.protobuf.Timestamp time = 2;
+  string description = 3;
+}
+
+message PlanResponse {}
+message ApplyResponse {}
