@@ -82,11 +82,24 @@ func NewWorkspacesServiceImpl(repository WorkspacesRepository, validate *validat
 }
 
 func (s WorkspacesServiceImpl) Create(workspace Workspace) {
-	err := s.Validate.Struct(workspace)
+	//err := s.Validate.Struct(workspace)
 }
 
 func (s WorkspacesServiceImpl) FindAll() []Workspace {
 	result := s.Repository.FindAll()
 
-	var workspaces []Workspace
+	//var workspaces []Workspace
+	return result
+}
+
+func (s WorkspacesServiceImpl) FindById(workspaceId string) Workspace {
+	return Workspace{}
+}
+
+func (s WorkspacesServiceImpl) Delete(workspaceId string) {
+
+}
+
+func (s WorkspacesServiceImpl) Update(workspace Workspace) {
+	return
 }

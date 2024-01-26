@@ -2,3 +2,6 @@
 .env
 data
 tmp
+
+testdata/.terraform*
+testdata/terraform*
