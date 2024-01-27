@@ -1,2 +1,2 @@
 server: air server --agent
-ui: npm run dev --prefix ui/chushi
+ui: npm run dev --prefix ui

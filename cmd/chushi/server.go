@@ -27,7 +27,7 @@ var serverCmd = &cobra.Command{
 
 		runAgent, _ := cmd.Flags().GetBool("agent")
 		if runAgent {
-			ag, err := agent.New()
+			ag, err := agent.New(nil)
 			if err != nil {
 				log.Fatal(err)
 			}
