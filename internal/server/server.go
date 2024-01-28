@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/chushi/internal/models"
 	"github.com/robwittman/chushi/internal/server/config"
@@ -20,7 +21,9 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		return nil, err
 	}
 
-	factory := &Factory{}
+	factory := &Factory{Database: database}
+	workspaceCtrl := factory.NewWorkspaceController()
+	organizationsCtrl := factory.NewOrganizationsController()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -29,48 +32,98 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		})
 	})
 
-	r.GET("/healthz", func(c *gin.Context) {
-		c.Data(http.StatusOK, "", []byte("OK"))
+	r.GET("/.well-known/terraform.json", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"modules.v1":   "/api/v1/registry/modules",
+			"providers.v1": "/api/v1/registry/providers",
+			"motd.v1":      "",
+			"state.v2":     "/api/v1",
+			"tfe.v2":       "/api/v1",
+			"tfe.v2.1":     "/api/v1",
+			"versions.v1":  "/api/v1/versions/",
+		})
 	})
-	r.GET("/readyz", func(c *gin.Context) {
-		c.Data(http.StatusOK, "", []byte("OK"))
-	})
-	r.GET("/status", func(c *gin.Context) {
-		c.Data(http.StatusOK, "", []byte("OK"))
-	})
-	r.GET("/metrics", notImplemented)
 
-	// Workspaces
-	workspaces := r.Group("/workspaces")
+	v1api := r.Group("/api/v1")
+
+	v1api.GET("/healthz", func(c *gin.Context) {
+		c.Data(http.StatusOK, "", []byte("OK"))
+	})
+	v1api.GET("/readyz", func(c *gin.Context) {
+		c.Data(http.StatusOK, "", []byte("OK"))
+	})
+	v1api.GET("/status", func(c *gin.Context) {
+		c.Data(http.StatusOK, "", []byte("OK"))
+	})
+	v1api.GET("/metrics", notImplemented)
+
+	v1api.Any("/terraform", func(context *gin.Context) {
+		fmt.Println(context.Request)
+	})
+	v1api.Any("/lock", func(context *gin.Context) {
+		fmt.Println(context.Request)
+	})
+	v1api.Any("/unlock", func(context *gin.Context) {
+		fmt.Println(context.Request)
+	})
+	v1api.GET("/orgs", organizationsCtrl.List)
+	v1api.POST("/orgs", organizationsCtrl.Create)
+	orgs := v1api.Group("/orgs/:organization")
 	{
-		ctrl := factory.NewWorkspaceController()
-		workspaces.POST("", ctrl.CreateWorkspace)
-		workspaces.GET("", ctrl.ListWorkspaces)
+		orgs.GET("", organizationsCtrl.Get)
+	}
+
+	execGroup := orgs.Group("/ws")
+	{
+		execGroup.GET("/:workspace", func(c *gin.Context) {
+		})
+		execGroup.POST("/:workspace", func(c *gin.Context) {
+			fmt.Println("Creating state file")
+			c.JSON(http.StatusOK, gin.H{})
+		})
+		execGroup.Handle("LOCK", "/:workspace", func(c *gin.Context) {
+			fmt.Println("Locking workspace")
+			fmt.Println(c.Request)
+		})
+		execGroup.Handle("UNLOCK", "/:workspace", func(c *gin.Context) {
+			fmt.Println("Unlocking workspace")
+			fmt.Println(c.Request)
+		})
+	}
+	// Workspaces
+	workspaces := orgs.Group("/workspaces")
+	{
+		workspaces.POST("", workspaceCtrl.CreateWorkspace)
+		workspaces.GET("", workspaceCtrl.ListWorkspaces)
 		workspace := workspaces.Group("/:workspace_id")
 		{
-			workspace.GET("", ctrl.GetWorkspace)
-			workspace.PATCH("", ctrl.UpdateWorkspace)
-			workspace.DELETE("", ctrl.DeleteWorkspace)
+			workspace.GET("", workspaceCtrl.GetWorkspace)
+			workspace.PATCH("", workspaceCtrl.UpdateWorkspace)
+			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
 			workspace.GET("/variables", notImplemented)
 			workspace.POST("/variables", notImplemented)
 			workspace.PATCH("/variables/:variable_id", notImplemented)
 			workspace.DELETE("/variables/:variable_id", notImplemented)
-			workspace.POST("/lock", notImplemented)
-			workspace.POST("/unlock", notImplemented)
+
+			// HTTP Backend handlers
+			workspace.GET("/state", workspaceCtrl.GetState)
+			workspace.POST("/state", workspaceCtrl.UploadState)
+			workspace.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
+			workspace.Handle("UNLOCK", "/unlock", workspaceCtrl.UnlockWorkspace)
 		}
 	}
 
 	// Plans
-	r.GET("/plans/:id", notImplemented)
+	orgs.GET("/plans/:id", notImplemented)
 
 	// Applies
-	r.GET("/applies/:id", notImplemented)
+	orgs.GET("/applies/:id", notImplemented)
 
 	// Cost Estimates
-	r.GET("/estimates/:id", notImplemented)
+	orgs.GET("/estimates/:id", notImplemented)
 
 	// Registry (Modules / Providers)
-	registry := r.Group("/registry/:id")
+	registry := orgs.Group("/registry/:id")
 	{
 		modules := registry.Group("/modules")
 		{
@@ -88,7 +141,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
-	runs := r.Group("/runs")
+	runs := orgs.Group("/runs")
 	{
 		runs.POST("", notImplemented)
 		runs.GET("/:run_id", notImplemented)
@@ -97,7 +150,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		runs.POST("/:run_id/cancel", notImplemented)
 	}
 
-	webhooks := r.Group("/webhooks")
+	webhooks := orgs.Group("/webhooks")
 	{
 		provider := webhooks.Group("/:provider")
 		{

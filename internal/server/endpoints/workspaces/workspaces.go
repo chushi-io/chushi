@@ -30,3 +30,19 @@ func (ctrl *Controller) UpdateWorkspace(c *gin.Context) {
 func (ctrl *Controller) DeleteWorkspace(c *gin.Context) {
 
 }
+
+func (ctrl *Controller) LockWorkspace(c *gin.Context) {
+
+}
+
+func (ctrl *Controller) UnlockWorkspace(c *gin.Context) {
+
+}
+
+func (ctrl *Controller) GetState(c *gin.Context) {
+
+}
+
+func (ctrl *Controller) UploadState(c *gin.Context) {
+	
+}
