@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 )
@@ -36,11 +37,12 @@ type WorkspaceLock struct {
 }
 
 type WorkspacesRepository interface {
-	Save(workspace Workspace)
-	Update(workspace Workspace)
-	Delete(workspaceId string)
-	FindById(workspaceId string) (Workspace, error)
-	FindAll() []Workspace
+	Save(workspace *Workspace) error
+	Update(workspace *Workspace) error
+	Delete(workspaceId string) error
+	FindById(workspaceId string) (*Workspace, error)
+	FindAll() ([]Workspace, error)
+	FindAllForOrg(organizationId string) ([]Workspace, error)
 }
 
 type WorkspacesRepositoryImpl struct {
@@ -51,32 +53,40 @@ func NewWorkspacesRepository(db *gorm.DB) WorkspacesRepository {
 	return &WorkspacesRepositoryImpl{Db: db}
 }
 
-func (w WorkspacesRepositoryImpl) Save(workspace Workspace) {
-
+func (w WorkspacesRepositoryImpl) Save(workspace *Workspace) error {
+	return nil
 }
 
-func (w WorkspacesRepositoryImpl) Update(workspace Workspace) {
-
+func (w WorkspacesRepositoryImpl) Update(workspace *Workspace) error {
+	return nil
 }
 
-func (w WorkspacesRepositoryImpl) Delete(workspaceId string) {
-
+func (w WorkspacesRepositoryImpl) Delete(workspaceId string) error {
+	return nil
 }
 
-func (w WorkspacesRepositoryImpl) FindById(workspaceId string) (Workspace, error) {
-	return Workspace{}, nil
+func (w WorkspacesRepositoryImpl) FindById(workspaceId string) (*Workspace, error) {
+	return &Workspace{}, nil
 }
 
-func (w WorkspacesRepositoryImpl) FindAll() []Workspace {
-	return []Workspace{}
+func (w WorkspacesRepositoryImpl) FindAll() ([]Workspace, error) {
+	return []Workspace{}, nil
+}
+
+func (w WorkspacesRepositoryImpl) FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error) {
+	var workspaces []Workspace
+	if result := w.Db.Where("organization_id = ?", organizationId).Find(&workspaces); result.Error != nil {
+		return []Workspace{}, result.Error
+	}
+	return workspaces, nil
 }
 
 type WorkspacesService interface {
-	Create(workspace Workspace)
-	Update(workspace Workspace)
-	Delete(workspaceId string)
-	FindById(workspaceId string) Workspace
-	FindAll() []Workspace
+	Create(workspace *Workspace) error
+	Update(workspace *Workspace) error
+	Delete(workspaceId string) error
+	FindById(workspaceId string) (*Workspace, error)
+	FindAll() ([]Workspace, error)
 }
 
 type WorkspacesServiceImpl struct {
@@ -91,25 +101,26 @@ func NewWorkspacesServiceImpl(repository WorkspacesRepository, validate *validat
 	}
 }
 
-func (s WorkspacesServiceImpl) Create(workspace Workspace) {
+func (s WorkspacesServiceImpl) Create(workspace *Workspace) error {
 	//err := s.Validate.Struct(workspace)
+	return nil
 }
 
-func (s WorkspacesServiceImpl) FindAll() []Workspace {
-	result := s.Repository.FindAll()
+func (s WorkspacesServiceImpl) FindAll() ([]Workspace, error) {
+	result, _ := s.Repository.FindAll()
 
 	//var workspaces []Workspace
-	return result
+	return result, nil
 }
 
-func (s WorkspacesServiceImpl) FindById(workspaceId string) Workspace {
-	return Workspace{}
+func (s WorkspacesServiceImpl) FindById(workspaceId string) (*Workspace, error) {
+	return &Workspace{}, nil
 }
 
-func (s WorkspacesServiceImpl) Delete(workspaceId string) {
-
+func (s WorkspacesServiceImpl) Delete(workspaceId string) error {
+	return nil
 }
 
-func (s WorkspacesServiceImpl) Update(workspace Workspace) {
-	return
+func (s WorkspacesServiceImpl) Update(workspace *Workspace) error {
+	return nil
 }

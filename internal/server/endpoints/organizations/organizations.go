@@ -10,6 +10,15 @@ type Controller struct {
 	Repository models.OrganizationRepository
 }
 
+func (ctrl *Controller) SetContext(c *gin.Context) {
+	org, err := ctrl.Repository.FindById(c.Param("organization"))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	} else {
+		c.Set("organization", org)
+	}
+}
+
 func (ctrl *Controller) Get(c *gin.Context) {
 	org, err := ctrl.Repository.FindById(c.Param("organization"))
 	if err != nil {

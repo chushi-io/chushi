@@ -72,6 +72,9 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	{
 		orgs.GET("", organizationsCtrl.Get)
 	}
+	orgs.Use(func(c *gin.Context) {
+
+	})
 
 	execGroup := orgs.Group("/ws")
 	{
