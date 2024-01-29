@@ -14,12 +14,12 @@ type Workspace struct {
 	AutoApply      bool                   `json:"auto_apply"`
 	AutoDestroyAt  *time.Time             `json:"auto_destroy_at" sql:"index"`
 	ExecutionMode  string                 `json:"execution_mode"`
-	Vcs            WorkspaceVcsConnection `gorm:"embedded;embeddedPrefix:vcs_"`
+	Vcs            WorkspaceVcsConnection `gorm:"embedded;embeddedPrefix:vcs_" json:"vcs"`
 	Version        string                 `json:"version"`
 	Locked         bool                   `json:"locked"`
 	Lock           WorkspaceLock          `gorm:"embedded;embeddedPrefix:lock_" json:"lock,omitempty"`
-	OrganizationID string                 `json:"organization_id"`
-	Organization   Organization
+	OrganizationID uuid.UUID              `json:"organization_id"`
+	Organization   Organization           `json:"-"`
 }
 
 type WorkspaceVcsConnection struct {
@@ -40,9 +40,9 @@ type WorkspacesRepository interface {
 	Save(workspace *Workspace) error
 	Update(workspace *Workspace) error
 	Delete(workspaceId string) error
-	FindById(workspaceId string) (*Workspace, error)
+	FindById(organizastionId uuid.UUID, workspaceId uuid.UUID) (*Workspace, error)
 	FindAll() ([]Workspace, error)
-	FindAllForOrg(organizationId string) ([]Workspace, error)
+	FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error)
 }
 
 type WorkspacesRepositoryImpl struct {
@@ -54,6 +54,9 @@ func NewWorkspacesRepository(db *gorm.DB) WorkspacesRepository {
 }
 
 func (w WorkspacesRepositoryImpl) Save(workspace *Workspace) error {
+	if result := w.Db.Create(workspace); result.Error != nil {
+		return result.Error
+	}
 	return nil
 }
 
@@ -65,8 +68,9 @@ func (w WorkspacesRepositoryImpl) Delete(workspaceId string) error {
 	return nil
 }
 
-func (w WorkspacesRepositoryImpl) FindById(workspaceId string) (*Workspace, error) {
-	return &Workspace{}, nil
+func (w WorkspacesRepositoryImpl) FindById(organizationId string, workspaceId uuid.UUID) (*Workspace, error) {
+	var workspace Workspace
+	if result := w.Db.First(&workspace, "name = ")
 }
 
 func (w WorkspacesRepositoryImpl) FindAll() ([]Workspace, error) {

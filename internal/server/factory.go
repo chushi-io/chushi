@@ -18,7 +18,9 @@ func (f *Factory) NewTerraformController() *terraform.Controller {
 }
 
 func (f *Factory) NewWorkspaceController() *workspaces.Controller {
-	return &workspaces.Controller{}
+	return &workspaces.Controller{
+		Repository: models.NewWorkspacesRepository(f.Database),
+	}
 }
 
 func (f *Factory) NewVcsConnectionsController() *vcs_connections.Controller {
