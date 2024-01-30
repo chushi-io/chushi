@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -39,8 +40,10 @@ type WorkspaceLock struct {
 type WorkspacesRepository interface {
 	Save(workspace *Workspace) error
 	Update(workspace *Workspace) error
+	Lock(workspace *Workspace) error
+	Unlock(workspace *Workspace) error
 	Delete(workspaceId string) error
-	FindById(organizastionId uuid.UUID, workspaceId uuid.UUID) (*Workspace, error)
+	FindById(organizationId uuid.UUID, workspaceId string) (*Workspace, error)
 	FindAll() ([]Workspace, error)
 	FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error)
 }
@@ -68,13 +71,56 @@ func (w WorkspacesRepositoryImpl) Delete(workspaceId string) error {
 	return nil
 }
 
-func (w WorkspacesRepositoryImpl) FindById(organizationId string, workspaceId uuid.UUID) (*Workspace, error) {
+func (w WorkspacesRepositoryImpl) FindById(organizationId uuid.UUID, workspaceId string) (*Workspace, error) {
 	var workspace Workspace
-	if result := w.Db.First(&workspace, "name = ")
+	// If someone decides they want to name their workspace using a UUID,
+	// this will start to fail. The UUID check will pass, but the
+	// resource is requested by name...
+	search := []string{"id = ?", workspaceId}
+	if _, err := uuid.Parse(workspaceId); err != nil {
+		search = []string{"name = ?", workspaceId}
+	}
+	if result := w.Db.
+		Scopes(BelongsToOrganization(organizationId)).
+		Where(search[0], search[1]).
+		First(&workspace); result.Error != nil {
+		return nil, result.Error
+	}
+	return &workspace, nil
 }
 
 func (w WorkspacesRepositoryImpl) FindAll() ([]Workspace, error) {
 	return []Workspace{}, nil
+}
+
+func (w WorkspacesRepositoryImpl) Lock(workspace *Workspace) error {
+	result := w.Db.
+		Model(&Workspace{}).
+		Where("id = ?", workspace.ID.String()).
+		Where("locked = ?", false).
+		Update("locked", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected < 0 {
+		return errors.New("workspace already locked")
+	}
+	return nil
+}
+
+func (w WorkspacesRepositoryImpl) Unlock(workspace *Workspace) error {
+	result := w.Db.
+		Model(&Workspace{}).
+		Where("id = ?", workspace.ID.String()).
+		Where("locked = ?", true).
+		Update("locked", false)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected < 0 {
+		return errors.New("workspace already unlocked")
+	}
+	return nil
 }
 
 func (w WorkspacesRepositoryImpl) FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error) {

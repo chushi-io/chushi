@@ -74,43 +74,26 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	}
 	orgs.Use(organizationsCtrl.SetContext)
 
-	execGroup := orgs.Group("/ws")
-	{
-		execGroup.GET("/:workspace", func(c *gin.Context) {
-		})
-		execGroup.POST("/:workspace", func(c *gin.Context) {
-			fmt.Println("Creating state file")
-			c.JSON(http.StatusOK, gin.H{})
-		})
-		execGroup.Handle("LOCK", "/:workspace", func(c *gin.Context) {
-			fmt.Println("Locking workspace")
-			fmt.Println(c.Request)
-		})
-		execGroup.Handle("UNLOCK", "/:workspace", func(c *gin.Context) {
-			fmt.Println("Unlocking workspace")
-			fmt.Println(c.Request)
-		})
-	}
 	// Workspaces
 	workspaces := orgs.Group("/workspaces")
 	{
 		workspaces.POST("", workspaceCtrl.CreateWorkspace)
 		workspaces.GET("", workspaceCtrl.ListWorkspaces)
-		workspace := workspaces.Group("/:workspace_id")
+		workspace := workspaces.Group("/:workspace")
 		{
 			workspace.GET("", workspaceCtrl.GetWorkspace)
 			workspace.PATCH("", workspaceCtrl.UpdateWorkspace)
 			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
 			workspace.GET("/variables", notImplemented)
 			workspace.POST("/variables", notImplemented)
-			workspace.PATCH("/variables/:variable_id", notImplemented)
-			workspace.DELETE("/variables/:variable_id", notImplemented)
+			workspace.PATCH("/variables/:variable", notImplemented)
+			workspace.DELETE("/variables/:variable", notImplemented)
 
 			// HTTP Backend handlers
 			workspace.GET("/state", workspaceCtrl.GetState)
 			workspace.POST("/state", workspaceCtrl.UploadState)
 			workspace.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
-			workspace.Handle("UNLOCK", "/unlock", workspaceCtrl.UnlockWorkspace)
+			workspace.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
 		}
 	}
 

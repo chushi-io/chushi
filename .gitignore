@@ -5,3 +5,4 @@ tmp
 
 testdata/.terraform*
 testdata/terraform*
+testdata/*.tfstate

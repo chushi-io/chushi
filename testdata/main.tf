@@ -1,3 +1,7 @@
+locals {
+  organization = "my-cool-org"
+  workspace = "workspace-1"
+}
 terraform {
 #  cloud {
 #    organization = "my-org"
@@ -17,9 +21,9 @@ terraform {
 #    }
 #  }
   backend "http" {
-    address = "http://localhost:5000/api/v1/orgs/a/workspaces/a/state"
-    lock_address = "http://localhost:5000/api/v1/orgs/a/workspaces/a"
-    unlock_address = "http://localhost:5000/api/v1/orgs/a/workspaces/a"
+    address = "http://localhost:5000/api/v1/orgs/my-cool-org/workspaces/workspace-1/state"
+    lock_address = "http://localhost:5000/api/v1/orgs/my-cool-org/workspaces/workspace-1"
+    unlock_address = "http://localhost:5000/api/v1/orgs/my-cool-org/workspaces/workspace-1"
   }
   required_version = "1.6.6"
 }
