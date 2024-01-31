@@ -24,6 +24,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	factory := &Factory{Database: database}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
+	authServer := factory.NewOauthServer()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -142,6 +143,18 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
+	v1auth := r.Group("/auth/v1")
+	{
+		v1auth.GET("/authorize", func(c *gin.Context) {
+			err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
+			if err != nil {
+				c.AbortWithError(http.StatusBadRequest, err)
+			}
+		})
+		v1auth.POST("/token", func(c *gin.Context) {
+			authServer.HandleTokenRequest(c.Writer, c.Request)
+		})
+	}
 	return r, nil
 }
 

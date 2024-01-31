@@ -7,12 +7,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/go-oauth2/oauth2/v4/errors"
+	"github.com/go-oauth2/oauth2/v4/manage"
+	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/robwittman/chushi/internal/models"
 	"github.com/robwittman/chushi/internal/server/endpoints/organizations"
 	"github.com/robwittman/chushi/internal/server/endpoints/terraform"
 	"github.com/robwittman/chushi/internal/server/endpoints/vcs_connections"
 	"github.com/robwittman/chushi/internal/server/endpoints/workspaces"
 	"gorm.io/gorm"
+	"log"
 	"os"
 )
 
@@ -50,6 +54,25 @@ func (f *Factory) NewOrganizationsController() *organizations.Controller {
 	return &organizations.Controller{
 		Repository: models.NewOrganizationRepository(f.Database),
 	}
+}
+
+func (f *Factory) NewOauthServer() *server.Server {
+	manager := manage.NewDefaultManager()
+	manager.MustTokenStorage(models.NewTokenStore(f.Database))
+	// client memory store
+	clientStore := models.NewClientStore(f.Database)
+	manager.MapClientStorage(clientStore)
+	srv := server.NewDefaultServer(manager)
+	srv.SetAllowGetAccessRequest(true)
+	srv.SetClientInfoHandler(server.ClientFormHandler)
+	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
+		log.Println("Internal Error:", err.Error())
+		return
+	})
+	srv.SetResponseErrorHandler(func(re *errors.Response) {
+		log.Println("Response Error:", re.Error.Error())
+	})
+	return srv
 }
 
 func getMinioClient() *s3.Client {

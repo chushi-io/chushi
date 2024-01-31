@@ -3,7 +3,7 @@ package models
 type Run struct {
 	Base
 	Status           string `json:"status"`
-	WorkspaceID      string
+	WorkspaceID      string `json:"workspace_id"`
 	Workspace        Workspace
 	Add              int `json:"add"`
 	Change           int `json:"change"`

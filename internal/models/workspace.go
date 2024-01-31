@@ -10,30 +10,57 @@ import (
 
 type Workspace struct {
 	Base
-	Name           string                 `json:"name"`
-	AllowDestroy   bool                   `json:"allow_destroy"`
-	AutoApply      bool                   `json:"auto_apply"`
-	AutoDestroyAt  *time.Time             `json:"auto_destroy_at" sql:"index"`
-	ExecutionMode  string                 `json:"execution_mode"`
-	Vcs            WorkspaceVcsConnection `gorm:"embedded;embeddedPrefix:vcs_" json:"vcs"`
-	Version        string                 `json:"version"`
-	Locked         bool                   `json:"locked"`
-	Lock           WorkspaceLock          `gorm:"embedded;embeddedPrefix:lock_" json:"lock,omitempty"`
-	OrganizationID uuid.UUID              `json:"organization_id"`
-	Organization   Organization           `json:"-"`
+	// Name of the workspace
+	Name string `json:"name"`
+	// Does the workspace allow destroy plans
+	AllowDestroy bool `json:"allow_destroy"`
+	// Does the workspace auto apply planned runs
+	AutoApply bool `json:"auto_apply"`
+	// Schedule the workspace for auto destruction
+	AutoDestroyAt *time.Time `json:"auto_destroy_at" sql:"index"`
+	// How our applies executed? Possible values are
+	// - apply_on_pull_request
+	// - apply_on_merge
+	ExecutionMode string `json:"execution_mode"`
+	// Configuration for the VCS containing the IaC
+	Vcs WorkspaceVcsConnection `gorm:"embedded;embeddedPrefix:vcs_" json:"vcs"`
+	// The opentofu version for the workspace
+	// Can be set to 'latest' to always pull the latest available version
+	Version string `json:"version"`
+	// Is the workspace currently locked
+	Locked bool `json:"locked"`
+	// Lock configuration
+	Lock WorkspaceLock `gorm:"embedded;embeddedPrefix:lock_" json:"lock,omitempty"`
+	// ID of the owning organization
+	OrganizationID uuid.UUID    `json:"organization_id"`
+	Organization   Organization `json:"-"`
+
+	// Agent configuration
+	AgentID uuid.UUID `json:"-"`
+	Agent   Agent     `json:"agent,omitempty"`
 }
 
 type WorkspaceVcsConnection struct {
-	Source           string   `json:"source"`
-	Branch           string   `json:"branch"`
-	Patterns         []string `json:"patterns" gorm:"serializer:json"`
-	Prefixes         []string `json:"prefixes" gorm:"serializer:json"`
-	WorkingDirectory string   `json:"working_directory"`
+	// The Git URL for the workspace
+	Source string `json:"source"`
+	// Which branch we're applying / watching for PRs to
+	Branch string `json:"branch"`
+	// Patterns to match for executing
+	Patterns []string `json:"patterns" gorm:"serializer:json"`
+	// Prefixes to match for executing
+	Prefixes []string `json:"prefixes" gorm:"serializer:json"`
+	// Specify the working directory
+	WorkingDirectory string `json:"working_directory"`
 }
 
 type WorkspaceLock struct {
+	// Who is the workspace locked by. Should be either
+	// - user ID
+	// - execution ID
 	By string `json:"by"`
+	// Time the workspace was locked at
 	At string `json:"at"`
+	// Lock ID
 	Id string `json:"id"`
 }
 
