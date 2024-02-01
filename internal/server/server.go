@@ -109,7 +109,12 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		agents.GET("/:agent", notImplemented)
 		agents.POST("/:agent", notImplemented)
 		agents.DELETE("/:agent", notImplemented)
-		agents.GET("/:agent/queue", agentCtrl.GetQueue)
+
+		agentsQueue := agents.Group("/:agent/queue")
+		{
+			agentsQueue.Use(agentCtrl.AgentAccess)
+			agentsQueue.GET("", agentCtrl.GetQueue)
+		}
 	}
 
 	// Plans

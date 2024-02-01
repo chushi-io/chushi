@@ -1,10 +1,15 @@
 package agents
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-oauth2/oauth2/v4/generates"
+	"github.com/golang-jwt/jwt"
 	"github.com/robwittman/chushi/internal/models"
 	"github.com/robwittman/chushi/internal/server/helpers"
 	"net/http"
+	"os"
+	"strings"
 )
 
 type Controller struct {
@@ -59,9 +64,37 @@ func (ctrl *Controller) Delete(c *gin.Context) {
 }
 
 func (ctrl *Controller) GetQueue(c *gin.Context) {
-	// Validate the token
-	// Verify the agent
-	// Get the first workspace that needs to be ran
-	// If none, return 204
-	// return the workspace object
+	queue := []string{}
+	c.JSON(http.StatusOK, gin.H{
+		"queue": queue,
+	})
+}
+
+func (ctrl *Controller) AgentAccess(c *gin.Context) {
+	input := c.Request.Header.Get("Authorization")
+	if input == "" {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	input, _ = strings.CutPrefix(input, "Bearer ")
+	fmt.Println(input)
+
+	token, err := jwt.ParseWithClaims(input, &generates.JWTAccessClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("parse error")
+		}
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+	})
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	claims := token.Claims.(*generates.JWTAccessClaims)
+	fmt.Println(claims.Audience)
+
+	if _, err := ctrl.Repository.FindByClientId(claims.Audience); err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 }

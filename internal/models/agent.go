@@ -18,6 +18,7 @@ type Agent struct {
 type AgentRepository interface {
 	List(organizationId uuid.UUID) ([]Agent, error)
 	FindById(organizationId uuid.UUID, agentId string) (*Agent, error)
+	FindByClientId(clientId string) (*Agent, error)
 	Create(agent *Agent) (*Agent, error)
 	Update(agent *Agent) (*Agent, error)
 	Delete(agentId string) error
@@ -36,11 +37,23 @@ func NewAgentRepository(db *gorm.DB, clientStore *ClientStore) AgentRepository {
 }
 
 func (a AgentRepositoryImpl) List(organizationId uuid.UUID) ([]Agent, error) {
-	return []Agent{}, nil
+	var agents []Agent
+	if result := a.Db.Where("organization_id = ?", organizationId).Find(&agents); result.Error != nil {
+		return []Agent{}, result.Error
+	}
+	return agents, nil
 }
 
 func (a AgentRepositoryImpl) FindById(organizationId uuid.UUID, agentId string) (*Agent, error) {
 	return nil, nil
+}
+
+func (a AgentRepositoryImpl) FindByClientId(clientId string) (*Agent, error) {
+	var agent Agent
+	if result := a.Db.Where("oauth_client_id = ?", clientId).First(&agent); result.Error != nil {
+		return &Agent{}, result.Error
+	}
+	return &agent, nil
 }
 
 func (a AgentRepositoryImpl) Create(agent *Agent) (*Agent, error) {

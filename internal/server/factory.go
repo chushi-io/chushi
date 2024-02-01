@@ -8,8 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-oauth2/oauth2/v4/errors"
+	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
+	"github.com/golang-jwt/jwt"
 	"github.com/robwittman/chushi/internal/models"
 	"github.com/robwittman/chushi/internal/server/endpoints/agents"
 	"github.com/robwittman/chushi/internal/server/endpoints/organizations"
@@ -67,6 +69,8 @@ func (f *Factory) NewAgentsController() *agents.Controller {
 func (f *Factory) NewOauthServer() *server.Server {
 	manager := manage.NewDefaultManager()
 	manager.MustTokenStorage(models.NewTokenStore(f.Database))
+	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte(os.Getenv("JWT_SECRET_KEY")), jwt.SigningMethodHS512))
+
 	// client memory store
 	clientStore := models.NewClientStore(f.Database)
 	manager.MapClientStorage(clientStore)
