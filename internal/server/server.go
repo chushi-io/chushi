@@ -7,13 +7,16 @@ import (
 	"github.com/robwittman/chushi/internal/server/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"net/http"
 )
 
 func New(conf *config.Config) (*gin.Engine, error) {
 
 	// Load and initialize our database
-	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), &gorm.Config{})
+	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +99,15 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			workspace.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
 			workspace.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
 		}
+	}
+
+	agents := orgs.Group("agents")
+	{
+		agents.GET("", notImplemented)
+		agents.POST("", notImplemented)
+		agents.GET("/:agent", notImplemented)
+		agents.POST("/:agent", notImplemented)
+		agents.DELETE("/:agent", notImplemented)
 	}
 
 	// Plans

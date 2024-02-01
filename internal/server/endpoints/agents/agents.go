@@ -18,7 +18,8 @@ func (ctrl *Controller) Get(c *gin.Context) {
 }
 
 func (ctrl *Controller) Create(c *gin.Context) {
-
+	// Create the agent
+	// Create the
 }
 
 func (ctrl *Controller) Update(c *gin.Context) {

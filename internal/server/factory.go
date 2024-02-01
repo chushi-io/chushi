@@ -17,6 +17,7 @@ import (
 	"github.com/robwittman/chushi/internal/server/endpoints/workspaces"
 	"gorm.io/gorm"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -63,8 +64,12 @@ func (f *Factory) NewOauthServer() *server.Server {
 	clientStore := models.NewClientStore(f.Database)
 	manager.MapClientStorage(clientStore)
 	srv := server.NewDefaultServer(manager)
-	srv.SetAllowGetAccessRequest(true)
 	srv.SetClientInfoHandler(server.ClientFormHandler)
+	srv.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+		fmt.Println("UserAuthorizationHandler called")
+		userID = "testing"
+		return
+	})
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 		log.Println("Internal Error:", err.Error())
 		return
