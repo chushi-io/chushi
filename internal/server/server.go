@@ -28,6 +28,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
 	authServer := factory.NewOauthServer()
+	agentCtrl := factory.NewAgentsController()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -103,11 +104,12 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	agents := orgs.Group("agents")
 	{
-		agents.GET("", notImplemented)
-		agents.POST("", notImplemented)
+		agents.GET("", agentCtrl.List)
+		agents.POST("", agentCtrl.Create)
 		agents.GET("/:agent", notImplemented)
 		agents.POST("/:agent", notImplemented)
 		agents.DELETE("/:agent", notImplemented)
+		agents.GET("/:agent/queue", agentCtrl.GetQueue)
 	}
 
 	// Plans

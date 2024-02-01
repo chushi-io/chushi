@@ -11,6 +11,7 @@ import (
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/robwittman/chushi/internal/models"
+	"github.com/robwittman/chushi/internal/server/endpoints/agents"
 	"github.com/robwittman/chushi/internal/server/endpoints/organizations"
 	"github.com/robwittman/chushi/internal/server/endpoints/terraform"
 	"github.com/robwittman/chushi/internal/server/endpoints/vcs_connections"
@@ -54,6 +55,12 @@ func (f *Factory) NewVcsConnectionsController() *vcs_connections.Controller {
 func (f *Factory) NewOrganizationsController() *organizations.Controller {
 	return &organizations.Controller{
 		Repository: models.NewOrganizationRepository(f.Database),
+	}
+}
+
+func (f *Factory) NewAgentsController() *agents.Controller {
+	return &agents.Controller{
+		Repository: models.NewAgentRepository(f.Database, models.NewClientStore(f.Database)),
 	}
 }
 

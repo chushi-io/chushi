@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -10,6 +11,8 @@ type Agent struct {
 	OrganizationID uuid.UUID    `json:"organization_id"`
 	Organization   Organization `json:"-"`
 	Status         string       `json:"status"`
+	OauthClientID  string       `json:"oauth_client_id"`
+	OauthClient    OauthClient  `json:"-"`
 }
 
 type AgentRepository interface {
@@ -21,11 +24,15 @@ type AgentRepository interface {
 }
 
 type AgentRepositoryImpl struct {
-	Db *gorm.DB
+	Db          *gorm.DB
+	ClientStore *ClientStore
 }
 
-func NewAgentRepository(db *gorm.DB) AgentRepository {
-	return &AgentRepositoryImpl{Db: db}
+func NewAgentRepository(db *gorm.DB, clientStore *ClientStore) AgentRepository {
+	return &AgentRepositoryImpl{
+		Db:          db,
+		ClientStore: clientStore,
+	}
 }
 
 func (a AgentRepositoryImpl) List(organizationId uuid.UUID) ([]Agent, error) {
@@ -37,7 +44,25 @@ func (a AgentRepositoryImpl) FindById(organizationId uuid.UUID, agentId string) 
 }
 
 func (a AgentRepositoryImpl) Create(agent *Agent) (*Agent, error) {
-	return nil, nil
+	err := a.Db.Transaction(func(tx *gorm.DB) error {
+		// Create an OAuth application
+		clientId := uuid.New()
+		clientSecret := uuid.New()
+		if err := a.ClientStore.Create(&models.Client{
+			ID:     clientId.String(),
+			Secret: clientSecret.String(),
+			Domain: "",
+			Public: false,
+		}); err != nil {
+			return err
+		}
+
+		// Create the agent resource
+		agent.OauthClientID = clientId.String()
+		result := a.Db.Create(agent)
+		return result.Error
+	})
+	return agent, err
 }
 
 func (a AgentRepositoryImpl) Update(agent *Agent) (*Agent, error) {
