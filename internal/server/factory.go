@@ -15,6 +15,7 @@ import (
 	"github.com/robwittman/chushi/internal/models"
 	"github.com/robwittman/chushi/internal/server/endpoints/agents"
 	"github.com/robwittman/chushi/internal/server/endpoints/organizations"
+	"github.com/robwittman/chushi/internal/server/endpoints/runs"
 	"github.com/robwittman/chushi/internal/server/endpoints/terraform"
 	"github.com/robwittman/chushi/internal/server/endpoints/vcs_connections"
 	"github.com/robwittman/chushi/internal/server/endpoints/workspaces"
@@ -64,6 +65,13 @@ func (f *Factory) NewAgentsController() *agents.Controller {
 	return &agents.Controller{
 		Repository:     models.NewAgentRepository(f.Database, models.NewClientStore(f.Database)),
 		RunsRepository: models.NewRunRepository(f.Database),
+	}
+}
+
+func (f *Factory) NewRunsController() *runs.Controller {
+	return &runs.Controller{
+		Runs:       models.NewRunRepository(f.Database),
+		Workspaces: models.NewWorkspacesRepository(f.Database),
 	}
 }
 

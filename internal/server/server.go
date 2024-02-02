@@ -29,23 +29,12 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	organizationsCtrl := factory.NewOrganizationsController()
 	authServer := factory.NewOauthServer()
 	agentCtrl := factory.NewAgentsController()
+	runsCtrl := factory.NewRunsController()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
-		})
-	})
-
-	r.GET("/.well-known/terraform.json", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"modules.v1":   "/api/v1/registry/modules",
-			"providers.v1": "/api/v1/registry/providers",
-			"motd.v1":      "",
-			"state.v2":     "/api/v1",
-			"tfe.v2":       "/api/v1",
-			"tfe.v2.1":     "/api/v1",
-			"versions.v1":  "/api/v1/versions/",
 		})
 	})
 
@@ -99,6 +88,15 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			workspace.POST("/state", workspaceCtrl.UploadState)
 			workspace.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
 			workspace.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+
+			runs := workspace.Group("/runs")
+			{
+				runs.GET("", runsCtrl.List)
+				runs.POST("", runsCtrl.Create)
+				runs.GET("/:run", notImplemented)
+				runs.POST("/:run", notImplemented)
+				runs.DELETE("/:run", notImplemented)
+			}
 		}
 	}
 

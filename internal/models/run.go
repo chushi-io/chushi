@@ -7,17 +7,17 @@ import (
 
 type Run struct {
 	Base
-	Status           string `json:"status"`
-	WorkspaceID      string `json:"workspace_id"`
-	Workspace        Workspace
-	Add              int `json:"add"`
-	Change           int `json:"change"`
-	Destroy          int `json:"destroy"`
-	ManagedResources int `json:"managed_resources"`
+	Status           string    `json:"status"`
+	WorkspaceID      string    `json:"workspace_id"`
+	Workspace        Workspace `json:"-"`
+	Add              int       `json:"add"`
+	Change           int       `json:"change"`
+	Destroy          int       `json:"destroy"`
+	ManagedResources int       `json:"managed_resources"`
 
 	// Agent configuration
-	AgentID uuid.UUID `json:"-"`
-	Agent   *Agent    `json:"agent,omitempty"`
+	AgentID *uuid.UUID `json:"-" gorm:"default:null"`
+	Agent   *Agent     `json:"agent,omitempty"`
 }
 
 type RunRepository interface {
@@ -33,8 +33,9 @@ type RunRepositoryImpl struct {
 }
 
 type RunListParams struct {
-	AgentId string
-	Status  string
+	AgentId     string
+	Status      string
+	WorkspaceId string
 }
 
 func NewRunRepository(db *gorm.DB) RunRepository {
@@ -43,9 +44,15 @@ func NewRunRepository(db *gorm.DB) RunRepository {
 
 func (r *RunRepositoryImpl) List(params *RunListParams) ([]Run, error) {
 	var runs []Run
-	query := r.Db.Where("agent_id = ?", params.AgentId)
+	query := r.Db
+	if params.AgentId != "" {
+		query.Where("agent_id = ?", params.AgentId)
+	}
 	if params.Status != "" {
 		query.Where("status = ?", params.Status)
+	}
+	if params.WorkspaceId != "" {
+		query.Where("workspace_id = ?", params.WorkspaceId)
 	}
 	result := query.Find(&runs)
 	return runs, result.Error
@@ -58,7 +65,8 @@ func (r *RunRepositoryImpl) Get(runId uuid.UUID) (*Run, error) {
 }
 
 func (r *RunRepositoryImpl) Create(run *Run) (*Run, error) {
-	return &Run{}, nil
+	result := r.Db.Create(run)
+	return run, result.Error
 }
 
 func (r *RunRepositoryImpl) Update(run *Run) (*Run, error) {

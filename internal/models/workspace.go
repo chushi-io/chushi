@@ -38,8 +38,8 @@ type Workspace struct {
 	Organization   Organization `json:"-"`
 
 	// Agent configuration
-	AgentID uuid.UUID `json:"-"`
-	Agent   *Agent    `json:"agent,omitempty"`
+	AgentID *uuid.UUID `json:"-"`
+	Agent   *Agent     `json:"agent,omitempty"`
 }
 
 type WorkspaceVcsConnection struct {
