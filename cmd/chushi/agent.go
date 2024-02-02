@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2/clientcredentials"
 	"io"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 	"log"
+	"net/http"
 )
 
 var agentCmd = &cobra.Command{
@@ -39,6 +43,16 @@ func init() {
 	rootCmd.AddCommand(agentCmd)
 }
 
+type RunResponse struct {
+	Runs []Run `json:"runs"`
+}
+
+type Run struct {
+	Id          string `json:"id"`
+	Status      string `json:"status"`
+	WorkspaceId string `json:"workspace_id"`
+}
+
 func runAgent(cmd *cobra.Command, args []string) {
 	clientId, _ := cmd.Flags().GetString("client-id")
 	clientSecret, _ := cmd.Flags().GetString("client-secret")
@@ -52,19 +66,108 @@ func runAgent(cmd *cobra.Command, args []string) {
 		ClientSecret: clientSecret,
 		TokenURL:     tokenUrl,
 	}
+	//
+	//kubeClient, err := getKubeClient()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
-	oc := client.Client(context.TODO())
+	sdk := &Sdk{
+		Client: client.Client(context.TODO()),
+		OrgId:  orgId,
+		ApiUrl: apiUrl,
+	}
 
-	runsUrl := fmt.Sprintf("%sorgs/%s/agents/%s/runs", apiUrl, orgId, agentId)
-	res, err := oc.Get(runsUrl)
+	runs, err := sdk.GetRuns(agentId)
 	if err != nil {
 		log.Fatal(err)
+	}
+	for _, run := range runs.Runs {
+		fmt.Println(run.Id)
+		ws, err := sdk.GetWorkspace(run.WorkspaceId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		workspace := ws.Workspace
+		if workspace.Locked {
+			fmt.Println("Workspace locked, skipping")
+			return
+		}
+
+		// Create the kubernetes pod
+		//podManifest := generatePodSpec()
+	}
+}
+
+type Sdk struct {
+	Client *http.Client
+	ApiUrl string
+	OrgId  string
+}
+
+func (s *Sdk) GetRuns(agentId string) (*RunResponse, error) {
+	runsUrl := fmt.Sprintf("%sorgs/%s/agents/%s/runs", s.ApiUrl, s.OrgId, agentId)
+	res, err := s.Client.Get(runsUrl)
+
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var data RunResponse
+	if err = json.Unmarshal(b, &data); err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+type WorkspaceResponse struct {
+	Workspace Workspace `json:"workspace"`
+}
+
+type Workspace struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Locked bool   `json:"locked"`
+}
+
+func (s *Sdk) GetWorkspace(workspaceId string) (*WorkspaceResponse, error) {
+	workspaceUrl := fmt.Sprintf("%sorgs/%s/workspaces/%s", s.ApiUrl, s.OrgId, workspaceId)
+	res, err := s.Client.Get(workspaceUrl)
+	if err != nil {
+		return nil, err
 	}
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	fmt.Println(string(b))
+	var workspaceResponse WorkspaceResponse
+	if err := json.Unmarshal(b, &workspaceResponse); err != nil {
+		return nil, err
+	}
+	return &workspaceResponse, nil
+}
+
+func getKubeClient() (*kubernetes.Clientset, error) {
+	return &kubernetes.Clientset{}, nil
+}
+
+func generatePodSpec() *v1.PodSpec {
+	podSpec := &v1.PodSpec{
+		Containers: []v1.Container{
+			// Actual run container
+			{
+				Name:    "chushi",
+				Image:   "TBD",
+				Command: []string{"runner"},
+			},
+		},
+		InitContainers: []v1.Container{
+			// Container to download VCS repo
+		},
+	}
+
+	return podSpec
 }

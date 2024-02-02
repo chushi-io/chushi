@@ -21,9 +21,9 @@ terraform {
 #    }
 #  }
   backend "http" {
-    address = "http://localhost:5000/api/v1/orgs/my-cool-org/workspaces/workspace-1/state"
-    lock_address = "http://localhost:5000/api/v1/orgs/my-cool-org/workspaces/workspace-1"
-    unlock_address = "http://localhost:5000/api/v1/orgs/my-cool-org/workspaces/workspace-1"
+    address = "https://caring-foxhound-whole.ngrok-free.app/api/v1/orgs/my-cool-org/workspaces/workspace-1/state"
+    lock_address = "https://caring-foxhound-whole.ngrok-free.app/api/v1/orgs/my-cool-org/workspaces/workspace-1"
+    unlock_address = "https://caring-foxhound-whole.ngrok-free.app/api/v1/orgs/my-cool-org/workspaces/workspace-1"
   }
   required_version = "1.6.6"
 }

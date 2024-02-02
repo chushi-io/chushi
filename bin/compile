@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -x
+eval $(minikube --profile chushi docker-env)
+docker build -t chushi:latest .
+#minikube image load chushi

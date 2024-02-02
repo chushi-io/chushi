@@ -1,0 +1,11 @@
+data
+testdata
+bin
+.env
+.env.example
+.air.toml
+.gitignore
+docker-compose.yml
+Dockerfile
+Procfile
+README.md
