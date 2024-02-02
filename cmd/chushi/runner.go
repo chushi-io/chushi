@@ -73,7 +73,6 @@ executions occuring for Chushi workspaces.'
 			fmt.Println("Changes found")
 		}
 
-		fmt.Println("Run completed")
 		fmt.Println(buf.String())
 	},
 }

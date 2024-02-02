@@ -24,7 +24,10 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		return nil, err
 	}
 
-	factory := &Factory{Database: database}
+	factory, err := NewFactory(database)
+	if err != nil {
+		return nil, err
+	}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
 	authServer := factory.NewOauthServer()
@@ -146,10 +149,11 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	runs := orgs.Group("/runs")
 	{
 		runs.POST("", notImplemented)
-		runs.GET("/:run_id", notImplemented)
-		runs.POST("/:run_id/apply", notImplemented)
-		runs.POST("/:run_id/discard", notImplemented)
-		runs.POST("/:run_id/cancel", notImplemented)
+		runs.GET("/:run", notImplemented)
+		runs.POST("/:run/apply", notImplemented)
+		runs.POST("/:run/discard", notImplemented)
+		runs.POST("/:run/cancel", notImplemented)
+		runs.POST("/:run/logs", runsCtrl.SaveLogs)
 	}
 
 	webhooks := orgs.Group("/webhooks")

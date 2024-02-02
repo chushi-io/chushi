@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -27,6 +26,24 @@ import (
 
 type Factory struct {
 	Database *gorm.DB
+	S3Client *s3.Client
+}
+
+func NewFactory(database *gorm.DB) (*Factory, error) {
+	var client *s3.Client
+	if os.Getenv("USE_MINIO") != "" {
+		client = getMinioClient()
+	} else {
+		sdkConfig, err := config.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+		client = s3.NewFromConfig(sdkConfig)
+	}
+	return &Factory{
+		Database: database,
+		S3Client: client,
+	}, nil
 }
 
 func (f *Factory) NewTerraformController() *terraform.Controller {
@@ -34,20 +51,10 @@ func (f *Factory) NewTerraformController() *terraform.Controller {
 }
 
 func (f *Factory) NewWorkspaceController() *workspaces.Controller {
-	var client *s3.Client
-	if os.Getenv("USE_MINIO") != "" {
-		client = getMinioClient()
-	} else {
-		sdkConfig, err := config.LoadDefaultConfig(context.TODO())
-		if err != nil {
-			fmt.Println("Couldn't load default configuration. Have you set up your AWS account?")
-			fmt.Println(err)
-		}
-		client = s3.NewFromConfig(sdkConfig)
-	}
+
 	return &workspaces.Controller{
 		Repository: models.NewWorkspacesRepository(f.Database),
-		S3Client:   client,
+		S3Client:   f.S3Client,
 	}
 }
 
@@ -72,6 +79,7 @@ func (f *Factory) NewRunsController() *runs.Controller {
 	return &runs.Controller{
 		Runs:       models.NewRunRepository(f.Database),
 		Workspaces: models.NewWorkspacesRepository(f.Database),
+		S3Client:   f.S3Client,
 	}
 }
 
