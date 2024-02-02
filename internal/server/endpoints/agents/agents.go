@@ -13,7 +13,9 @@ import (
 )
 
 type Controller struct {
-	Repository models.AgentRepository
+	Repository          models.AgentRepository
+	RunsRepository      models.RunRepository
+	WorkspaceRepository models.WorkspacesRepository
 }
 
 func (ctrl *Controller) List(c *gin.Context) {
@@ -63,10 +65,21 @@ func (ctrl *Controller) Delete(c *gin.Context) {
 
 }
 
-func (ctrl *Controller) GetQueue(c *gin.Context) {
-	queue := []string{}
+func (ctrl *Controller) GetRuns(c *gin.Context) {
+
+	params := &models.RunListParams{
+		AgentId: c.Param("agent"),
+	}
+	if status := c.Query("status"); status != "" {
+		params.Status = status
+	}
+	runs, err := ctrl.RunsRepository.List(params)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"queue": queue,
+		"runs": runs,
 	})
 }
 
@@ -78,7 +91,6 @@ func (ctrl *Controller) AgentAccess(c *gin.Context) {
 	}
 
 	input, _ = strings.CutPrefix(input, "Bearer ")
-	fmt.Println(input)
 
 	token, err := jwt.ParseWithClaims(input, &generates.JWTAccessClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -91,7 +103,6 @@ func (ctrl *Controller) AgentAccess(c *gin.Context) {
 		return
 	}
 	claims := token.Claims.(*generates.JWTAccessClaims)
-	fmt.Println(claims.Audience)
 
 	if _, err := ctrl.Repository.FindByClientId(claims.Audience); err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)

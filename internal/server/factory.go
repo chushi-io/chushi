@@ -62,7 +62,8 @@ func (f *Factory) NewOrganizationsController() *organizations.Controller {
 
 func (f *Factory) NewAgentsController() *agents.Controller {
 	return &agents.Controller{
-		Repository: models.NewAgentRepository(f.Database, models.NewClientStore(f.Database)),
+		Repository:     models.NewAgentRepository(f.Database, models.NewClientStore(f.Database)),
+		RunsRepository: models.NewRunRepository(f.Database),
 	}
 }
 
@@ -77,7 +78,6 @@ func (f *Factory) NewOauthServer() *server.Server {
 	srv := server.NewDefaultServer(manager)
 	srv.SetClientInfoHandler(server.ClientFormHandler)
 	srv.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-		fmt.Println("UserAuthorizationHandler called")
 		userID = "testing"
 		return
 	})

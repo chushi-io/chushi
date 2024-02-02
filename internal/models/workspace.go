@@ -11,7 +11,7 @@ import (
 type Workspace struct {
 	Base
 	// Name of the workspace
-	Name string `json:"name"`
+	Name string `gorm:"index:idx_name,unique" json:"name"`
 	// Does the workspace allow destroy plans
 	AllowDestroy bool `json:"allow_destroy"`
 	// Does the workspace auto apply planned runs
@@ -30,14 +30,16 @@ type Workspace struct {
 	// Is the workspace currently locked
 	Locked bool `json:"locked"`
 	// Lock configuration
+	// TODO: Just move this to top level fields, no need
+	// to embed this as a separate object
 	Lock WorkspaceLock `gorm:"embedded;embeddedPrefix:lock_" json:"lock,omitempty"`
 	// ID of the owning organization
-	OrganizationID uuid.UUID    `json:"organization_id"`
+	OrganizationID uuid.UUID    `gorm:"index:idx_name,unique" json:"organization_id"`
 	Organization   Organization `json:"-"`
 
 	// Agent configuration
 	AgentID uuid.UUID `json:"-"`
-	Agent   Agent     `json:"agent,omitempty"`
+	Agent   *Agent    `json:"agent,omitempty"`
 }
 
 type WorkspaceVcsConnection struct {

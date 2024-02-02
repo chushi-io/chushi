@@ -8,5 +8,6 @@ func Setup(db *gorm.DB) error {
 		&Organization{},
 		&OauthClient{},
 		&OauthToken{},
+		&Run{},
 	)
 }

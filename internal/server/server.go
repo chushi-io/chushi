@@ -110,10 +110,10 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		agents.POST("/:agent", notImplemented)
 		agents.DELETE("/:agent", notImplemented)
 
-		agentsQueue := agents.Group("/:agent/queue")
+		agentRuns := agents.Group("/:agent/runs")
 		{
-			agentsQueue.Use(agentCtrl.AgentAccess)
-			agentsQueue.GET("", agentCtrl.GetQueue)
+			agentRuns.Use(agentCtrl.AgentAccess)
+			agentRuns.GET("", agentCtrl.GetRuns)
 		}
 	}
 

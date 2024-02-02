@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"gorm.io/gorm"
@@ -31,8 +30,6 @@ func NewClientStore(db *gorm.DB) *ClientStore {
 func (cs *ClientStore) toClientInfo(data []byte) (oauth2.ClientInfo, error) {
 	var cm models.Client
 	err := json.Unmarshal(data, &cm)
-	fmt.Println(cm.IsPublic())
-	fmt.Println(cm.GetDomain())
 	return &cm, err
 }
 
