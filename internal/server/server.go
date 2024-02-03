@@ -176,6 +176,11 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			authServer.HandleTokenRequest(c.Writer, c.Request)
 		})
 	}
+
+	r.Static("/ui", "./ui/build")
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./ui/build/index.html")
+	})
 	return r, nil
 }
 
