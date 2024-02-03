@@ -11,11 +11,22 @@ import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} fr
 
 import Root from "./routes/Root";
 import ListWorkspaces from "./routes/ListWorkspaces";
+import ErrorPage from "./error-page";
+import ShowWorkspace from "./routes/ShowWorkspace";
+import ListAgents from "./routes/ListAgents";
+import ShowAgent from "./routes/ShowAgent";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path="/" element={<Root />}>
-            <Route path="workspaces" element={<ListWorkspaces />} />
+        <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+            <Route path="workspaces">
+                <Route index={true} element={<ListWorkspaces />} />
+                <Route path={":workspaceId"} element={<ShowWorkspace />} />
+            </Route>
+            <Route path={"agents"}>
+                <Route index={true} element={<ListAgents />} />
+                <Route path={":agentId"} element={<ShowAgent />} />
+            </Route>
         </Route>
     ), {
         basename: "/ui"

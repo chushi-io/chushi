@@ -12,6 +12,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-pro-sidebar": "^1.1.0-alpha.2",
@@ -24,7 +25,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "npm run build && run-when-changed --watch \"src/**/*.js[x]\" --exec \"npm run build\""
+    "dev": "npm run build && run-when-changed --watch \"src/**/*\" --exec \"npm run build\""
   },
   "eslintConfig": {
     "extends": [

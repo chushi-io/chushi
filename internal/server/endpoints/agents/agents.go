@@ -35,7 +35,20 @@ func (ctrl *Controller) List(c *gin.Context) {
 }
 
 func (ctrl *Controller) Get(c *gin.Context) {
-
+	orgId, err := helpers.GetOrganizationId(c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+	agent, err := ctrl.Repository.FindById(orgId, c.Param("agent"))
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"agent": agent,
+		})
+	}
 }
 
 func (ctrl *Controller) Create(c *gin.Context) {

@@ -45,7 +45,13 @@ func (a AgentRepositoryImpl) List(organizationId uuid.UUID) ([]Agent, error) {
 }
 
 func (a AgentRepositoryImpl) FindById(organizationId uuid.UUID, agentId string) (*Agent, error) {
-	return nil, nil
+	var agent Agent
+	if result := a.Db.
+		Scopes(BelongsToOrganization(organizationId)).
+		Where("id = ?", agentId).First(&agent); result.Error != nil {
+		return nil, result.Error
+	}
+	return &agent, nil
 }
 
 func (a AgentRepositoryImpl) FindByClientId(clientId string) (*Agent, error) {

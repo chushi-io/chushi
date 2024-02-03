@@ -107,7 +107,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	{
 		agents.GET("", agentCtrl.List)
 		agents.POST("", agentCtrl.Create)
-		agents.GET("/:agent", notImplemented)
+		agents.GET("/:agent", agentCtrl.Get)
 		agents.POST("/:agent", notImplemented)
 		agents.DELETE("/:agent", notImplemented)
 
