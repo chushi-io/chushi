@@ -1,21 +1,18 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/robwittman/chushi/internal/agent"
+	"github.com/robwittman/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2/clientcredentials"
-	"io"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
-	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -50,16 +47,6 @@ func init() {
 	rootCmd.AddCommand(agentCmd)
 }
 
-type RunResponse struct {
-	Runs []Run `json:"runs"`
-}
-
-type Run struct {
-	Id          string `json:"id"`
-	Status      string `json:"status"`
-	WorkspaceId string `json:"workspace_id"`
-}
-
 func runAgent(cmd *cobra.Command, args []string) {
 	clientId, _ := cmd.Flags().GetString("client-id")
 	clientSecret, _ := cmd.Flags().GetString("client-secret")
@@ -80,18 +67,22 @@ func runAgent(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	sdk := &Sdk{
-		Client: client.Client(context.TODO()),
-		OrgId:  orgId,
-		ApiUrl: apiUrl,
+	sdk := &sdk.Sdk{
+		Client:         client.Client(context.TODO()),
+		ApiUrl:         apiUrl,
+		OrganizationId: orgId,
 	}
+
+	ag, _ := agent.New(kubeClient)
+	// Register stdout
+	//ag.RegisterSink(os.Stdout)
+	ag.RegisterSink(agent.ChangeSink{})
 
 	runs, err := sdk.GetRuns(agentId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, run := range runs.Runs {
-		fmt.Println(run.Id)
 		ws, err := sdk.GetWorkspace(run.WorkspaceId)
 		if err != nil {
 			log.Fatal(err)
@@ -148,75 +139,16 @@ func runAgent(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 		defer podLogs.Close()
-		buf := new(bytes.Buffer)
-		_, err = io.Copy(buf, podLogs)
+		err = ag.PollLogs(podLogs)
 		if err != nil {
 			log.Fatal(err)
 		}
-		str := buf.String()
-		if err = sdk.ShipLogs(run.Id, str); err != nil {
-			log.Fatal(err)
-		}
+		/*		str := buf.String()
+				if err = sdk.ShipLogs(run.Id, str); err != nil {
+					log.Fatal(err)
+				}*/
 		// back to Chushi server
 	}
-}
-
-type Sdk struct {
-	Client *http.Client
-	ApiUrl string
-	OrgId  string
-}
-
-func (s *Sdk) GetRuns(agentId string) (*RunResponse, error) {
-	runsUrl := fmt.Sprintf("%sorgs/%s/agents/%s/runs", s.ApiUrl, s.OrgId, agentId)
-	res, err := s.Client.Get(runsUrl)
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var data RunResponse
-	if err = json.Unmarshal(b, &data); err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-type WorkspaceResponse struct {
-	Workspace Workspace `json:"workspace"`
-}
-
-type Workspace struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Locked bool   `json:"locked"`
-}
-
-func (s *Sdk) GetWorkspace(workspaceId string) (*WorkspaceResponse, error) {
-	workspaceUrl := fmt.Sprintf("%sorgs/%s/workspaces/%s", s.ApiUrl, s.OrgId, workspaceId)
-	res, err := s.Client.Get(workspaceUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var workspaceResponse WorkspaceResponse
-	if err := json.Unmarshal(b, &workspaceResponse); err != nil {
-		return nil, err
-	}
-	return &workspaceResponse, nil
-}
-
-func (s *Sdk) ShipLogs(runId string, logs string) error {
-	logsUrl := fmt.Sprintf("%sorgs/%s/runs/%s/logs", s.ApiUrl, s.OrgId, runId)
-	reader := strings.NewReader(logs)
-	_, err := s.Client.Post(logsUrl, "", reader)
-	return err
 }
 
 func getKubeClient(configFile string) (*kubernetes.Clientset, error) {
@@ -231,7 +163,7 @@ func getKubeClient(configFile string) (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func generatePodSpec(run Run, workspace Workspace) *v1.Pod {
+func generatePodSpec(run sdk.Run, workspace sdk.Workspace) *v1.Pod {
 	podSpec := v1.PodSpec{
 		Containers: []v1.Container{
 			// Actual run container
