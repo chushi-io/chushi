@@ -83,6 +83,7 @@ func (s *Sdk) UpdateRun(runId string, data map[string]interface{}) error {
 	if err := json.NewEncoder(b).Encode(data); err != nil {
 		return err
 	}
-	_, err := s.Client.Post(runUrl, "application/json", b)
+	res, err := s.Client.Post(runUrl, "application/json", b)
+	fmt.Println(res)
 	return err
 }

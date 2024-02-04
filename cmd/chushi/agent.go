@@ -2,18 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/robwittman/chushi/internal/agent"
 	"github.com/robwittman/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2/clientcredentials"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"os"
-	"time"
 )
 
 var agentCmd = &cobra.Command{
@@ -67,87 +63,19 @@ func runAgent(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	sdk := &sdk.Sdk{
+	chushiSdk := &sdk.Sdk{
 		Client:         client.Client(context.TODO()),
 		ApiUrl:         apiUrl,
 		OrganizationId: orgId,
 	}
 
-	ag, _ := agent.New(kubeClient)
-	// Register stdout
-	//ag.RegisterSink(os.Stdout)
-	ag.RegisterSink(agent.ChangeSink{})
-
-	runs, err := sdk.GetRuns(agentId)
+	ag, _ := agent.New(kubeClient, chushiSdk)
+	runs, err := chushiSdk.GetRuns(agentId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, run := range runs.Runs {
-		ws, err := sdk.GetWorkspace(run.WorkspaceId)
-		if err != nil {
-			log.Fatal(err)
-		}
-		workspace := ws.Workspace
-		if workspace.Locked {
-			fmt.Println("Workspace locked, skipping")
-			return
-		}
-
-		// Create the kubernetes pod
-		podManifest := generatePodSpec(run, workspace)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// Create the pod
-		pod, err := kubeClient.CoreV1().
-			Pods("default").
-			Create(context.TODO(), podManifest, metav1.CreateOptions{})
-		fmt.Println(pod.Name)
-
-		// Ensure it starts
-
-		// TODO: Tail the logs, piping them to stdout on the agent
-		// After completion, get the full log output, and ship
-
-		// Wait for completion
-	loop:
-		for {
-			pod, err := kubeClient.CoreV1().
-				Pods(pod.Namespace).
-				Get(context.TODO(), pod.Name, metav1.GetOptions{})
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			switch pod.Status.Phase {
-			case v1.PodSucceeded:
-				break loop
-			case v1.PodFailed:
-				log.Fatal(pod.Status.Message)
-			case v1.PodPending:
-			case v1.PodRunning:
-				time.Sleep(time.Second)
-			}
-		}
-
-		podLogOpts := v1.PodLogOptions{}
-		req := kubeClient.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-		podLogs, err := req.Stream(context.TODO())
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer podLogs.Close()
-		err = ag.PollLogs(podLogs)
-		if err != nil {
-			log.Fatal(err)
-		}
-		/*		str := buf.String()
-				if err = sdk.ShipLogs(run.Id, str); err != nil {
-					log.Fatal(err)
-				}*/
-		// back to Chushi server
+		ag.Handle(run)
 	}
 }
 
@@ -161,66 +89,4 @@ func getKubeClient(configFile string) (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 	return kubernetes.NewForConfig(config)
-}
-
-func generatePodSpec(run sdk.Run, workspace sdk.Workspace) *v1.Pod {
-	podSpec := v1.PodSpec{
-		Containers: []v1.Container{
-			// Actual run container
-			{
-				Name:            "chushi",
-				Image:           "chushi",
-				ImagePullPolicy: "Never",
-				Command:         []string{"/chushi"},
-				Args: []string{
-					"runner",
-					"-d=/workspace/testdata",
-					"plan",
-					"-v=1.6.6",
-				},
-				VolumeMounts: []v1.VolumeMount{
-					{
-						MountPath: "/workspace",
-						Name:      "workspace",
-					},
-				},
-			},
-		},
-		InitContainers: []v1.Container{
-			{
-				Name:  "git",
-				Image: "alpine/git",
-				Args: []string{
-					"clone",
-					"https://github.com/robwittman/chushi",
-					"/workspace",
-				},
-				VolumeMounts: []v1.VolumeMount{
-					{
-						MountPath: "/workspace",
-						Name:      "workspace",
-					},
-				},
-			},
-			// Container to download VCS repo
-		},
-		Volumes: []v1.Volume{
-			{
-				Name: "workspace",
-				VolumeSource: v1.VolumeSource{
-					EmptyDir: &v1.EmptyDirVolumeSource{},
-				},
-			},
-		},
-		RestartPolicy: v1.RestartPolicyNever,
-	}
-
-	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    "default",
-			GenerateName: "chushi-runner-",
-			Labels:       map[string]string{},
-		},
-		Spec: podSpec,
-	}
 }

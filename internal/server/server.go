@@ -7,7 +7,6 @@ import (
 	"github.com/robwittman/chushi/internal/server/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"net/http"
 )
 
@@ -15,7 +14,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	// Load and initialize our database
 	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		//Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		return nil, err
@@ -150,6 +149,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	{
 		runs.POST("", notImplemented)
 		runs.GET("/:run", notImplemented)
+		runs.POST("/:run", runsCtrl.Update)
 		runs.POST("/:run/apply", notImplemented)
 		runs.POST("/:run/discard", notImplemented)
 		runs.POST("/:run/cancel", notImplemented)

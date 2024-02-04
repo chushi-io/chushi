@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/robwittman/chushi/internal/agent"
 	"github.com/robwittman/chushi/internal/server"
 	"github.com/robwittman/chushi/internal/server/config"
 	"github.com/spf13/cobra"
@@ -25,14 +24,14 @@ var serverCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		runAgent, _ := cmd.Flags().GetBool("agent")
-		if runAgent {
-			ag, err := agent.New(nil)
-			if err != nil {
-				log.Fatal(err)
-			}
-			go ag.Run()
-		}
+		//runAgent, _ := cmd.Flags().GetBool("agent")
+		//if runAgent {
+		//	ag, err := agent.New(nil)
+		//	if err != nil {
+		//		log.Fatal(err)
+		//	}
+		//	go ag.Run()
+		//}
 		if err := srv.Run(); err != nil {
 			log.Fatal(err)
 		}

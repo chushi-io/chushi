@@ -38,6 +38,12 @@ type RunListParams struct {
 	WorkspaceId string
 }
 
+type UpdateRunParams struct {
+	Add    int `json:"add,omitempty"`
+	Change int `json:"change,omitempty"`
+	Remove int `json:"remove,omitempty"`
+}
+
 func NewRunRepository(db *gorm.DB) RunRepository {
 	return &RunRepositoryImpl{Db: db}
 }

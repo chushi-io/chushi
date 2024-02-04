@@ -29,5 +29,6 @@ terraform {
 }
 
 resource "random_string" "test" {
+  count = 8
   length = 8
 }

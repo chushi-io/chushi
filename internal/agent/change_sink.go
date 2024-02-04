@@ -3,9 +3,12 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/robwittman/chushi/pkg/sdk"
 )
 
 type ChangeSink struct {
+	Sdk   *sdk.Sdk
+	RunId string
 }
 
 type ChangeSummary struct {
@@ -37,5 +40,10 @@ func (sink ChangeSink) Write(p []byte) (int, error) {
 		summary.Changes.Change,
 		summary.Changes.Remove,
 	)
-	return 0, nil
+	err := sink.Sdk.UpdateRun(sink.RunId, map[string]interface{}{
+		"add":    summary.Changes.Add,
+		"change": summary.Changes.Change,
+		"remove": summary.Changes.Remove,
+	})
+	return 0, err
 }

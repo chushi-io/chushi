@@ -101,5 +101,40 @@ func (ctrl *Controller) SaveLogs(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
 
+func (ctrl *Controller) Update(c *gin.Context) {
+	var params models.UpdateRunParams
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	runId, err := uuid.Parse(c.Param("run"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	run, err := ctrl.Runs.Get(runId)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if params.Add != 0 {
+		run.Add = params.Add
+	}
+	if params.Change != 0 {
+		run.Change = params.Change
+	}
+	if params.Remove != 0 {
+		run.Destroy = params.Remove
+	}
+
+	if _, err = ctrl.Runs.Update(run); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"run": run})
+	}
 }
