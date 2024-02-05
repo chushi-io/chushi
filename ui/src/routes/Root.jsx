@@ -1,6 +1,7 @@
 import * as React from "react";
 import Sidebar from "../components/Sidebar";
 import {Outlet} from "react-router-dom";
+import {Container} from "@mui/material";
 
 const Root = () => {
     return (
@@ -8,7 +9,9 @@ const Root = () => {
             <Sidebar>
 
             </Sidebar>
-            <Outlet />
+            <Container>
+                <Outlet />
+            </Container>
         </div>
     )
 }
