@@ -76,6 +76,33 @@ func (ctrl *Controller) GetWorkspace(c *gin.Context) {
 }
 
 func (ctrl *Controller) UpdateWorkspace(c *gin.Context) {
+	orgId, err := helpers.GetOrganizationId(c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	workspace, err := ctrl.Repository.FindById(orgId, c.Param("workspace"))
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, errors.New("not found"))
+		return
+	}
+
+	var params models.UpdateWorkspaceParams
+	if err := c.BindJSON(&params); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	// TODO: Verify ownership of the agent before attaching
+	if params.AgentId != nil {
+		workspace.AgentID = params.AgentId
+	}
+
+	if _, err = ctrl.Repository.Update(workspace); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"workspace": workspace})
 
 }
 

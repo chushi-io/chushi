@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/robwittman/chushi/pkg/sdk"
 )
 
@@ -34,16 +33,11 @@ func (sink ChangeSink) Write(p []byte) (int, error) {
 		return 0, nil
 	}
 
-	fmt.Printf(
-		"Add: %d; Change: %d; Remove: %d;\n",
-		summary.Changes.Add,
-		summary.Changes.Change,
-		summary.Changes.Remove,
-	)
-	err := sink.Sdk.UpdateRun(sink.RunId, map[string]interface{}{
-		"add":    summary.Changes.Add,
-		"change": summary.Changes.Change,
-		"remove": summary.Changes.Remove,
+	_, err := sink.Sdk.Runs().Update(&sdk.UpdateRunParams{
+		RunId:   sink.RunId,
+		Add:     summary.Changes.Add,
+		Change:  summary.Changes.Change,
+		Destroy: summary.Changes.Remove,
 	})
 	return 0, err
 }

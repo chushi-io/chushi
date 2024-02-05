@@ -50,6 +50,13 @@ func (a *Agent) Handle(run sdk.Run) error {
 		return errors.New("workspace is already locked")
 	}
 
+	if _, err := a.Sdk.Runs().Update(&sdk.UpdateRunParams{
+		RunId:  run.Id,
+		Status: "running",
+	}); err != nil {
+		return err
+	}
+
 	pod, err := a.launchPod(run, ws.Workspace)
 	if err != nil {
 		return err
@@ -61,7 +68,6 @@ func (a *Agent) Handle(run sdk.Run) error {
 	}
 
 	if !success {
-		// Do something with the error
 		return errors.New("workspace failed")
 	}
 
@@ -69,7 +75,7 @@ func (a *Agent) Handle(run sdk.Run) error {
 	req := a.Client.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream(context.TODO())
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer podLogs.Close()
 	if err = a.PollLogs(podLogs); err != nil {
@@ -77,8 +83,11 @@ func (a *Agent) Handle(run sdk.Run) error {
 	}
 
 	// Lastly, post updates back to the run
-
-	return nil
+	_, err = a.Sdk.Runs().Update(&sdk.UpdateRunParams{
+		RunId:  run.Id,
+		Status: "completed",
+	})
+	return err
 }
 
 func (a *Agent) waitForPodCompletion(pod *v1.Pod) (bool, error) {
@@ -106,7 +115,7 @@ loop:
 }
 
 func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace) (*v1.Pod, error) {
-	podManifest := a.podSpecForRun()
+	podManifest := a.podSpecForRun(run, workspace)
 	return a.Client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
@@ -139,7 +148,7 @@ func (a *Agent) writeLine(line string) error {
 	return nil
 }
 
-func (a *Agent) podSpecForRun() *v1.Pod {
+func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace) *v1.Pod {
 	podSpec := v1.PodSpec{
 		Containers: []v1.Container{
 			// Actual run container
@@ -151,7 +160,7 @@ func (a *Agent) podSpecForRun() *v1.Pod {
 				Args: []string{
 					"runner",
 					"-d=/workspace/testdata",
-					"plan",
+					run.Operation,
 					"-v=1.6.6",
 				},
 				VolumeMounts: []v1.VolumeMount{

@@ -40,6 +40,14 @@ type Workspace struct {
 	// Agent configuration
 	AgentID *uuid.UUID `json:"-"`
 	Agent   *Agent     `json:"agent,omitempty"`
+
+	// DriftDetection
+	DriftDetection DriftDetection `gorm:"embedded;embeddedPrefix:drift_detection_" json:"drift_detection"`
+}
+
+type DriftDetection struct {
+	Enabled  bool   `json:"enabled"`
+	Schedule string `json:"schedule"`
 }
 
 type WorkspaceVcsConnection struct {
@@ -68,13 +76,17 @@ type WorkspaceLock struct {
 
 type WorkspacesRepository interface {
 	Save(workspace *Workspace) error
-	Update(workspace *Workspace) error
+	Update(workspace *Workspace) (*Workspace, error)
 	Lock(workspace *Workspace) error
 	Unlock(workspace *Workspace) error
 	Delete(workspaceId string) error
 	FindById(organizationId uuid.UUID, workspaceId string) (*Workspace, error)
 	FindAll() ([]Workspace, error)
 	FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error)
+}
+
+type UpdateWorkspaceParams struct {
+	AgentId *uuid.UUID `json:"agent_id,omitempty"`
 }
 
 type WorkspacesRepositoryImpl struct {
@@ -92,8 +104,9 @@ func (w WorkspacesRepositoryImpl) Save(workspace *Workspace) error {
 	return nil
 }
 
-func (w WorkspacesRepositoryImpl) Update(workspace *Workspace) error {
-	return nil
+func (w WorkspacesRepositoryImpl) Update(workspace *Workspace) (*Workspace, error) {
+	result := w.Db.Save(workspace)
+	return workspace, result.Error
 }
 
 func (w WorkspacesRepositoryImpl) Delete(workspaceId string) error {

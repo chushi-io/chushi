@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Controller struct {
@@ -28,6 +29,13 @@ func (ctrl *Controller) List(c *gin.Context) {
 	//}
 
 	params := &models.RunListParams{}
+	if workspaceId := c.Param("workspace"); workspaceId != "" {
+		params.WorkspaceId = workspaceId
+	}
+	if status := c.Query("status"); status != "" {
+		params.Status = status
+	}
+	fmt.Println(params)
 	runs, err := ctrl.Runs.List(params)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -36,6 +44,10 @@ func (ctrl *Controller) List(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"runs": runs,
 	})
+}
+
+type CreateRunRequest struct {
+	Operation string `json:"operation"`
 }
 
 func (ctrl *Controller) Create(c *gin.Context) {
@@ -51,10 +63,17 @@ func (ctrl *Controller) Create(c *gin.Context) {
 		return
 	}
 
+	var params CreateRunRequest
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	run := &models.Run{
 		Workspace: *workspace,
-		Agent:     workspace.Agent,
+		AgentID:   workspace.AgentID,
 		Status:    "pending",
+		Operation: params.Operation,
 	}
 
 	if _, err := ctrl.Runs.Create(run); err != nil {
@@ -130,6 +149,13 @@ func (ctrl *Controller) Update(c *gin.Context) {
 	if params.Remove != 0 {
 		run.Destroy = params.Remove
 	}
+	if params.Status != "" {
+		run.Status = params.Status
+		if params.Status == "completed" || params.Status == "failed" {
+			completion := time.Now()
+			run.CompletedAt = &completion
+		}
+	}
 
 	if _, err = ctrl.Runs.Update(run); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -137,4 +163,24 @@ func (ctrl *Controller) Update(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"run": run})
 	}
+}
+
+func (ctrl *Controller) Get(c *gin.Context) {
+	//orgId, err := helpers.GetOrganizationId(c)
+	//if err != nil {
+	//	c.AbortWithError(http.StatusUnauthorized, err)
+	//	return
+	//}
+
+	runId, err := uuid.Parse(c.Param("run"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	run, err := ctrl.Runs.Get(runId)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"run": run})
 }

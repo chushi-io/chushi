@@ -70,12 +70,20 @@ func runAgent(cmd *cobra.Command, args []string) {
 	}
 
 	ag, _ := agent.New(kubeClient, chushiSdk)
-	runs, err := chushiSdk.GetRuns(agentId)
+	runs, err := chushiSdk.Runs().List(&sdk.ListRunsParams{
+		AgentId: agentId,
+		Status:  "pending",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, run := range runs.Runs {
-		ag.Handle(run)
+		if err := ag.Handle(run); err != nil {
+			chushiSdk.Runs().Update(&sdk.UpdateRunParams{
+				RunId:  run.Id,
+				Status: "failed",
+			})
+		}
 	}
 }
 
