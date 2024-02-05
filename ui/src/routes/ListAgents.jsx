@@ -26,7 +26,8 @@ const ListAgents = () => {
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Client ID</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -35,11 +36,13 @@ const ListAgents = () => {
                                 key={agent.name}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                <TableCell component="th" scope="row">
+                                <TableCell>
                                     <Link to={`/agents/${agent.id}`}>
-                                        {agent.id}
+                                        {agent.name}
                                     </Link>
                                 </TableCell>
+                                <TableCell align={"right"}>{agent.oauth_client_id}</TableCell>
+
                             </TableRow>
                         ))}
                     </TableBody>

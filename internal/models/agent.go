@@ -8,7 +8,8 @@ import (
 
 type Agent struct {
 	Base
-	OrganizationID uuid.UUID    `json:"organization_id"`
+	Name           string       `gorm:"index:idx_name,unique" json:"name"`
+	OrganizationID uuid.UUID    `gorm:"index:idx_name,unique" json:"organization_id"`
 	Organization   Organization `json:"-"`
 	Status         string       `json:"status"`
 	OauthClientID  string       `json:"oauth_client_id"`

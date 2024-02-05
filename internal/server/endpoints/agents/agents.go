@@ -51,14 +51,26 @@ func (ctrl *Controller) Get(c *gin.Context) {
 	}
 }
 
+type CreateAgentRequest struct {
+	Name string `json:"name"`
+}
+
 func (ctrl *Controller) Create(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
+
+	var params CreateAgentRequest
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
 	agent := &models.Agent{
 		OrganizationID: orgId,
+		Name:           params.Name,
 	}
 	if _, err := ctrl.Repository.Create(agent); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -67,7 +79,6 @@ func (ctrl *Controller) Create(c *gin.Context) {
 			"agent": agent,
 		})
 	}
-
 }
 
 func (ctrl *Controller) Update(c *gin.Context) {
