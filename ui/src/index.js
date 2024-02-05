@@ -17,6 +17,30 @@ import ShowWorkspace from "./routes/ShowWorkspace";
 import ListAgents from "./routes/ListAgents";
 import ShowAgent from "./routes/ShowAgent";
 
+import { Link as RouterLink } from 'react-router-dom';
+import {ThemeProvider, createTheme} from "@mui/material/styles";
+import NewAgent from "./routes/NewAgent";
+
+const LinkBehavior = React.forwardRef((props, ref) => {
+    const { href, ...other } = props;
+    return <RouterLink ref={ref} to={href} {...other} />;
+});
+
+const theme = createTheme({
+    components: {
+        MuiLink: {
+            defaultProps: {
+                component: LinkBehavior,
+            },
+        },
+        MuiButtonBase: {
+            defaultProps: {
+                LinkComponent: LinkBehavior,
+            },
+        },
+    },
+});
+
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
@@ -26,6 +50,7 @@ const router = createBrowserRouter(
             </Route>
             <Route path={"agents"}>
                 <Route index={true} element={<ListAgents />} />
+                <Route path={"new"} element={<NewAgent />} />
                 <Route path={":agentId"} element={<ShowAgent />} />
             </Route>
         </Route>
@@ -38,7 +63,9 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
       <StyledEngineProvider>
-          <RouterProvider router={router} />
+          <ThemeProvider theme={theme}>
+              <RouterProvider router={router} />
+          </ThemeProvider>
       </StyledEngineProvider>
   </React.StrictMode>
 );
