@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+#env:
+#  GOPRIVATE: github.com/launchboxio/operator
+#  GH_ACCESS_TOKEN: ${{ secrets.GO_MODULE_ACCESS_TOKEN }}
+
+jobs:
+  lint:
+    name: Lint Agent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - run: go get
+      - run: |
+          formatted_count=$(gofmt -s -l . | wc -l)
+          if [ "${formatted_count}" -ne 0 ] ; then
+            echo "Run 'go fmt github.com/chushi-io/chushi...'"
+            exit 1
+          fi
+
+  test:
+    name: Test Agent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - run: go get
+      - run: go build -v ./...
+      - run: go test -v ./... -cover
