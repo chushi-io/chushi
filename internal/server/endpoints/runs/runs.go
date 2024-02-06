@@ -1,6 +1,7 @@
 package runs
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -112,7 +113,7 @@ func (ctrl *Controller) SaveLogs(c *gin.Context) {
 	reader := strings.NewReader(string(b))
 	_, err = ctrl.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(orgId.String()),
-		Key:    aws.String(fmt.Sprintf("runs/%s", run.ID.String())),
+		Key:    aws.String(fmt.Sprintf("runs/%s/logs", run.ID.String())),
 		Body:   reader,
 	})
 	if err != nil {
@@ -183,4 +184,79 @@ func (ctrl *Controller) Get(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"run": run})
+}
+
+func (ctrl *Controller) StorePlan(c *gin.Context) {
+	orgId, err := helpers.GetOrganizationId(c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	runId, err := uuid.Parse(c.Param("run"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	run, err := ctrl.Runs.Get(runId)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	b, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	_, err = ctrl.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(orgId.String()),
+		Key:    aws.String(fmt.Sprintf("runs/%s/plan", run.ID.String())),
+		Body:   bytes.NewReader(b),
+	})
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
+func (ctrl *Controller) GeneratePresignedUrl(c *gin.Context) {
+	orgId, err := helpers.GetOrganizationId(c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	runId, err := uuid.Parse(c.Param("run"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	run, err := ctrl.Runs.Get(runId)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	presignClient := s3.NewPresignClient(ctrl.S3Client)
+	request, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(orgId.String()),
+		Key:    aws.String(fmt.Sprintf("runs/%s/plan", run.ID.String())),
+	}, func(opts *s3.PresignOptions) {
+		opts.Expires = time.Duration(300 * int64(time.Second))
+		opts.ClientOptions = []func(*s3.Options){
+			func(options *s3.Options) {
+				options.BaseEndpoint = aws.String("http://host.minikube.internal:9000")
+			},
+		}
+	})
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"url": request.URL,
+	})
 }

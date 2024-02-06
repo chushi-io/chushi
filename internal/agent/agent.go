@@ -50,6 +50,13 @@ func (a *Agent) Handle(run sdk.Run) error {
 		return errors.New("workspace is already locked")
 	}
 
+	url, err := a.Sdk.Runs().PresignedUrl(&sdk.GeneratePresignedUrlParams{
+		RunId: run.Id,
+	})
+	if err != nil {
+		return err
+	}
+
 	if _, err := a.Sdk.Runs().Update(&sdk.UpdateRunParams{
 		RunId:  run.Id,
 		Status: "running",
@@ -57,10 +64,12 @@ func (a *Agent) Handle(run sdk.Run) error {
 		return err
 	}
 
-	pod, err := a.launchPod(run, ws.Workspace)
+	pod, err := a.launchPod(run, ws.Workspace, url.Url)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(pod.Name)
 
 	success, err := a.waitForPodCompletion(pod)
 	if err != nil {
@@ -114,8 +123,8 @@ loop:
 	return true, nil
 }
 
-func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace) (*v1.Pod, error) {
-	podManifest := a.podSpecForRun(run, workspace)
+func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, presignedUrl string) (*v1.Pod, error) {
+	podManifest := a.podSpecForRun(run, workspace, presignedUrl)
 	return a.Client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
@@ -148,7 +157,19 @@ func (a *Agent) writeLine(line string) error {
 	return nil
 }
 
-func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace) *v1.Pod {
+func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, presignedUrl string) *v1.Pod {
+	args := []string{
+		"runner",
+		"-d=/workspace/testdata",
+		"-v=1.6.6",
+	}
+	args = append(args, run.Operation)
+	if run.Operation == "plan" {
+		args = append(args, run.Operation, "-out=tf.plan")
+	} else {
+		args = append(args, run.Operation, "tf.plan")
+	}
+
 	podSpec := v1.PodSpec{
 		Containers: []v1.Container{
 			// Actual run container
@@ -162,6 +183,20 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace) *v1.Pod {
 					"-d=/workspace/testdata",
 					run.Operation,
 					"-v=1.6.6",
+				},
+				Env: []v1.EnvVar{
+					{
+						Name:  "CHUSHI_API_URL",
+						Value: a.Sdk.ApiUrl,
+					},
+					{
+						Name:  "CHUSHI_ORGANIZATION",
+						Value: a.Sdk.OrganizationId,
+					},
+					{
+						Name:  "CHUSHI_RUN_ID",
+						Value: run.Id,
+					},
 				},
 				VolumeMounts: []v1.VolumeMount{
 					{

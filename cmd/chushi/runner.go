@@ -9,8 +9,12 @@ import (
 	"github.com/hashicorp/hc-install/product"
 	"github.com/hashicorp/hc-install/releases"
 	"github.com/hashicorp/terraform-exec/tfexec"
+	"github.com/robwittman/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
 	"log"
+	"net/http"
+	"os"
+	"path/filepath"
 )
 
 var runnerCmd = &cobra.Command{
@@ -56,7 +60,7 @@ executions occuring for Chushi workspaces.'
 		var buf bytes.Buffer
 		switch args[0] {
 		case "plan":
-			hasChanges, err = tf.PlanJSON(ctx, &buf)
+			hasChanges, err = tf.PlanJSON(ctx, &buf, tfexec.Out("tfplan"))
 		case "apply":
 			err = tf.ApplyJSON(ctx, &buf)
 		case "destroy":
@@ -71,6 +75,21 @@ executions occuring for Chushi workspaces.'
 
 		if args[0] == "plan" && hasChanges {
 			fmt.Println("Changes found")
+			chushiSdk := &sdk.Sdk{
+				Client:         &http.Client{},
+				ApiUrl:         os.Getenv("CHUSHI_API_URL"),
+				OrganizationId: os.Getenv("CHUSHI_ORGANIZATION"),
+			}
+			data, err := os.ReadFile(filepath.Join(workingDir, "tfplan"))
+			if err != nil {
+				log.Fatal(err)
+			}
+			if _, err := chushiSdk.Runs().UploadPlan(&sdk.UploadPlanParams{
+				RunId: os.Getenv("CHUSHI_RUN_ID"),
+				Plan:  data,
+			}); err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		fmt.Println(buf.String())

@@ -7,6 +7,8 @@ import (
 	"github.com/google/go-querystring/query"
 	"github.com/google/uuid"
 	"io"
+	"log"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -99,9 +101,64 @@ func (r *Runs) Update(params *UpdateRunParams) (*UpdateRunResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
+
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(res.Body)
 	var response UpdateRunResponse
+	err = json.Unmarshal(buf.Bytes(), &response)
+	return &response, err
+}
+
+type UploadPlanParams struct {
+	RunId string
+	Plan  []byte
+}
+
+type UploadPlanResponse struct {
+	Run Run `json:"run"`
+}
+
+func (r *Runs) UploadPlan(params *UploadPlanParams) (*UploadPlanResponse, error) {
+	runUrl := fmt.Sprintf("%sorgs/%s/runs/%s/plan", r.sdk.ApiUrl, r.sdk.OrganizationId, params.RunId)
+
+	req, err := http.NewRequest(http.MethodPut, runUrl, bytes.NewBuffer(params.Plan))
+	if err != nil {
+		return nil, err
+	}
+	resp, err := r.sdk.Client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	var response UploadPlanResponse
+	err = json.Unmarshal(buf.Bytes(), &response)
+	return &response, err
+}
+
+type GeneratePresignedUrlParams struct {
+	RunId string
+}
+
+type GeneratePresignedUrlResponse struct {
+	Url string `json:"url"`
+}
+
+func (r *Runs) PresignedUrl(params *GeneratePresignedUrlParams) (*GeneratePresignedUrlResponse, error) {
+	runUrl := fmt.Sprintf("%sorgs/%s/runs/%s/presigned_url", r.sdk.ApiUrl, r.sdk.OrganizationId, params.RunId)
+
+	res, err := r.sdk.Client.Post(runUrl, "application/json", nil)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(res.Body)
+	var response GeneratePresignedUrlResponse
 	err = json.Unmarshal(buf.Bytes(), &response)
 	return &response, err
 }

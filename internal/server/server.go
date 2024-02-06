@@ -151,6 +151,8 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		runs.POST("", notImplemented)
 		runs.GET("/:run", runsCtrl.Get)
 		runs.POST("/:run", runsCtrl.Update)
+		runs.POST("/:run/presigned_url", runsCtrl.GeneratePresignedUrl)
+		runs.PUT("/:run/plan", runsCtrl.StorePlan)
 		runs.POST("/:run/apply", notImplemented)
 		runs.POST("/:run/discard", notImplemented)
 		runs.POST("/:run/cancel", notImplemented)
