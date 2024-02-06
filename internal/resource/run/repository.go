@@ -1,7 +1,6 @@
 package run
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/robwittman/chushi/pkg/types"
 	"gorm.io/gorm"
@@ -9,10 +8,10 @@ import (
 
 type RunRepository interface {
 	List(params *RunListParams) ([]Run, error)
-	Get(runId uuid.UUID) (*Run, error)
+	Get(runId *types.UuidOrString) (*Run, error)
 	Create(run *Run) (*Run, error)
 	Update(run *Run) (*Run, error)
-	Delete(runId uuid.UUID) error
+	Delete(runId *types.UuidOrString) error
 }
 
 type RunRepositoryImpl struct {
@@ -20,9 +19,15 @@ type RunRepositoryImpl struct {
 }
 
 type RunListParams struct {
-	AgentId     string
-	Status      types.RunStatus
-	WorkspaceId string
+	AgentId        string
+	Status         types.RunStatus
+	WorkspaceId    string
+	OrganizationId uuid.UUID
+}
+
+type GetParams struct {
+	RequestId string
+	RunId     uuid.UUID
 }
 
 type UpdateRunParams struct {
@@ -42,9 +47,7 @@ func (r *RunRepositoryImpl) List(params *RunListParams) ([]Run, error) {
 	if params.AgentId != "" {
 		query = query.Where("agent_id = ?", params.AgentId)
 	}
-	fmt.Println(params.Status)
 	if params.Status != "" {
-		fmt.Println("filtering on status")
 		query = query.Where("status = ?", params.Status)
 	}
 	if params.WorkspaceId != "" {
@@ -54,9 +57,9 @@ func (r *RunRepositoryImpl) List(params *RunListParams) ([]Run, error) {
 	return runs, result.Error
 }
 
-func (r *RunRepositoryImpl) Get(runId uuid.UUID) (*Run, error) {
+func (r *RunRepositoryImpl) Get(runId *types.UuidOrString) (*Run, error) {
 	var run Run
-	result := r.Db.Where("id = ?", runId).First(&run)
+	result := r.Db.Where("id = ?", runId.String()).First(&run)
 	return &run, result.Error
 }
 
@@ -72,7 +75,7 @@ func (r *RunRepositoryImpl) Update(run *Run) (*Run, error) {
 	return run, result.Error
 }
 
-func (r *RunRepositoryImpl) Delete(runId uuid.UUID) error {
+func (r *RunRepositoryImpl) Delete(runId *types.UuidOrString) error {
 	result := r.Db.Where("id = ?", runId.String()).Delete(&Run{})
 	return result.Error
 }
