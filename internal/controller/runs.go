@@ -65,7 +65,7 @@ func (ctrl *RunsController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"run": r})
+	c.JSON(http.StatusOK, gin.H{"run": r.Run})
 }
 
 func (ctrl *RunsController) SaveLogs(c *gin.Context) {

@@ -57,6 +57,11 @@ func (a *Agent) Handle(run sdk.Run) error {
 		return err
 	}
 
+	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{})
+	if err != nil {
+		return err
+	}
+
 	if _, err := a.Sdk.Runs().Update(&sdk.UpdateRunParams{
 		RunId:  run.Id,
 		Status: "running",
@@ -64,7 +69,7 @@ func (a *Agent) Handle(run sdk.Run) error {
 		return err
 	}
 
-	pod, err := a.launchPod(run, ws.Workspace, url.Url)
+	pod, err := a.launchPod(run, ws.Workspace, token, url.Url)
 	if err != nil {
 		return err
 	}
@@ -123,8 +128,8 @@ loop:
 	return true, nil
 }
 
-func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, presignedUrl string) (*v1.Pod, error) {
-	podManifest := a.podSpecForRun(run, workspace, presignedUrl)
+func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, presignedUrl string) (*v1.Pod, error) {
+	podManifest := a.podSpecForRun(run, workspace, token, presignedUrl)
 	return a.Client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
@@ -157,17 +162,12 @@ func (a *Agent) writeLine(line string) error {
 	return nil
 }
 
-func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, presignedUrl string) *v1.Pod {
+func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, presignedUrl string) *v1.Pod {
 	args := []string{
 		"runner",
 		"-d=/workspace/testdata",
 		"-v=1.6.6",
-	}
-	args = append(args, run.Operation)
-	if run.Operation == "plan" {
-		args = append(args, run.Operation, "-out=tf.plan")
-	} else {
-		args = append(args, run.Operation, "tf.plan")
+		run.Operation,
 	}
 
 	podSpec := v1.PodSpec{
@@ -178,12 +178,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, presignedUrl
 				Image:           "chushi",
 				ImagePullPolicy: "Never",
 				Command:         []string{"/chushi"},
-				Args: []string{
-					"runner",
-					"-d=/workspace/testdata",
-					run.Operation,
-					"-v=1.6.6",
-				},
+				Args:            args,
 				Env: []v1.EnvVar{
 					{
 						Name:  "CHUSHI_API_URL",
@@ -196,6 +191,10 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, presignedUrl
 					{
 						Name:  "CHUSHI_RUN_ID",
 						Value: run.Id,
+					},
+					{
+						Name:  "RUNNER_TOKEN",
+						Value: token.AccessToken,
 					},
 				},
 				VolumeMounts: []v1.VolumeMount{

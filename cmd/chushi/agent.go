@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/robwittman/chushi/internal/agent"
 	"github.com/robwittman/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
@@ -66,6 +67,7 @@ func runAgent(cmd *cobra.Command, args []string) {
 	chushiSdk := &sdk.Sdk{
 		Client:         client.Client(context.TODO()),
 		ApiUrl:         apiUrl,
+		TokenUrl:       tokenUrl,
 		OrganizationId: orgId,
 	}
 
@@ -83,6 +85,7 @@ func runAgent(cmd *cobra.Command, args []string) {
 				RunId:  run.Id,
 				Status: "failed",
 			})
+			fmt.Println(err)
 		}
 	}
 }

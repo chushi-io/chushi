@@ -10,9 +10,11 @@ import (
 type Sdk struct {
 	Client         *http.Client
 	ApiUrl         string
+	TokenUrl       string
 	OrganizationId string
 
-	runs *Runs
+	runs   *Runs
+	tokens *Tokens
 }
 
 func New() {
@@ -24,6 +26,13 @@ func (s *Sdk) Runs() *Runs {
 		s.runs = &Runs{sdk: s}
 	}
 	return s.runs
+}
+
+func (s *Sdk) Tokens() *Tokens {
+	if s.tokens == nil {
+		s.tokens = &Tokens{sdk: s}
+	}
+	return s.tokens
 }
 
 type WorkspaceResponse struct {

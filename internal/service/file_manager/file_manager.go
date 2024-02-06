@@ -1,6 +1,7 @@
 package file_manager
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -105,10 +106,19 @@ func (impl *FileManagerImpl) PresignedPlanUrl(organizationId uuid.UUID, runId uu
 }
 
 func uploadObject(client *s3.Client, ctx context.Context, bucket string, key string, body io.Reader) (*s3.PutObjectOutput, error) {
+	// TODO: This is a hack to copy the body in memory. Ideally,
+	// we would pipe the original reader to the S3 client. However
+	// this causes errors with the signing process
+	buf := new(bytes.Buffer)
+	_, err := io.Copy(buf, body)
+	if err != nil {
+		return nil, err
+	}
+	r := bytes.NewReader(buf.Bytes())
 	return client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
-		Body:   body,
+		Body:   r,
 	})
 }
 

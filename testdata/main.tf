@@ -25,7 +25,7 @@ terraform {
     lock_address = "https://caring-foxhound-whole.ngrok-free.app/api/v1/orgs/my-cool-org/workspaces/workspace-1"
     unlock_address = "https://caring-foxhound-whole.ngrok-free.app/api/v1/orgs/my-cool-org/workspaces/workspace-1"
   }
-  required_version = "1.6.6"
+  required_version = "1.6.1"
 }
 
 resource "random_string" "test" {

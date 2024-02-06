@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/hc-install/product"
-	"github.com/hashicorp/hc-install/releases"
 	"github.com/hashicorp/terraform-exec/tfexec"
+	"github.com/robwittman/chushi/internal/installer"
 	"github.com/robwittman/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
 	"log"
@@ -35,18 +33,19 @@ executions occuring for Chushi workspaces.'
 			log.Fatal("Please provider a command to run")
 		}
 		ctx := context.Background()
-		terraformVersion, _ := cmd.Flags().GetString("version")
-		installer := &releases.ExactVersion{
-			Product: product.Terraform,
-			Version: version.Must(version.NewVersion(terraformVersion)),
+		tofuVersion, _ := cmd.Flags().GetString("version")
+		workingDir, _ := cmd.Flags().GetString("directory")
+
+		ver, err := version.NewVersion(tofuVersion)
+		if err != nil {
+			log.Fatal(err)
 		}
-		execPath, err := installer.Install(ctx)
+		install, err := installer.Install(ver, workingDir)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		workingDir, _ := cmd.Flags().GetString("directory")
-		tf, err := tfexec.NewTerraform(workingDir, execPath)
+		tf, err := tfexec.NewTerraform(workingDir, install)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -74,7 +73,6 @@ executions occuring for Chushi workspaces.'
 		}
 
 		if args[0] == "plan" && hasChanges {
-			fmt.Println("Changes found")
 			chushiSdk := &sdk.Sdk{
 				Client:         &http.Client{},
 				ApiUrl:         os.Getenv("CHUSHI_API_URL"),
@@ -84,15 +82,14 @@ executions occuring for Chushi workspaces.'
 			if err != nil {
 				log.Fatal(err)
 			}
-			if _, err := chushiSdk.Runs().UploadPlan(&sdk.UploadPlanParams{
+			if resp, err := chushiSdk.Runs().UploadPlan(&sdk.UploadPlanParams{
 				RunId: os.Getenv("CHUSHI_RUN_ID"),
 				Plan:  data,
 			}); err != nil {
+				log.Println(resp.Run)
 				log.Fatal(err)
 			}
 		}
-
-		fmt.Println(buf.String())
 	},
 }
 

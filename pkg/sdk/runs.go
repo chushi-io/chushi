@@ -53,7 +53,6 @@ func (r *Runs) List(params *ListRunsParams) (*ListRunsResponse, error) {
 		runsUrl = fmt.Sprintf("%sorgs/%s/runs", r.sdk.ApiUrl, r.sdk.OrganizationId)
 	}
 
-	fmt.Println(runsUrl)
 	v, _ := query.Values(params)
 	fullUrl := strings.Join([]string{runsUrl, v.Encode()}, "?")
 	res, err := r.sdk.Client.Get(fullUrl)
@@ -131,11 +130,7 @@ func (r *Runs) UploadPlan(params *UploadPlanParams) (*UploadPlanResponse, error)
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
 	var response UploadPlanResponse
-	err = json.Unmarshal(buf.Bytes(), &response)
 	return &response, err
 }
 

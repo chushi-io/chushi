@@ -18,6 +18,8 @@ import (
 	"github.com/robwittman/chushi/internal/resource/run"
 	"github.com/robwittman/chushi/internal/resource/vcs_connection"
 	"github.com/robwittman/chushi/internal/resource/workspaces"
+	"github.com/robwittman/chushi/internal/service/file_manager"
+	"github.com/robwittman/chushi/internal/service/run_manager"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -50,7 +52,9 @@ func (f *Factory) NewWorkspaceController() *controller.WorkspacesController {
 
 	return &controller.WorkspacesController{
 		Repository: workspaces.NewWorkspacesRepository(f.Database),
-		S3Client:   f.S3Client,
+		FileManager: &file_manager.FileManagerImpl{
+			S3Client: f.S3Client,
+		},
 	}
 }
 
@@ -72,10 +76,15 @@ func (f *Factory) NewAgentsController() *controller.AgentsController {
 }
 
 func (f *Factory) NewRunsController() *controller.RunsController {
+	workspaceRepo := workspaces.NewWorkspacesRepository(f.Database)
+	runsRepo := run.NewRunRepository(f.Database)
 	return &controller.RunsController{
-		Runs:       run.NewRunRepository(f.Database),
-		Workspaces: workspaces.NewWorkspacesRepository(f.Database),
-		S3Client:   f.S3Client,
+		Runs:       runsRepo,
+		Workspaces: workspaceRepo,
+		FileManager: &file_manager.FileManagerImpl{
+			S3Client: f.S3Client,
+		},
+		RunManager: run_manager.New(runsRepo, workspaceRepo),
 	}
 }
 
