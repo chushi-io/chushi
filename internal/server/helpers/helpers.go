@@ -15,3 +15,8 @@ func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {
 
 	return org.(*organization.Organization).ID, nil
 }
+
+func GetOrganization(c *gin.Context) *organization.Organization {
+	org, _ := c.Get("organization")
+	return org.(*organization.Organization)
+}

@@ -1,22 +1,17 @@
 package controller
 
 import (
-	"context"
 	"errors"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"github.com/robwittman/chushi/internal/server/helpers"
-	"io"
+	"github.com/robwittman/chushi/internal/service/file_manager"
 	"net/http"
-	"strings"
 )
 
 type WorkspacesController struct {
-	Repository workspaces.WorkspacesRepository
-	S3Client   *s3.Client
+	Repository  workspaces.WorkspacesRepository
+	FileManager file_manager.FileManager
 }
 
 func (ctrl *WorkspacesController) CreateWorkspace(c *gin.Context) {
@@ -153,68 +148,34 @@ func (ctrl *WorkspacesController) UnlockWorkspace(c *gin.Context) {
 }
 
 func (ctrl *WorkspacesController) GetState(c *gin.Context) {
-	orgId, err := helpers.GetOrganizationId(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
+	org := helpers.GetOrganization(c)
 
-	workspace, err := ctrl.Repository.FindById(orgId, c.Param("workspace"))
+	workspace, err := ctrl.Repository.FindById(org.ID, c.Param("workspace"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	output, err := ctrl.S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: aws.String(orgId.String()),
-		Key:    aws.String(workspace.ID.String()),
-	})
-	var nsk *types.NoSuchKey
-
-	if err != nil && !errors.As(err, &nsk) {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	} else if err != nil {
-		c.Status(http.StatusOK)
-		return
-	}
-
-	defer output.Body.Close()
-	b, err := io.ReadAll(output.Body)
+	state, err := ctrl.FileManager.FetchState(org.ID, workspace.ID)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	c.Writer.Write(b)
+	c.Writer.Write(state)
 	c.Status(http.StatusOK)
 }
 
 func (ctrl *WorkspacesController) UploadState(c *gin.Context) {
-	orgId, err := helpers.GetOrganizationId(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
+	org := helpers.GetOrganization(c)
 
-	workspace, err := ctrl.Repository.FindById(orgId, c.Param("workspace"))
+	workspace, err := ctrl.Repository.FindById(org.ID, c.Param("workspace"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	b, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	reader := strings.NewReader(string(b))
-	_, err = ctrl.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(orgId.String()),
-		Key:    aws.String(workspace.ID.String()),
-		Body:   reader,
-	})
+	err = ctrl.FileManager.UploadState(org.ID, workspace.ID, c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return

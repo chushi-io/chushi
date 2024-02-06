@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -11,6 +10,8 @@ import (
 	"github.com/robwittman/chushi/internal/resource/run"
 	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"github.com/robwittman/chushi/internal/server/helpers"
+	"github.com/robwittman/chushi/internal/service/file_manager"
+	"github.com/robwittman/chushi/internal/service/run_manager"
 	"github.com/robwittman/chushi/pkg/types"
 	"io"
 	"net/http"
@@ -19,9 +20,11 @@ import (
 )
 
 type RunsController struct {
-	Runs       run.RunRepository
-	Workspaces workspaces.WorkspacesRepository
-	S3Client   *s3.Client
+	Runs        run.RunRepository
+	Workspaces  workspaces.WorkspacesRepository
+	S3Client    *s3.Client
+	RunManager  run_manager.RunManager
+	FileManager file_manager.FileManager
 }
 
 func (ctrl *RunsController) List(c *gin.Context) {
@@ -49,44 +52,31 @@ func (ctrl *RunsController) List(c *gin.Context) {
 	})
 }
 
-type CreateRunRequest struct {
+type CreateRunInput struct {
 	Operation string `json:"operation"`
 }
 
 func (ctrl *RunsController) Create(c *gin.Context) {
-	orgId, err := helpers.GetOrganizationId(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
+	org := helpers.GetOrganization(c)
 
-	workspace, err := ctrl.Workspaces.FindById(orgId, c.Param("workspace"))
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	var params CreateRunRequest
+	var params CreateRunInput
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	r := &run.Run{
-		Workspace: *workspace,
-		AgentID:   workspace.AgentID,
-		Status:    "pending",
-		Operation: params.Operation,
-	}
+	r, err := ctrl.RunManager.CreateRun(&run_manager.CreateRunParams{
+		OrganizationId: org.ID,
+		WorkspaceId:    uuid.MustParse(c.Param("workspace")),
+		Operation:      params.Operation,
+	})
 
-	if _, err := ctrl.Runs.Create(r); err != nil {
+	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"run": r,
-	})
+	c.JSON(http.StatusOK, gin.H{"run": r})
 }
 
 func (ctrl *RunsController) SaveLogs(c *gin.Context) {
@@ -190,34 +180,20 @@ func (ctrl *RunsController) Get(c *gin.Context) {
 }
 
 func (ctrl *RunsController) StorePlan(c *gin.Context) {
-	orgId, err := helpers.GetOrganizationId(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
+	org := helpers.GetOrganization(c)
 
 	runId, err := uuid.Parse(c.Param("run"))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	run, err := ctrl.Runs.Get(runId)
+	r, err := ctrl.Runs.Get(runId)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	b, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	_, err = ctrl.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(orgId.String()),
-		Key:    aws.String(fmt.Sprintf("runs/%s/plan", run.ID.String())),
-		Body:   bytes.NewReader(b),
-	})
-	if err != nil {
+	if err = ctrl.FileManager.UploadPlan(org.ID, r.ID, c.Request.Body); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
