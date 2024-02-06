@@ -11,13 +11,13 @@ import (
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/golang-jwt/jwt"
-	"github.com/robwittman/chushi/internal/models"
-	"github.com/robwittman/chushi/internal/server/endpoints/agents"
-	"github.com/robwittman/chushi/internal/server/endpoints/organizations"
-	"github.com/robwittman/chushi/internal/server/endpoints/runs"
-	"github.com/robwittman/chushi/internal/server/endpoints/terraform"
-	"github.com/robwittman/chushi/internal/server/endpoints/vcs_connections"
-	"github.com/robwittman/chushi/internal/server/endpoints/workspaces"
+	"github.com/robwittman/chushi/internal/controller"
+	"github.com/robwittman/chushi/internal/resource/agent"
+	"github.com/robwittman/chushi/internal/resource/oauth"
+	"github.com/robwittman/chushi/internal/resource/organization"
+	"github.com/robwittman/chushi/internal/resource/run"
+	"github.com/robwittman/chushi/internal/resource/vcs_connection"
+	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -46,50 +46,46 @@ func NewFactory(database *gorm.DB) (*Factory, error) {
 	}, nil
 }
 
-func (f *Factory) NewTerraformController() *terraform.Controller {
-	return &terraform.Controller{}
-}
+func (f *Factory) NewWorkspaceController() *controller.WorkspacesController {
 
-func (f *Factory) NewWorkspaceController() *workspaces.Controller {
-
-	return &workspaces.Controller{
-		Repository: models.NewWorkspacesRepository(f.Database),
+	return &controller.WorkspacesController{
+		Repository: workspaces.NewWorkspacesRepository(f.Database),
 		S3Client:   f.S3Client,
 	}
 }
 
-func (f *Factory) NewVcsConnectionsController() *vcs_connections.Controller {
-	return &vcs_connections.Controller{}
+func (f *Factory) NewVcsConnectionsController() *vcs_connection.Controller {
+	return &vcs_connection.Controller{}
 }
 
-func (f *Factory) NewOrganizationsController() *organizations.Controller {
-	return &organizations.Controller{
-		Repository: models.NewOrganizationRepository(f.Database),
+func (f *Factory) NewOrganizationsController() *controller.OrganizationsController {
+	return &controller.OrganizationsController{
+		Repository: organization.NewOrganizationRepository(f.Database),
 	}
 }
 
-func (f *Factory) NewAgentsController() *agents.Controller {
-	return &agents.Controller{
-		Repository:     models.NewAgentRepository(f.Database, models.NewClientStore(f.Database)),
-		RunsRepository: models.NewRunRepository(f.Database),
+func (f *Factory) NewAgentsController() *controller.AgentsController {
+	return &controller.AgentsController{
+		Repository:     agent.NewAgentRepository(f.Database, oauth.NewClientStore(f.Database)),
+		RunsRepository: run.NewRunRepository(f.Database),
 	}
 }
 
-func (f *Factory) NewRunsController() *runs.Controller {
-	return &runs.Controller{
-		Runs:       models.NewRunRepository(f.Database),
-		Workspaces: models.NewWorkspacesRepository(f.Database),
+func (f *Factory) NewRunsController() *controller.RunsController {
+	return &controller.RunsController{
+		Runs:       run.NewRunRepository(f.Database),
+		Workspaces: workspaces.NewWorkspacesRepository(f.Database),
 		S3Client:   f.S3Client,
 	}
 }
 
 func (f *Factory) NewOauthServer() *server.Server {
 	manager := manage.NewDefaultManager()
-	manager.MustTokenStorage(models.NewTokenStore(f.Database))
+	manager.MustTokenStorage(oauth.NewTokenStore(f.Database))
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte(os.Getenv("JWT_SECRET_KEY")), jwt.SigningMethodHS512))
 
 	// client memory store
-	clientStore := models.NewClientStore(f.Database)
+	clientStore := oauth.NewClientStore(f.Database)
 	manager.MapClientStorage(clientStore)
 	srv := server.NewDefaultServer(manager)
 	srv.SetClientInfoHandler(server.ClientFormHandler)

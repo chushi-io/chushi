@@ -1,24 +1,27 @@
-package agents
+package controller
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/golang-jwt/jwt"
-	"github.com/robwittman/chushi/internal/models"
+	"github.com/robwittman/chushi/internal/resource/agent"
+	"github.com/robwittman/chushi/internal/resource/run"
+	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"github.com/robwittman/chushi/internal/server/helpers"
+	"github.com/robwittman/chushi/pkg/types"
 	"net/http"
 	"os"
 	"strings"
 )
 
-type Controller struct {
-	Repository          models.AgentRepository
-	RunsRepository      models.RunRepository
-	WorkspaceRepository models.WorkspacesRepository
+type AgentsController struct {
+	Repository          agent.AgentRepository
+	RunsRepository      run.RunRepository
+	WorkspaceRepository workspaces.WorkspacesRepository
 }
 
-func (ctrl *Controller) List(c *gin.Context) {
+func (ctrl *AgentsController) List(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -34,19 +37,19 @@ func (ctrl *Controller) List(c *gin.Context) {
 	}
 }
 
-func (ctrl *Controller) Get(c *gin.Context) {
+func (ctrl *AgentsController) Get(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
-	agent, err := ctrl.Repository.FindById(orgId, c.Param("agent"))
+	ag, err := ctrl.Repository.FindById(orgId, c.Param("agent"))
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"agent": agent,
+			"agent": ag,
 		})
 	}
 }
@@ -55,7 +58,7 @@ type CreateAgentRequest struct {
 	Name string `json:"name"`
 }
 
-func (ctrl *Controller) Create(c *gin.Context) {
+func (ctrl *AgentsController) Create(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -68,34 +71,35 @@ func (ctrl *Controller) Create(c *gin.Context) {
 		return
 	}
 
-	agent := &models.Agent{
+	ag := &agent.Agent{
 		OrganizationID: orgId,
 		Name:           params.Name,
 	}
-	if _, err := ctrl.Repository.Create(agent); err != nil {
+	if _, err := ctrl.Repository.Create(ag); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"agent": agent,
+			"agent": ag,
 		})
 	}
 }
 
-func (ctrl *Controller) Update(c *gin.Context) {
+func (ctrl *AgentsController) Update(c *gin.Context) {
 
 }
 
-func (ctrl *Controller) Delete(c *gin.Context) {
+func (ctrl *AgentsController) Delete(c *gin.Context) {
 
 }
 
-func (ctrl *Controller) GetRuns(c *gin.Context) {
+func (ctrl *AgentsController) GetRuns(c *gin.Context) {
 
-	params := &models.RunListParams{
+	params := &run.RunListParams{
 		AgentId: c.Param("agent"),
 	}
 	if status := c.Query("status"); status != "" {
-		params.Status = status
+		runStatus, _ := types.ToRunStatus(status)
+		params.Status = runStatus
 	}
 	runs, err := ctrl.RunsRepository.List(params)
 	if err != nil {
@@ -107,7 +111,7 @@ func (ctrl *Controller) GetRuns(c *gin.Context) {
 	})
 }
 
-func (ctrl *Controller) AgentAccess(c *gin.Context) {
+func (ctrl *AgentsController) AgentAccess(c *gin.Context) {
 	input := c.Request.Header.Get("Authorization")
 	if input == "" {
 		c.AbortWithStatus(http.StatusForbidden)

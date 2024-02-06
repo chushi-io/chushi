@@ -1,11 +1,6 @@
-package models
+package organization
 
 import "gorm.io/gorm"
-
-type Organization struct {
-	Base
-	Name string `json:"name" gorm:"index:idx_name,unique;not_null"`
-}
 
 type OrganizationRepository interface {
 	Save(org *Organization) error

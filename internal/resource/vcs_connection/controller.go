@@ -1,4 +1,4 @@
-package vcs_connections
+package vcs_connection
 
 import "github.com/gin-gonic/gin"
 

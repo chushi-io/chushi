@@ -1,4 +1,4 @@
-package runs
+package controller
 
 import (
 	"bytes"
@@ -8,35 +8,37 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/models"
+	"github.com/robwittman/chushi/internal/resource/run"
+	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"github.com/robwittman/chushi/internal/server/helpers"
+	"github.com/robwittman/chushi/pkg/types"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 )
 
-type Controller struct {
-	Runs       models.RunRepository
-	Workspaces models.WorkspacesRepository
+type RunsController struct {
+	Runs       run.RunRepository
+	Workspaces workspaces.WorkspacesRepository
 	S3Client   *s3.Client
 }
 
-func (ctrl *Controller) List(c *gin.Context) {
+func (ctrl *RunsController) List(c *gin.Context) {
 	//orgId, err := helpers.GetOrganizationId(c)
 	//if err != nil {
 	//	c.AbortWithError(http.StatusUnauthorized, err)
 	//	return
 	//}
 
-	params := &models.RunListParams{}
+	params := &run.RunListParams{}
 	if workspaceId := c.Param("workspace"); workspaceId != "" {
 		params.WorkspaceId = workspaceId
 	}
 	if status := c.Query("status"); status != "" {
-		params.Status = status
+		runStatus, _ := types.ToRunStatus(status)
+		params.Status = runStatus
 	}
-	fmt.Println(params)
 	runs, err := ctrl.Runs.List(params)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -51,7 +53,7 @@ type CreateRunRequest struct {
 	Operation string `json:"operation"`
 }
 
-func (ctrl *Controller) Create(c *gin.Context) {
+func (ctrl *RunsController) Create(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -70,24 +72,24 @@ func (ctrl *Controller) Create(c *gin.Context) {
 		return
 	}
 
-	run := &models.Run{
+	r := &run.Run{
 		Workspace: *workspace,
 		AgentID:   workspace.AgentID,
 		Status:    "pending",
 		Operation: params.Operation,
 	}
 
-	if _, err := ctrl.Runs.Create(run); err != nil {
+	if _, err := ctrl.Runs.Create(r); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"run": run,
+		"run": r,
 	})
 }
 
-func (ctrl *Controller) SaveLogs(c *gin.Context) {
+func (ctrl *RunsController) SaveLogs(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -123,8 +125,8 @@ func (ctrl *Controller) SaveLogs(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (ctrl *Controller) Update(c *gin.Context) {
-	var params models.UpdateRunParams
+func (ctrl *RunsController) Update(c *gin.Context) {
+	var params run.UpdateRunParams
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -151,7 +153,8 @@ func (ctrl *Controller) Update(c *gin.Context) {
 		run.Destroy = params.Remove
 	}
 	if params.Status != "" {
-		run.Status = params.Status
+		status, _ := types.ToRunStatus(params.Status)
+		run.Status = status
 		if params.Status == "completed" || params.Status == "failed" {
 			completion := time.Now()
 			run.CompletedAt = &completion
@@ -166,7 +169,7 @@ func (ctrl *Controller) Update(c *gin.Context) {
 	}
 }
 
-func (ctrl *Controller) Get(c *gin.Context) {
+func (ctrl *RunsController) Get(c *gin.Context) {
 	//orgId, err := helpers.GetOrganizationId(c)
 	//if err != nil {
 	//	c.AbortWithError(http.StatusUnauthorized, err)
@@ -186,7 +189,7 @@ func (ctrl *Controller) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"run": run})
 }
 
-func (ctrl *Controller) StorePlan(c *gin.Context) {
+func (ctrl *RunsController) StorePlan(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -221,7 +224,7 @@ func (ctrl *Controller) StorePlan(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (ctrl *Controller) GeneratePresignedUrl(c *gin.Context) {
+func (ctrl *RunsController) GeneratePresignedUrl(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)

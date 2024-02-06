@@ -1,4 +1,4 @@
-package workspaces
+package controller
 
 import (
 	"context"
@@ -7,20 +7,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/chushi/internal/models"
+	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"github.com/robwittman/chushi/internal/server/helpers"
 	"io"
 	"net/http"
 	"strings"
 )
 
-type Controller struct {
-	Repository models.WorkspacesRepository
+type WorkspacesController struct {
+	Repository workspaces.WorkspacesRepository
 	S3Client   *s3.Client
 }
 
-func (ctrl *Controller) CreateWorkspace(c *gin.Context) {
-	var workspace models.Workspace
+func (ctrl *WorkspacesController) CreateWorkspace(c *gin.Context) {
+	var workspace workspaces.Workspace
 
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
@@ -44,7 +44,7 @@ func (ctrl *Controller) CreateWorkspace(c *gin.Context) {
 	})
 }
 
-func (ctrl *Controller) ListWorkspaces(c *gin.Context) {
+func (ctrl *WorkspacesController) ListWorkspaces(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -59,7 +59,7 @@ func (ctrl *Controller) ListWorkspaces(c *gin.Context) {
 	}
 }
 
-func (ctrl *Controller) GetWorkspace(c *gin.Context) {
+func (ctrl *WorkspacesController) GetWorkspace(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -75,7 +75,7 @@ func (ctrl *Controller) GetWorkspace(c *gin.Context) {
 	}
 }
 
-func (ctrl *Controller) UpdateWorkspace(c *gin.Context) {
+func (ctrl *WorkspacesController) UpdateWorkspace(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -88,7 +88,7 @@ func (ctrl *Controller) UpdateWorkspace(c *gin.Context) {
 		return
 	}
 
-	var params models.UpdateWorkspaceParams
+	var params workspaces.UpdateWorkspaceParams
 	if err := c.BindJSON(&params); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -106,11 +106,11 @@ func (ctrl *Controller) UpdateWorkspace(c *gin.Context) {
 
 }
 
-func (ctrl *Controller) DeleteWorkspace(c *gin.Context) {
+func (ctrl *WorkspacesController) DeleteWorkspace(c *gin.Context) {
 
 }
 
-func (ctrl *Controller) LockWorkspace(c *gin.Context) {
+func (ctrl *WorkspacesController) LockWorkspace(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -131,7 +131,7 @@ func (ctrl *Controller) LockWorkspace(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (ctrl *Controller) UnlockWorkspace(c *gin.Context) {
+func (ctrl *WorkspacesController) UnlockWorkspace(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -152,7 +152,7 @@ func (ctrl *Controller) UnlockWorkspace(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (ctrl *Controller) GetState(c *gin.Context) {
+func (ctrl *WorkspacesController) GetState(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -190,7 +190,7 @@ func (ctrl *Controller) GetState(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (ctrl *Controller) UploadState(c *gin.Context) {
+func (ctrl *WorkspacesController) UploadState(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)

@@ -1,20 +1,12 @@
-package models
+package agent
 
 import (
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/google/uuid"
+	"github.com/robwittman/chushi/internal/resource/oauth"
+	"github.com/robwittman/chushi/internal/scopes"
 	"gorm.io/gorm"
 )
-
-type Agent struct {
-	Base
-	Name           string       `gorm:"index:idx_name,unique" json:"name"`
-	OrganizationID uuid.UUID    `gorm:"index:idx_name,unique" json:"organization_id"`
-	Organization   Organization `json:"-"`
-	Status         string       `json:"status"`
-	OauthClientID  string       `json:"oauth_client_id"`
-	OauthClient    OauthClient  `json:"-"`
-}
 
 type AgentRepository interface {
 	List(organizationId uuid.UUID) ([]Agent, error)
@@ -27,10 +19,10 @@ type AgentRepository interface {
 
 type AgentRepositoryImpl struct {
 	Db          *gorm.DB
-	ClientStore *ClientStore
+	ClientStore *oauth.ClientStore
 }
 
-func NewAgentRepository(db *gorm.DB, clientStore *ClientStore) AgentRepository {
+func NewAgentRepository(db *gorm.DB, clientStore *oauth.ClientStore) AgentRepository {
 	return &AgentRepositoryImpl{
 		Db:          db,
 		ClientStore: clientStore,
@@ -48,7 +40,7 @@ func (a AgentRepositoryImpl) List(organizationId uuid.UUID) ([]Agent, error) {
 func (a AgentRepositoryImpl) FindById(organizationId uuid.UUID, agentId string) (*Agent, error) {
 	var agent Agent
 	if result := a.Db.
-		Scopes(BelongsToOrganization(organizationId)).
+		Scopes(scopes.BelongsToOrganization(organizationId)).
 		Where("id = ?", agentId).First(&agent); result.Error != nil {
 		return nil, result.Error
 	}

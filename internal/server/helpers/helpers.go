@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/models"
+	"github.com/robwittman/chushi/internal/resource/organization"
 )
 
 func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {
@@ -13,5 +13,5 @@ func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {
 		return uuid.UUID{}, errors.New("organization ID not found")
 	}
 
-	return org.(*models.Organization).ID, nil
+	return org.(*organization.Organization).ID, nil
 }

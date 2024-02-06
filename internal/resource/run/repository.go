@@ -1,39 +1,11 @@
-package models
+package run
 
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/robwittman/chushi/pkg/types"
 	"gorm.io/gorm"
-	"time"
 )
-
-// TODO: Does run make sense as the unit of work? Each individual
-// run does _either_ a plan or apply, there's currently no relation
-// between a "RunGroup" that attributes 1 "plan" run for the workspace,
-// and an associated "apply" that applies the generated plan. For the
-// purposes of reporting / visualization, it probably makes sense to
-// have a single Execution, which references the plan / apply runs?
-
-// DECISION: Instead, we'll simply refactor "Runs" to be a higher level
-// object. We'll add states to represent planning, applying, pending_approval,
-// and execute a run up to 2 times. Once to plan, store the plan output,
-// and request approval if necessary. Then again to apply the stored plan
-type Run struct {
-	Base
-	Status           string     `json:"status"`
-	WorkspaceID      string     `json:"workspace_id"`
-	Workspace        Workspace  `json:"-"`
-	Add              int        `json:"add"`
-	Change           int        `json:"change"`
-	Destroy          int        `json:"destroy"`
-	ManagedResources int        `json:"managed_resources"`
-	CompletedAt      *time.Time `json:"completed_at"`
-	Operation        string     `json:"operation"`
-
-	// Agent configuration
-	AgentID *uuid.UUID `json:"-" gorm:"default:null"`
-	Agent   *Agent     `json:"agent,omitempty"`
-}
 
 type RunRepository interface {
 	List(params *RunListParams) ([]Run, error)
@@ -49,7 +21,7 @@ type RunRepositoryImpl struct {
 
 type RunListParams struct {
 	AgentId     string
-	Status      string
+	Status      types.RunStatus
 	WorkspaceId string
 }
 

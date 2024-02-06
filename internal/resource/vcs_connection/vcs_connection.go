@@ -1,8 +1,16 @@
-package models
+package vcs_connection
+
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type VcsConnection struct {
-	Base
-	Name string `json:"name"`
+	ID        uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
+	Name      string     `json:"name"`
 	// One of github, gitlab, bitbucket, or git
 	Provider  string              `json:"provider"`
 	Github    GithubConnection    `gorm:"embedded;embeddedPrefix:github_"`

@@ -3,7 +3,10 @@ package server
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/chushi/internal/models"
+	"github.com/robwittman/chushi/internal/resource/oauth"
+	"github.com/robwittman/chushi/internal/resource/organization"
+	"github.com/robwittman/chushi/internal/resource/run"
+	"github.com/robwittman/chushi/internal/resource/workspaces"
 	"github.com/robwittman/chushi/internal/server/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,7 +23,14 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := models.Setup(database); err != nil {
+
+	if err := database.AutoMigrate(
+		&workspaces.Workspace{},
+		&organization.Organization{},
+		&oauth.OauthClient{},
+		&oauth.OauthToken{},
+		&run.Run{},
+	); err != nil {
 		return nil, err
 	}
 
