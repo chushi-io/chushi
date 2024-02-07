@@ -9,6 +9,7 @@ on:
       - '**/*.go'
       - 'go.mod'
       - '.github/workflows/release.yaml'
+      - '.github/workflows/docker.yaml'
       - '.releaserc.json'
 
 jobs:
