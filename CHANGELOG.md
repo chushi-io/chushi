@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.0.1](https://github.com/chushi-io/chushi/compare/v1.0.0...v1.0.1) (2024-02-07)
+
+
+### Bug Fixes
+
+* **ci:** Add packages:write permissions to default token permissions ([dae111c](https://github.com/chushi-io/chushi/commit/dae111ca2b026aaf977be0a9b73da36e68f0e7f5))
+
 ## 1.0.0 (2024-02-06)
 
 
