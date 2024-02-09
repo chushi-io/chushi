@@ -2,7 +2,7 @@ package agent
 
 import (
 	"encoding/json"
-	"github.com/robwittman/chushi/pkg/sdk"
+	"github.com/chushi-io/chushi/pkg/sdk"
 )
 
 type ChangeSink struct {

@@ -1,9 +1,9 @@
 package agent
 
 import (
+	"github.com/chushi-io/chushi/internal/resource/oauth"
+	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/resource/oauth"
-	"github.com/robwittman/chushi/internal/resource/organization"
 	"time"
 )
 

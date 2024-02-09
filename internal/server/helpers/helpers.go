@@ -2,9 +2,9 @@ package helpers
 
 import (
 	"errors"
+	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/resource/organization"
 )
 
 func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {

@@ -1,8 +1,8 @@
 package run
 
 import (
+	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/pkg/types"
 	"gorm.io/gorm"
 )
 

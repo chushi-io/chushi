@@ -1,10 +1,10 @@
 package run
 
 import (
+	"github.com/chushi-io/chushi/internal/resource/agent"
+	"github.com/chushi-io/chushi/internal/resource/workspaces"
+	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/resource/agent"
-	"github.com/robwittman/chushi/internal/resource/workspaces"
-	"github.com/robwittman/chushi/pkg/types"
 	"time"
 )
 

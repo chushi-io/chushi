@@ -27,7 +27,7 @@ spec:
       image: alpine/git
       args:
         - "clone"
-        - "https://github.com/robwittman/chushi"
+        - "https://github.com/chushi-io/chushi"
         - "/workspace"
       volumeMounts:
         - mountPath: /workspace

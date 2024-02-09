@@ -1,4 +1,4 @@
-module github.com/robwittman/chushi
+module github.com/chushi-io/chushi
 
 go 1.21
 

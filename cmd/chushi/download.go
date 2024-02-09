@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/chushi-io/chushi/internal/installer"
 	"github.com/hashicorp/go-version"
-	"github.com/robwittman/chushi/internal/installer"
 	"github.com/spf13/cobra"
 	"log"
 )

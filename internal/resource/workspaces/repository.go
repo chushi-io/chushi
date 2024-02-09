@@ -2,8 +2,8 @@ package workspaces
 
 import (
 	"errors"
+	"github.com/chushi-io/chushi/internal/scopes"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/scopes"
 	"gorm.io/gorm"
 )
 

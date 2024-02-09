@@ -2,12 +2,12 @@ package server
 
 import (
 	"fmt"
+	"github.com/chushi-io/chushi/internal/resource/oauth"
+	"github.com/chushi-io/chushi/internal/resource/organization"
+	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/workspaces"
+	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/chushi/internal/resource/oauth"
-	"github.com/robwittman/chushi/internal/resource/organization"
-	"github.com/robwittman/chushi/internal/resource/run"
-	"github.com/robwittman/chushi/internal/resource/workspaces"
-	"github.com/robwittman/chushi/internal/server/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

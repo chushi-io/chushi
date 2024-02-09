@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/robwittman/chushi/internal/agent"
-	"github.com/robwittman/chushi/pkg/sdk"
+	"github.com/chushi-io/chushi/internal/agent"
+	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2/clientcredentials"
 	"k8s.io/client-go/kubernetes"
