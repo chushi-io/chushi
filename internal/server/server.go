@@ -8,6 +8,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/gin-gonic/gin"
+	adapter "github.com/gwatts/gin-adapter"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -40,9 +41,10 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
-	authServer := factory.NewOauthServer()
+	//authServer := factory.NewOauthServer()
 	agentCtrl := factory.NewAgentsController()
 	runsCtrl := factory.NewRunsController()
+	ab := factory.NewAuthBoss()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -177,20 +179,22 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
-	v1auth := r.Group("/auth/v1")
-	{
-		v1auth.GET("/authorize", func(c *gin.Context) {
-			err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
-			if err != nil {
-				c.AbortWithError(http.StatusBadRequest, err)
-			}
-		})
-		v1auth.POST("/token", func(c *gin.Context) {
-			authServer.HandleTokenRequest(c.Writer, c.Request)
-		})
-	}
+	r.Any("/auth/*w", gin.WrapH(ab.Config.Core.Router))
 
-	r.Static("/ui", "./ui/build")
+	//v1auth := r.Group("/auth/v1")
+	//{
+	//	v1auth.GET("/authorize", func(c *gin.Context) {
+	//		err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
+	//		if err != nil {
+	//			c.AbortWithError(http.StatusBadRequest, err)
+	//		}
+	//	})
+	//	v1auth.POST("/token", func(c *gin.Context) {
+	//		authServer.HandleTokenRequest(c.Writer, c.Request)
+	//	})
+	//}
+
+	r.Use(adapter.Wrap(ab.LoadClientStateMiddleware)).Static("/ui", "./ui/build")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./ui/build/index.html")
 	})

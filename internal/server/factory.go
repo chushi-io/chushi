@@ -11,6 +11,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/user"
 	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
@@ -20,6 +21,8 @@ import (
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/golang-jwt/jwt"
+	"github.com/volatiletech/authboss/v3"
+	"github.com/volatiletech/authboss/v3/defaults"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -110,6 +113,20 @@ func (f *Factory) NewOauthServer() *server.Server {
 		log.Println("Response Error:", re.Error.Error())
 	})
 	return srv
+}
+
+func (f *Factory) NewAuthBoss() *authboss.Authboss {
+	userStore := user.NewStore(f.Database)
+	ab := authboss.New()
+	ab.Config.Storage.Server = userStore
+	
+	ab.Config.Paths.Mount = "/auth"
+	defaults.SetCore(&ab.Config, false, false)
+	if err := ab.Init(); err != nil {
+		panic(err)
+	}
+
+	return ab
 }
 
 func getMinioClient() *s3.Client {
