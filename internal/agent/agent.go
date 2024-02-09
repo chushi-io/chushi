@@ -16,25 +16,43 @@ import (
 
 type Agent struct {
 	Client *kubernetes.Clientset
+	Config *Config
 	Sdk    *sdk.Sdk
 	sinks  []io.Writer
 }
 
-func New(client *kubernetes.Clientset, sdk *sdk.Sdk) (*Agent, error) {
+func New(client *kubernetes.Clientset, sdk *sdk.Sdk, conf *Config) (*Agent, error) {
 	return &Agent{
 		Client: client,
 		Sdk:    sdk,
+		Config: conf,
 	}, nil
 }
 
+// For now, this just queries the current list of runs,
+// and exists. However, it should query the API (or stream)
+// and emit runners as needed
 func (a *Agent) Run() error {
-	fmt.Println("Running agent...")
-	// Subscribe to whichever endpoint for getting queued runs,
-	// and handle events
-	select {}
+	runs, err := a.Sdk.Runs().List(&sdk.ListRunsParams{
+		AgentId: a.Config.GetAgentId(),
+		Status:  "pending",
+	})
+	if err != nil {
+		return err
+	}
+	for _, run := range runs.Runs {
+		if err := a.handle(run); err != nil {
+			a.Sdk.Runs().Update(&sdk.UpdateRunParams{
+				RunId:  run.Id,
+				Status: "failed",
+			})
+			return err
+		}
+	}
+	return nil
 }
 
-func (a *Agent) Handle(run sdk.Run) error {
+func (a *Agent) handle(run sdk.Run) error {
 	a.sinks = []io.Writer{ChangeSink{
 		RunId: run.Id,
 		Sdk:   a.Sdk,
@@ -175,14 +193,14 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 			// Actual run container
 			{
 				Name:            "chushi",
-				Image:           "chushi",
+				Image:           a.Config.GetImage(),
 				ImagePullPolicy: "Never",
 				Command:         []string{"/chushi"},
 				Args:            args,
 				Env: []v1.EnvVar{
 					{
 						Name:  "CHUSHI_API_URL",
-						Value: a.Sdk.ApiUrl,
+						Value: a.Config.GetApiUrl(),
 					},
 					{
 						Name:  "CHUSHI_ORGANIZATION",
@@ -236,7 +254,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    "default",
+			Namespace:    a.Config.GetNamespace(),
 			GenerateName: "chushi-runner-",
 			Labels:       map[string]string{},
 		},

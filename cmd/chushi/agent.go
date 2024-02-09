@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/robwittman/chushi/internal/agent"
 	"github.com/robwittman/chushi/pkg/sdk"
 	"github.com/spf13/cobra"
@@ -33,8 +32,6 @@ configurations and parameters, start and monitor it, and clean up once completed
 
 func init() {
 	agentCmd.Flags().Int("poll-interval", 2, "How often to poll the queue endpoint (seconds)")
-	agentCmd.Flags().String("client-id", "", "OAuth Client ID")
-	agentCmd.Flags().String("client-secret", "", "OAuth Client Secret")
 	agentCmd.Flags().String("agent-id", "", "ID of the agent")
 	agentCmd.Flags().String("token-url", "https://chushi.io/auth/v1/token", "Chushi Token URL")
 	agentCmd.Flags().String("api-url", "https://chushi.io/api/v1/", "Chushi API URL")
@@ -45,8 +42,9 @@ func init() {
 }
 
 func runAgent(cmd *cobra.Command, args []string) {
-	clientId, _ := cmd.Flags().GetString("client-id")
-	clientSecret, _ := cmd.Flags().GetString("client-secret")
+	clientId := os.Getenv("CHUSHI_CLIENT_ID")
+	clientSecret := os.Getenv("CHUSHI_CLIENT_SECRET")
+
 	agentId, _ := cmd.Flags().GetString("agent-id")
 	tokenUrl, _ := cmd.Flags().GetString("token-url")
 	apiUrl, _ := cmd.Flags().GetString("api-url")
@@ -64,29 +62,30 @@ func runAgent(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
+	cnf := &agent.Config{
+		Server: &agent.ServerConfig{
+			TokenUrl: tokenUrl,
+			ApiUrl:   apiUrl,
+		},
+		Runner: &agent.RunnerConfig{
+			Image:   "chushi",
+			Version: "latest",
+		},
+		AgentId: agentId,
+	}
+
 	chushiSdk := &sdk.Sdk{
 		Client:         client.Client(context.TODO()),
-		ApiUrl:         apiUrl,
-		TokenUrl:       tokenUrl,
+		ApiUrl:         cnf.Server.ApiUrl,
+		TokenUrl:       cnf.Server.TokenUrl,
 		OrganizationId: orgId,
 	}
 
-	ag, _ := agent.New(kubeClient, chushiSdk)
-	runs, err := chushiSdk.Runs().List(&sdk.ListRunsParams{
-		AgentId: agentId,
-		Status:  "pending",
-	})
+	ag, _ := agent.New(kubeClient, chushiSdk, cnf)
+
+	err = ag.Run()
 	if err != nil {
 		log.Fatal(err)
-	}
-	for _, run := range runs.Runs {
-		if err := ag.Handle(run); err != nil {
-			chushiSdk.Runs().Update(&sdk.UpdateRunParams{
-				RunId:  run.Id,
-				Status: "failed",
-			})
-			fmt.Println(err)
-		}
 	}
 }
 
