@@ -68,6 +68,8 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/gwatts/gin-adapter v1.0.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -105,6 +107,8 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
+	github.com/volatiletech/authboss-clientstate v0.0.0-20230313034706-0b930a6c0713 // indirect
+	github.com/volatiletech/authboss-renderer v0.0.0-20210622044114-b32bb7a1387f // indirect
 	github.com/volatiletech/authboss/v3 v3.5.0 // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

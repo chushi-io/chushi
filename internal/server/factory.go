@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -21,8 +22,17 @@ import (
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/golang-jwt/jwt"
+	abrenderer "github.com/volatiletech/authboss-renderer"
+	"regexp"
+
+	// Authentication modules
+	abclientstate "github.com/volatiletech/authboss-clientstate"
 	"github.com/volatiletech/authboss/v3"
+	_ "github.com/volatiletech/authboss/v3/auth"
 	"github.com/volatiletech/authboss/v3/defaults"
+	_ "github.com/volatiletech/authboss/v3/logout"
+	_ "github.com/volatiletech/authboss/v3/register"
+
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -118,10 +128,44 @@ func (f *Factory) NewOauthServer() *server.Server {
 func (f *Factory) NewAuthBoss() *authboss.Authboss {
 	userStore := user.NewStore(f.Database)
 	ab := authboss.New()
+	ab.Config.Paths.RootURL = "http://localhost:5000"
 	ab.Config.Storage.Server = userStore
-	
+	ab.Config.Storage.SessionState = f.NewSessionStore()
+	ab.Config.Storage.CookieState = f.NewSessionStore()
 	ab.Config.Paths.Mount = "/auth"
+	ab.Config.Core.ViewRenderer = abrenderer.NewHTML("/auth", "views/auth")
+
 	defaults.SetCore(&ab.Config, false, false)
+
+	emailRule := defaults.Rules{
+		FieldName: "email", Required: true,
+		MatchError: "Must be a valid e-mail address",
+		MustMatch:  regexp.MustCompile(`.*@.*\.[a-z]{1,}`),
+	}
+	passwordRule := defaults.Rules{
+		FieldName: "password", Required: true,
+		MinLength: 4,
+	}
+	//nameRule := defaults.Rules{
+	//	FieldName: "name", Required: true,
+	//	MinLength: 2,
+	//}
+
+	ab.Config.Core.BodyReader = defaults.HTTPBodyReader{
+		ReadJSON: false,
+		Rulesets: map[string][]defaults.Rules{
+			"register":    {emailRule, passwordRule}, // nameRule},
+			"recover_end": {passwordRule},
+		},
+		Confirms: map[string][]string{
+			"register":    {"password", authboss.ConfirmPrefix + "password"},
+			"recover_end": {"password", authboss.ConfirmPrefix + "password"},
+		},
+		Whitelist: map[string][]string{
+			"register": []string{"email", "name", "password"},
+		},
+	}
+
 	if err := ab.Init(); err != nil {
 		panic(err)
 	}
@@ -148,4 +192,14 @@ func getMinioClient() *s3.Client {
 	return s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = true
 	})
+}
+
+func (f *Factory) NewCookieStore() abclientstate.CookieStorer {
+	cookieStoreKey, _ := base64.StdEncoding.DecodeString(`NpEPi8pEjKVjLGJ6kYCS+VTCzi6BUuDzU0wrwXyf5uDPArtlofn2AG6aTMiPmN3C909rsEWMNqJqhIVPGP3Exg==`)
+	return abclientstate.NewCookieStorer(cookieStoreKey, nil)
+}
+
+func (f *Factory) NewSessionStore() abclientstate.SessionStorer {
+	sessionStoreKey, _ := base64.StdEncoding.DecodeString(`AbfYwmmt8UCwUuhd9qvfNA9UCuN1cVcKJN1ofbiky6xCyyBj20whe40rJa3Su0WOWLWcPpO1taqJdsEI/65+JA==`)
+	return abclientstate.NewSessionStorer("test", sessionStoreKey, nil)
 }

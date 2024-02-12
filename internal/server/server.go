@@ -6,9 +6,9 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
+	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/gin-gonic/gin"
-	adapter "github.com/gwatts/gin-adapter"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -47,6 +47,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	ab := factory.NewAuthBoss()
 
 	r := gin.Default()
+	//r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
@@ -179,7 +180,11 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
-	r.Any("/auth/*w", gin.WrapH(ab.Config.Core.Router))
+	authGroup := r.Group("/auth").Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	{
+		//authGroup.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", ab.Config.Core.Router)))
+	}
 
 	//v1auth := r.Group("/auth/v1")
 	//{
@@ -194,10 +199,19 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	//	})
 	//}
 
-	r.Use(adapter.Wrap(ab.LoadClientStateMiddleware)).Static("/ui", "./ui/build")
+	r.Static("/ui", "./ui/build")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./ui/build/index.html")
 	})
+
+	fmt.Printf("- ab.Config.Paths.RootURL: %s\n", ab.Config.Paths.RootURL)
+	fmt.Printf("- ab.Config.Paths.Mount: %s\n", ab.Config.Paths.Mount)
+
+	routes := r.Routes()
+	for route := range routes {
+		fmt.Printf("- %s\n", routes[route].Path)
+	}
+
 	return r, nil
 }
 
