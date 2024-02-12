@@ -8,6 +8,7 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/inter": "^5.0.16",
     "@fontsource/roboto": "^5.0.8",
+    "@material/web": "^1.2.0",
     "@mui/icons-material": "^5.15.7",
     "@mui/joy": "^5.0.0-beta.25",
     "@mui/material": "^5.15.7",

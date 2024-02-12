@@ -5,6 +5,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/user"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
@@ -31,6 +32,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		&oauth.OauthClient{},
 		&oauth.OauthToken{},
 		&run.Run{},
+		&user.User{},
 	); err != nil {
 		return nil, err
 	}

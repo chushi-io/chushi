@@ -133,7 +133,7 @@ func (f *Factory) NewAuthBoss() *authboss.Authboss {
 	ab.Config.Storage.SessionState = f.NewSessionStore()
 	ab.Config.Storage.CookieState = f.NewSessionStore()
 	ab.Config.Paths.Mount = "/auth"
-	ab.Config.Core.ViewRenderer = abrenderer.NewHTML("/auth", "views/auth")
+	ab.Config.Core.ViewRenderer = abrenderer.NewHTML("/auth", "internal/server/views/auth")
 
 	defaults.SetCore(&ab.Config, false, false)
 
