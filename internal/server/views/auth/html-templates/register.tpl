@@ -1,5 +1,5 @@
 <div class="mdc-card-outlined">
-<form action="{{mountpathed "login"}}" method="post">
+<form action="{{mountpathed "register"}}" method="post">
 
 	{{with .errors}}{{with (index . "")}}{{range .}}<span>{{.}}</span><br />{{end}}{{end}}{{end -}}
 	<!-- Email Field -->

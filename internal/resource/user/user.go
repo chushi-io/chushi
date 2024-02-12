@@ -31,10 +31,10 @@ type User struct {
 	RecoverTokenExpiry time.Time
 
 	// OAuth2
-	OAuth2UID          string
-	OAuth2Provider     string
-	OAuth2AccessToken  string
-	OAuth2RefreshToken string
+	OAuth2UID          string `gorm:"column:oauth2_uid"`
+	OAuth2Provider     string `gorm:"column:oauth2_provider"`
+	OAuth2AccessToken  string `gorm:"column:oauth2_access_token"`
+	OAuth2RefreshToken string `gorm:"column:oauth2_refresh_token"`
 	OAuth2Expiry       time.Time
 
 	// 2fa
