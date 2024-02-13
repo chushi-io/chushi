@@ -1,4 +1,4 @@
-package user
+package organization
 
 import (
 	"errors"
@@ -42,6 +42,8 @@ type User struct {
 	SMSPhoneNumber     string `gorm:"column:sms_phone_number"`
 	SMSSeedPhoneNumber string `gorm:"column:sms_seed_phone_number"`
 	RecoveryCodes      string `gorm:"column:recovery_codes"`
+
+	Organizations []*Organization `gorm:"many2many:organization_users;"`
 }
 
 var (

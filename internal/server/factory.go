@@ -13,7 +13,6 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
-	"github.com/chushi-io/chushi/internal/resource/user"
 	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
@@ -87,6 +86,13 @@ func (f *Factory) NewOrganizationsController() *controller.OrganizationsControll
 	}
 }
 
+func (f *Factory) NewMeController(ab *authboss.Authboss) *controller.MeController {
+	return &controller.MeController{
+		Database: f.Database,
+		Auth:     ab,
+	}
+}
+
 func (f *Factory) NewAgentsController() *controller.AgentsController {
 	return &controller.AgentsController{
 		Repository:     agent.NewAgentRepository(f.Database, oauth.NewClientStore(f.Database)),
@@ -132,7 +138,7 @@ func (f *Factory) NewOauthServer() *server.Server {
 }
 
 func (f *Factory) NewAuthBoss() *authboss.Authboss {
-	userStore := user.NewStore(f.Database)
+	userStore := organization.NewUserStore(f.Database)
 	ab := authboss.New()
 	ab.Config.Paths.RootURL = "http://localhost:5000"
 	ab.Config.Storage.Server = userStore

@@ -5,7 +5,6 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
-	"github.com/chushi-io/chushi/internal/resource/user"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
@@ -32,7 +31,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		&oauth.OauthClient{},
 		&oauth.OauthToken{},
 		&run.Run{},
-		&user.User{},
+		&organization.User{},
 	); err != nil {
 		return nil, err
 	}
@@ -47,6 +46,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	agentCtrl := factory.NewAgentsController()
 	runsCtrl := factory.NewRunsController()
 	ab := factory.NewAuthBoss()
+	meCtrl := factory.NewMeController(ab)
 
 	r := gin.Default()
 	//r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
@@ -56,6 +56,11 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		})
 	})
 
+	meApi := r.Group("me").
+		Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	{
+		meApi.GET("orgs", meCtrl.ListOrganizations)
+	}
 	v1api := r.Group("/api/v1")
 
 	v1api.GET("/healthz", func(c *gin.Context) {

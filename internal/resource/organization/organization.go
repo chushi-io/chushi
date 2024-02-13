@@ -11,7 +11,7 @@ type Organization struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
 	Name      string     `json:"name" gorm:"index:idx_name,unique;not_null"`
-
+	Users     []*User    `gorm:"many2many:user_languages;"`
 	// Features for the organization
 	AllowAutoCreateWorkspace bool `json:"allow_auto_create_workspace"`
 }

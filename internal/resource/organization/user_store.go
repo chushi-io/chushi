@@ -1,4 +1,4 @@
-package user
+package organization
 
 import (
 	"context"
@@ -7,21 +7,22 @@ import (
 	"gorm.io/gorm"
 )
 
-type Store struct {
+type UserStore struct {
 	Database *gorm.DB
 }
 
-func NewStore(db *gorm.DB) *Store {
-	return &Store{Database: db}
+func NewUserStore(db *gorm.DB) *UserStore {
+	return &UserStore{Database: db}
 }
-func (s *Store) Save(_ context.Context, user authboss.User) error {
+
+func (s *UserStore) Save(_ context.Context, user authboss.User) error {
 	u := user.(*User)
 	result := s.Database.Save(&u)
 	// Save to the database
 	return result.Error
 }
 
-func (s *Store) Load(_ context.Context, key string) (user authboss.User, err error) {
+func (s *UserStore) Load(_ context.Context, key string) (user authboss.User, err error) {
 	var u User
 	provider, uid, err := authboss.ParseOAuth2PID(key)
 	if err == nil {
@@ -46,11 +47,11 @@ func (s *Store) Load(_ context.Context, key string) (user authboss.User, err err
 	return &u, nil
 }
 
-func (s *Store) New(_ context.Context) authboss.User {
+func (s *UserStore) New(_ context.Context) authboss.User {
 	return &User{}
 }
 
-func (s *Store) Create(_ context.Context, user authboss.User) error {
+func (s *UserStore) Create(_ context.Context, user authboss.User) error {
 	// We'd probably want to check if the user already exists
 	u := user.(*User)
 	result := s.Database.Save(&u)
@@ -58,7 +59,7 @@ func (s *Store) Create(_ context.Context, user authboss.User) error {
 	return result.Error
 }
 
-func (s *Store) LoadByConfirmSelector(_ context.Context, selector string) (user authboss.ConfirmableUser, err error) {
+func (s *UserStore) LoadByConfirmSelector(_ context.Context, selector string) (user authboss.ConfirmableUser, err error) {
 	var res User
 	result := s.Database.Where("confirm_selector = ?", selector).First(&res)
 	if result.Error != nil {
@@ -71,7 +72,7 @@ func (s *Store) LoadByConfirmSelector(_ context.Context, selector string) (user 
 	return user, authboss.ErrUserNotFound
 }
 
-func (s *Store) LoadByRecoverSelector(_ context.Context, selector string) (user authboss.RecoverableUser, err error) {
+func (s *UserStore) LoadByRecoverSelector(_ context.Context, selector string) (user authboss.RecoverableUser, err error) {
 	var res User
 	result := s.Database.Where("recover_selector = ?", selector).First(&res)
 	if result.Error != nil {
@@ -84,22 +85,22 @@ func (s *Store) LoadByRecoverSelector(_ context.Context, selector string) (user 
 	return user, authboss.ErrUserNotFound
 }
 
-func (s *Store) AddRememberToken(_ context.Context, pid, token string) error {
+func (s *UserStore) AddRememberToken(_ context.Context, pid, token string) error {
 	return nil
 }
 
-func (s *Store) DelRememberTokens(_ context.Context, pid string) error {
+func (s *UserStore) DelRememberTokens(_ context.Context, pid string) error {
 	return nil
 }
 
-func (s *Store) UseRememberToken(_ context.Context, token string) error {
+func (s *UserStore) UseRememberToken(_ context.Context, token string) error {
 	return nil
 }
 
-func (s *Store) NewFromOAuth2(_ context.Context, provider string, details map[string]string) (authboss.OAuth2User, error) {
+func (s *UserStore) NewFromOAuth2(_ context.Context, provider string, details map[string]string) (authboss.OAuth2User, error) {
 	return &User{}, nil
 }
 
-func (s *Store) SaveOAuth2(_ context.Context, user authboss.OAuth2User) error {
+func (s *UserStore) SaveOAuth2(_ context.Context, user authboss.OAuth2User) error {
 	return nil
 }
