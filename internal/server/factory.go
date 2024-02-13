@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -23,14 +24,19 @@ import (
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/golang-jwt/jwt"
 	abrenderer "github.com/volatiletech/authboss-renderer"
+	"github.com/volatiletech/authboss/v3/otp/twofactor"
+	"github.com/volatiletech/authboss/v3/otp/twofactor/sms2fa"
+	"github.com/volatiletech/authboss/v3/otp/twofactor/totp2fa"
 	"regexp"
 
 	// Authentication modules
 	abclientstate "github.com/volatiletech/authboss-clientstate"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
+	//_ "github.com/volatiletech/authboss/v3/confirm"
 	"github.com/volatiletech/authboss/v3/defaults"
 	_ "github.com/volatiletech/authboss/v3/logout"
+	_ "github.com/volatiletech/authboss/v3/otp/twofactor"
 	_ "github.com/volatiletech/authboss/v3/register"
 
 	"gorm.io/gorm"
@@ -132,8 +138,13 @@ func (f *Factory) NewAuthBoss() *authboss.Authboss {
 	ab.Config.Storage.Server = userStore
 	ab.Config.Storage.SessionState = f.NewSessionStore()
 	ab.Config.Storage.CookieState = f.NewSessionStore()
+	ab.Config.Modules.TwoFactorEmailAuthRequired = true
+	ab.Config.Modules.LogoutMethod = "GET"
 	ab.Config.Paths.Mount = "/auth"
+	ab.Config.Core.MailRenderer = abrenderer.NewEmail("/auth", "ab_views")
 	ab.Config.Core.ViewRenderer = abrenderer.NewHTML("/auth", "internal/server/views/auth")
+	ab.Config.Modules.TOTP2FAIssuer = "Chushi"
+	ab.Config.Modules.ResponseOnUnauthed = authboss.RespondRedirect
 
 	defaults.SetCore(&ab.Config, false, false)
 
@@ -164,6 +175,21 @@ func (f *Factory) NewAuthBoss() *authboss.Authboss {
 		Whitelist: map[string][]string{
 			"register": []string{"email", "name", "password"},
 		},
+	}
+
+	twofaRecovery := &twofactor.Recovery{Authboss: ab}
+	if err := twofaRecovery.Setup(); err != nil {
+		panic(err)
+	}
+
+	totp := &totp2fa.TOTP{Authboss: ab}
+	if err := totp.Setup(); err != nil {
+		panic(err)
+	}
+
+	sms := &sms2fa.SMS{Authboss: ab, Sender: smsLogSender{}}
+	if err := sms.Setup(); err != nil {
+		panic(err)
 	}
 
 	if err := ab.Init(); err != nil {
@@ -202,4 +228,13 @@ func (f *Factory) NewCookieStore() abclientstate.CookieStorer {
 func (f *Factory) NewSessionStore() abclientstate.SessionStorer {
 	sessionStoreKey, _ := base64.StdEncoding.DecodeString(`AbfYwmmt8UCwUuhd9qvfNA9UCuN1cVcKJN1ofbiky6xCyyBj20whe40rJa3Su0WOWLWcPpO1taqJdsEI/65+JA==`)
 	return abclientstate.NewSessionStorer("test", sessionStoreKey, nil)
+}
+
+type smsLogSender struct {
+}
+
+// Send an SMS
+func (s smsLogSender) Send(_ context.Context, number, text string) error {
+	fmt.Println("sms sent to:", number, "contents:", text)
+	return nil
 }

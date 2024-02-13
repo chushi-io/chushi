@@ -12,36 +12,36 @@ type User struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
 	Email     string     `gorm:"index:idx_email,unique"`
-	Password  string
-	Active    bool
+	Password  string     `gorm:"column:password"`
+	Active    bool       `gorm:"column:active"`
 
 	// Confirm
-	ConfirmSelector string
-	ConfirmVerifier string
-	Confirmed       bool
+	ConfirmSelector string `gorm:"column:confirm_selector"`
+	ConfirmVerifier string `gorm:"column:confirm_verifier"`
+	Confirmed       bool   `gorm:"column:confirmed"`
 
 	// Lock
-	AttemptCount int
-	LastAttempt  time.Time
-	Locked       time.Time
+	AttemptCount int       `gorm:"column:attempt_count"`
+	LastAttempt  time.Time `gorm:"column:last_attempt"`
+	Locked       time.Time `gorm:"column:locked"`
 
 	// Recover
-	RecoverSelector    string
-	RecoverVerifier    string
-	RecoverTokenExpiry time.Time
+	RecoverSelector    string    `gorm:"column:recover_selector"`
+	RecoverVerifier    string    `gorm:"column:recover_verifier"`
+	RecoverTokenExpiry time.Time `gorm:"column:recover_token_expiry"`
 
 	// OAuth2
-	OAuth2UID          string `gorm:"column:oauth2_uid"`
-	OAuth2Provider     string `gorm:"column:oauth2_provider"`
-	OAuth2AccessToken  string `gorm:"column:oauth2_access_token"`
-	OAuth2RefreshToken string `gorm:"column:oauth2_refresh_token"`
-	OAuth2Expiry       time.Time
+	OAuth2UID          string    `gorm:"column:oauth2_uid"`
+	OAuth2Provider     string    `gorm:"column:oauth2_provider"`
+	OAuth2AccessToken  string    `gorm:"column:oauth2_access_token"`
+	OAuth2RefreshToken string    `gorm:"column:oauth2_refresh_token"`
+	OAuth2Expiry       time.Time `gorm:"column:oauth2_expiry"`
 
 	// 2fa
-	TOTPSecretKey      string
-	SMSPhoneNumber     string
-	SMSSeedPhoneNumber string
-	RecoveryCodes      string
+	TOTPSecretKey      string `gorm:"column:totp_secret_key"`
+	SMSPhoneNumber     string `gorm:"column:sms_phone_number"`
+	SMSSeedPhoneNumber string `gorm:"column:sms_seed_phone_number"`
+	RecoveryCodes      string `gorm:"column:recovery_codes"`
 }
 
 var (

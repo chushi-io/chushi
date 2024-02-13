@@ -22,8 +22,7 @@ func (s *Store) Save(_ context.Context, user authboss.User) error {
 }
 
 func (s *Store) Load(_ context.Context, key string) (user authboss.User, err error) {
-	//var res User
-	//u := user.(*User)
+	var u User
 	provider, uid, err := authboss.ParseOAuth2PID(key)
 	if err == nil {
 		result := s.Database.Where("oauth2_provider = ?", provider).Where("oauth2_uid = ?", uid).First(&u)
@@ -33,7 +32,7 @@ func (s *Store) Load(_ context.Context, key string) (user authboss.User, err err
 			}
 			return nil, result.Error
 		}
-		return u, nil
+		return &u, nil
 	}
 
 	result := s.Database.Where("email = ?", key).First(&u)
@@ -44,7 +43,7 @@ func (s *Store) Load(_ context.Context, key string) (user authboss.User, err err
 		return nil, result.Error
 	}
 
-	return u, nil
+	return &u, nil
 }
 
 func (s *Store) New(_ context.Context) authboss.User {

@@ -182,7 +182,9 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
-	authGroup := r.Group("/auth").Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	authGroup := r.Group("/auth").
+		Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	//Use(adapter.Wrap(confirm.Middleware(ab)))
 	{
 		//authGroup.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
 		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", ab.Config.Core.Router)))
