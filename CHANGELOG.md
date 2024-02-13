@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/chushi-io/chushi/compare/v1.0.3...v1.1.0) (2024-02-13)
+
+
+### Features
+
+* **org:** Add organization selection ([94dd7df](https://github.com/chushi-io/chushi/commit/94dd7df27aca30479582dfd45935081a5c88c97d))
+* **orgs:** Auto create user org, add UI provider for viewing organizations ([7c84014](https://github.com/chushi-io/chushi/commit/7c840142734b4730d399334a87cd5515cff91d44))
+
 ### [1.0.3](https://github.com/chushi-io/chushi/compare/v1.0.2...v1.0.3) (2024-02-13)
 
 
