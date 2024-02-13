@@ -6,7 +6,7 @@ const OrganizationContext = React.createContext(undefined)
 
 const OrganizationProvider = ({ children }) => {
     const [organizations, setOrganizations] = useState([])
-    const [currentOrganization, setCurrentOrganization] = useState({})
+    const [currentOrganization, setCurrentOrganization] = useState(undefined)
 
     useEffect(() => {
         axios.get("/me/orgs").then(res => {
