@@ -53,10 +53,33 @@ func (s *UserStore) New(_ context.Context) authboss.User {
 
 func (s *UserStore) Create(_ context.Context, user authboss.User) error {
 	// We'd probably want to check if the user already exists
-	u := user.(*User)
-	result := s.Database.Save(&u)
-	// Save to the database
-	return result.Error
+	return s.Database.Transaction(func(tx *gorm.DB) error {
+		u := user.(*User)
+		result := s.Database.Save(&u)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		// Also create the organization
+		org := &Organization{
+			Name:  u.Email,
+			Type:  "personal",
+			Users: []*User{u},
+		}
+		result = s.Database.Save(org)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		ou := &OrganizationUser{
+			OrganizationID: org.ID,
+			UserID:         u.ID,
+			Role:           "owner",
+		}
+		result = s.Database.Save(ou)
+		// Save to the database
+		return result.Error
+	})
 }
 
 func (s *UserStore) LoadByConfirmSelector(_ context.Context, selector string) (user authboss.ConfirmableUser, err error) {

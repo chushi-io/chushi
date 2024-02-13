@@ -146,7 +146,12 @@ func (f *Factory) NewAuthBoss() *authboss.Authboss {
 	ab.Config.Storage.CookieState = f.NewSessionStore()
 	ab.Config.Modules.TwoFactorEmailAuthRequired = true
 	ab.Config.Modules.LogoutMethod = "GET"
+
+	// Set paths for redirection
 	ab.Config.Paths.Mount = "/auth"
+	ab.Config.Paths.AuthLoginOK = "/ui"
+	ab.Config.Paths.RegisterOK = "/ui" // TODO: This should be the organization creation screen?
+
 	ab.Config.Core.MailRenderer = abrenderer.NewEmail("/auth", "ab_views")
 	ab.Config.Core.ViewRenderer = abrenderer.NewHTML("/auth", "internal/server/views/auth")
 	ab.Config.Modules.TOTP2FAIssuer = "Chushi"

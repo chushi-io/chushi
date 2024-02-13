@@ -2,7 +2,13 @@ import * as React from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import {Link} from "react-router-dom";
 
+import {OrganizationContext, useOrganizations} from "../providers/OrganizationProvider";
+
 const NavigationSidebar = () => {
+    const context = useOrganizations()
+
+    console.log(context.organizations)
+
     return (
         <Sidebar className="app">
             <Menu>
@@ -14,6 +20,7 @@ const NavigationSidebar = () => {
                 <MenuItem> <Link to={"/registry"}>Registry</Link> </MenuItem>
                 <MenuItem> <Link to={"/settings"}>Settings</Link> </MenuItem>
             </Menu>
+
         </Sidebar>
     )
 }

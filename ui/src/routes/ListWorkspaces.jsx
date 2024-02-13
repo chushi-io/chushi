@@ -9,13 +9,16 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import {Link} from "react-router-dom";
+import {useOrganizations} from "../providers/OrganizationProvider";
 
 const ListWorkspaces = () => {
     const [workspaces, setWorkspaces] = useState([])
     const [loading, setLoading] = useState(true)
 
+    const orgs = useOrganizations()
+
     useEffect(() => {
-        axios.get("/api/v1/orgs/my-cool-org/workspaces").then(res => {
+        axios.get(`/api/v1/orgs/${orgs.organizations[0].name}/workspaces`).then(res => {
             setLoading(false)
             setWorkspaces(res.data.workspaces)
         })

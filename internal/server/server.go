@@ -32,6 +32,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		&oauth.OauthToken{},
 		&run.Run{},
 		&organization.User{},
+		&organization.OrganizationUser{},
 	); err != nil {
 		return nil, err
 	}
@@ -191,8 +192,20 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		Use(adapter.Wrap(ab.LoadClientStateMiddleware))
 	//Use(adapter.Wrap(confirm.Middleware(ab)))
 	{
-		//authGroup.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+		// Hack to auto-create a personal organization for the user on registration success
+		authGroup.Use(func(c *gin.Context) {
+			// Process the request
+			c.Next()
+
+			//// If request was POST /auth/register, and it was successful
+			//if c.Request.Method == http.MethodPost && c.Request.URL.Path == "/auth/register" {
+			//	org := &organization.Organization{
+			//		Name:
+			//	}
+			//}
+		})
 		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", ab.Config.Core.Router)))
+
 	}
 
 	//v1auth := r.Group("/auth/v1")

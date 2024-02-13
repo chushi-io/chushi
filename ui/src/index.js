@@ -20,6 +20,7 @@ import ShowAgent from "./routes/ShowAgent";
 import { Link as RouterLink } from 'react-router-dom';
 import {ThemeProvider, createTheme} from "@mui/material/styles";
 import NewAgent from "./routes/NewAgent";
+import OrganizationProvider from "./providers/OrganizationProvider";
 
 const LinkBehavior = React.forwardRef((props, ref) => {
     const { href, ...other } = props;
@@ -63,9 +64,11 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
       <StyledEngineProvider>
-          <ThemeProvider theme={theme}>
-              <RouterProvider router={router} />
-          </ThemeProvider>
+          <OrganizationProvider>
+              <ThemeProvider theme={theme}>
+                  <RouterProvider router={router} />
+              </ThemeProvider>
+          </OrganizationProvider>
       </StyledEngineProvider>
   </React.StrictMode>
 );
