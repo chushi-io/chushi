@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.0.3](https://github.com/chushi-io/chushi/compare/v1.0.2...v1.0.3) (2024-02-13)
+
+
+### Bug Fixes
+
+* **orgs:** Add route for me/orgs to get organizations for current user ([50b7f32](https://github.com/chushi-io/chushi/commit/50b7f32b7f4abe9bf61f7e2525cf241256aa7a00))
+
 ### [1.0.2](https://github.com/chushi-io/chushi/compare/v1.0.1...v1.0.2) (2024-02-13)
 
 
