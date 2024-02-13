@@ -12,9 +12,11 @@ import {Link} from "react-router-dom";
 
 const ListWorkspaces = () => {
     const [workspaces, setWorkspaces] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         axios.get("/api/v1/orgs/my-cool-org/workspaces").then(res => {
+            setLoading(false)
             setWorkspaces(res.data.workspaces)
         })
     }, [])

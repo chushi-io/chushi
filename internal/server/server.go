@@ -2,12 +2,14 @@ package server
 
 import (
 	"fmt"
+	"github.com/chushi-io/chushi/internal/resource/oauth"
+	"github.com/chushi-io/chushi/internal/resource/organization"
+	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/user"
+	"github.com/chushi-io/chushi/internal/resource/workspaces"
+	"github.com/chushi-io/chushi/internal/server/adapter"
+	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/chushi/internal/resource/oauth"
-	"github.com/robwittman/chushi/internal/resource/organization"
-	"github.com/robwittman/chushi/internal/resource/run"
-	"github.com/robwittman/chushi/internal/resource/workspaces"
-	"github.com/robwittman/chushi/internal/server/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -30,6 +32,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		&oauth.OauthClient{},
 		&oauth.OauthToken{},
 		&run.Run{},
+		&user.User{},
 	); err != nil {
 		return nil, err
 	}
@@ -40,11 +43,13 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
-	authServer := factory.NewOauthServer()
+	//authServer := factory.NewOauthServer()
 	agentCtrl := factory.NewAgentsController()
 	runsCtrl := factory.NewRunsController()
+	ab := factory.NewAuthBoss()
 
 	r := gin.Default()
+	//r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
@@ -177,23 +182,40 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
-	v1auth := r.Group("/auth/v1")
+	authGroup := r.Group("/auth").
+		Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	//Use(adapter.Wrap(confirm.Middleware(ab)))
 	{
-		v1auth.GET("/authorize", func(c *gin.Context) {
-			err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
-			if err != nil {
-				c.AbortWithError(http.StatusBadRequest, err)
-			}
-		})
-		v1auth.POST("/token", func(c *gin.Context) {
-			authServer.HandleTokenRequest(c.Writer, c.Request)
-		})
+		//authGroup.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", ab.Config.Core.Router)))
 	}
+
+	//v1auth := r.Group("/auth/v1")
+	//{
+	//	v1auth.GET("/authorize", func(c *gin.Context) {
+	//		err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
+	//		if err != nil {
+	//			c.AbortWithError(http.StatusBadRequest, err)
+	//		}
+	//	})
+	//	v1auth.POST("/token", func(c *gin.Context) {
+	//		authServer.HandleTokenRequest(c.Writer, c.Request)
+	//	})
+	//}
 
 	r.Static("/ui", "./ui/build")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./ui/build/index.html")
 	})
+
+	fmt.Printf("- ab.Config.Paths.RootURL: %s\n", ab.Config.Paths.RootURL)
+	fmt.Printf("- ab.Config.Paths.Mount: %s\n", ab.Config.Paths.Mount)
+
+	routes := r.Routes()
+	for route := range routes {
+		fmt.Printf("- %s\n", routes[route].Path)
+	}
+
 	return r, nil
 }
 

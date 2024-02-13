@@ -1,9 +1,9 @@
 package workspaces
 
 import (
+	"github.com/chushi-io/chushi/internal/resource/agent"
+	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/resource/agent"
-	"github.com/robwittman/chushi/internal/resource/organization"
 	"time"
 )
 

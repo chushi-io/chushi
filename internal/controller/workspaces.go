@@ -2,10 +2,10 @@ package controller
 
 import (
 	"errors"
+	"github.com/chushi-io/chushi/internal/resource/workspaces"
+	"github.com/chushi-io/chushi/internal/server/helpers"
+	"github.com/chushi-io/chushi/internal/service/file_manager"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/chushi/internal/resource/workspaces"
-	"github.com/robwittman/chushi/internal/server/helpers"
-	"github.com/robwittman/chushi/internal/service/file_manager"
 	"net/http"
 )
 

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/robwittman/chushi/internal/server"
-	"github.com/robwittman/chushi/internal/server/config"
+	"github.com/chushi-io/chushi/internal/server"
+	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/spf13/cobra"
 	"log"
 )

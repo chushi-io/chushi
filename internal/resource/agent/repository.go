@@ -1,10 +1,10 @@
 package agent
 
 import (
+	"github.com/chushi-io/chushi/internal/resource/oauth"
+	"github.com/chushi-io/chushi/internal/scopes"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/google/uuid"
-	"github.com/robwittman/chushi/internal/resource/oauth"
-	"github.com/robwittman/chushi/internal/scopes"
 	"gorm.io/gorm"
 )
 

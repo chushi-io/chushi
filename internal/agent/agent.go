@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/robwittman/chushi/pkg/sdk"
+	"github.com/chushi-io/chushi/pkg/sdk"
 	"io"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -229,7 +229,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 				Image: "alpine/git",
 				Args: []string{
 					"clone",
-					"https://github.com/robwittman/chushi",
+					"https://github.com/chushi-io/chushi",
 					"/workspace",
 				},
 				VolumeMounts: []v1.VolumeMount{
