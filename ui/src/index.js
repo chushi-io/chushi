@@ -21,6 +21,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import {ThemeProvider, createTheme} from "@mui/material/styles";
 import NewAgent from "./routes/NewAgent";
 import OrganizationProvider from "./providers/OrganizationProvider";
+import CreateWorkspace from "./routes/CreateWorkspace";
 
 const LinkBehavior = React.forwardRef((props, ref) => {
     const { href, ...other } = props;
@@ -47,6 +48,7 @@ const router = createBrowserRouter(
         <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
             <Route path="workspaces">
                 <Route index={true} element={<ListWorkspaces />} />
+                <Route path={"new"} element={<CreateWorkspace />} />
                 <Route path={":workspaceId"} element={<ShowWorkspace />} />
             </Route>
             <Route path={"agents"}>
