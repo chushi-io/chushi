@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/chushi-io/chushi/compare/v1.1.0...v1.2.0) (2024-02-14)
+
+
+### Features
+
+* **ui:** Agent and workspace creation added ([0948b3b](https://github.com/chushi-io/chushi/commit/0948b3b2a3a29592d0920b0730879135d4a91745))
+
 ## [1.1.0](https://github.com/chushi-io/chushi/compare/v1.0.3...v1.1.0) (2024-02-13)
 
 
