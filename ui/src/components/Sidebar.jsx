@@ -45,6 +45,7 @@ const NavigationSidebar = () => {
                     <MenuItem> <Link to={"/registry"}>Registry</Link> </MenuItem>
                     <MenuItem> <Link to={"/settings"}>Settings</Link> </MenuItem>
                     <MenuItem> <Link to={"/organizations"}>Organizations</Link> </MenuItem>
+                    <MenuItem> <Link to={"/vcs_connections"}>VCS Connections</Link> </MenuItem>
                 </Menu>
 
             </Sidebar>

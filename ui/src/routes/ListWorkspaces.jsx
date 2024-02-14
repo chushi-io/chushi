@@ -24,7 +24,7 @@ const ListWorkspaces = () => {
         if (orgs.currentOrganization === undefined) {
             return
         }
-        axios.get(`/api/v1/orgs/${orgs.organizations[0].name}/workspaces`).then(res => {
+        axios.get(`/api/v1/orgs/${orgs.currentOrganization}/workspaces`).then(res => {
             setLoading(false)
             setWorkspaces(res.data.workspaces)
         })

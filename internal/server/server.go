@@ -5,6 +5,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
@@ -13,6 +14,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"net/http"
+	"strings"
 )
 
 func New(conf *config.Config) (*gin.Engine, error) {
@@ -33,6 +35,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		&run.Run{},
 		&organization.User{},
 		&organization.OrganizationUser{},
+		&vcs_connection.VcsConnection{},
 	); err != nil {
 		return nil, err
 	}
@@ -46,6 +49,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	//authServer := factory.NewOauthServer()
 	agentCtrl := factory.NewAgentsController()
 	runsCtrl := factory.NewRunsController()
+	vcsCtrl := factory.NewVcsConnectionsController()
 	ab := factory.NewAuthBoss()
 	meCtrl := factory.NewMeController(ab)
 
@@ -167,6 +171,13 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	}
 
+	vcsConnections := orgs.Group("/vcs_connections")
+	{
+		vcsConnections.GET("", vcsCtrl.List)
+		vcsConnections.POST("", vcsCtrl.Create)
+		vcsConnections.GET(":vcs_connection", vcsCtrl.Get)
+		vcsConnections.DELETE(":vcs_connection", vcsCtrl.Delete)
+	}
 	runs := orgs.Group("/runs")
 	{
 		runs.POST("", notImplemented)
@@ -223,7 +234,11 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	r.Static("/ui", "./ui/build")
 	r.NoRoute(func(c *gin.Context) {
-		c.File("./ui/build/index.html")
+		if strings.HasPrefix(c.Request.URL.Path, "/ui") {
+			c.File("./ui/build/index.html")
+		} else {
+			c.AbortWithStatus(http.StatusNotFound)
+		}
 	})
 
 	fmt.Printf("- ab.Config.Paths.RootURL: %s\n", ab.Config.Paths.RootURL)

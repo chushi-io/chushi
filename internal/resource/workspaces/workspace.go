@@ -63,7 +63,8 @@ type WorkspaceVcsConnection struct {
 	// Prefixes to match for executing
 	Prefixes []string `json:"prefixes" gorm:"serializer:json"`
 	// Specify the working directory
-	WorkingDirectory string `json:"working_directory"`
+	WorkingDirectory string    `json:"working_directory"`
+	ConnectionId     uuid.UUID `json:"connection_id"`
 }
 
 type WorkspaceLock struct {

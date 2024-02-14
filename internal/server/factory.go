@@ -76,8 +76,8 @@ func (f *Factory) NewWorkspaceController() *controller.WorkspacesController {
 	}
 }
 
-func (f *Factory) NewVcsConnectionsController() *vcs_connection.Controller {
-	return &vcs_connection.Controller{}
+func (f *Factory) NewVcsConnectionsController() *controller.VcsConnectionsController {
+	return &controller.VcsConnectionsController{Repository: vcs_connection.New(f.Database)}
 }
 
 func (f *Factory) NewOrganizationsController() *controller.OrganizationsController {

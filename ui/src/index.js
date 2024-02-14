@@ -23,6 +23,8 @@ import NewAgent from "./routes/NewAgent";
 import OrganizationProvider from "./providers/OrganizationProvider";
 import CreateWorkspace from "./routes/CreateWorkspace";
 import ListOrganizations from "./routes/ListOrganizations";
+import ListVcsConnections from "./routes/ListVcsConnections";
+import CreateVcsConnection from "./routes/CreateVcsConnection";
 
 const LinkBehavior = React.forwardRef((props, ref) => {
     const { href, ...other } = props;
@@ -59,6 +61,10 @@ const router = createBrowserRouter(
                 <Route index={true} element={<ListAgents />} />
                 <Route path={"new"} element={<NewAgent />} />
                 <Route path={":agentId"} element={<ShowAgent />} />
+            </Route>
+            <Route path={"vcs_connections"}>
+                <Route index={true} element={<ListVcsConnections />} />
+                <Route path={"new"} element={<CreateVcsConnection />} />
             </Route>
         </Route>
     ), {
