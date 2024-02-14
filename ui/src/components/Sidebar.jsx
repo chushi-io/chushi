@@ -16,7 +16,7 @@ const NavigationSidebar = () => {
     const context = useOrganizations()
 
     console.log(context.organizations)
-
+    console.log(context.currentOrganization)
     return (
         <React.Fragment>
             <Sidebar className="app">
@@ -27,10 +27,11 @@ const NavigationSidebar = () => {
                     <MenuItem>
                         <FormControl>
                             <Select
-                                value={context.currentOrganization?.id}
+                                value={context.currentOrganization}
                                 label={"Organization"}
                                 onChange={(event) => {
-                                    context.setCurrentOrganization(event.target.value)
+                                    console.log(event.target.value)
+                                    context.changeOrganization(event.target.value)
                                 }}
                             >
                                 {context.organizations.map(org => {
@@ -43,6 +44,7 @@ const NavigationSidebar = () => {
                     <MenuItem> <Link to={"/agents"}>Agents</Link> </MenuItem>
                     <MenuItem> <Link to={"/registry"}>Registry</Link> </MenuItem>
                     <MenuItem> <Link to={"/settings"}>Settings</Link> </MenuItem>
+                    <MenuItem> <Link to={"/organizations"}>Organizations</Link> </MenuItem>
                 </Menu>
 
             </Sidebar>

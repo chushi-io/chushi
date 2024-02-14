@@ -7,6 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	ErrWorkspaceNameAlreadyInUse = "a workspace already exists with this name"
+)
+
 type WorkspacesRepository interface {
 	Save(workspace *Workspace) error
 	Update(workspace *Workspace) (*Workspace, error)
@@ -31,6 +35,13 @@ func NewWorkspacesRepository(db *gorm.DB) WorkspacesRepository {
 }
 
 func (w WorkspacesRepositoryImpl) Save(workspace *Workspace) error {
+	check := w.Db.
+		Where("organization_id = ?", workspace.OrganizationID).
+		Where("name = ?", workspace.Name).
+		First(&Workspace{})
+	if check.Error == nil {
+		return errors.New(ErrWorkspaceNameAlreadyInUse)
+	}
 	if result := w.Db.Create(workspace); result.Error != nil {
 		return result.Error
 	}

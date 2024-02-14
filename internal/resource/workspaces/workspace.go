@@ -14,7 +14,7 @@ type Workspace struct {
 	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
 
 	// Name of the workspace
-	Name string `gorm:"index:idx_name,unique" json:"name"`
+	Name string `gorm:"uniqueIndex:idx_name,unique" json:"name"`
 	// Does the workspace allow destroy plans
 	AllowDestroy bool `json:"allow_destroy"`
 	// Does the workspace auto apply planned runs
@@ -37,7 +37,7 @@ type Workspace struct {
 	// to embed this as a separate object
 	Lock WorkspaceLock `gorm:"embedded;embeddedPrefix:lock_" json:"lock,omitempty"`
 	// ID of the owning organization
-	OrganizationID uuid.UUID                 `gorm:"index:idx_name,unique" json:"organization_id"`
+	OrganizationID uuid.UUID                 `gorm:"uniqueIndex:idx_name,unique" json:"organization_id"`
 	Organization   organization.Organization `json:"-"`
 
 	// Agent configuration

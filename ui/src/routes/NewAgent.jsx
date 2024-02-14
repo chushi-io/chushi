@@ -6,8 +6,11 @@ import TextField from '@mui/material/TextField';
 import {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import Button from "@mui/material/Button";
+import {useOrganizations} from "../providers/OrganizationProvider";
 
 const NewAgent = () => {
+    const orgs = useOrganizations()
     const navigate = useNavigate();
     const [name, setName] = useState("")
 
@@ -15,7 +18,7 @@ const NewAgent = () => {
         // post the agent information
         event.preventDefault()
 
-        axios.post("/api/v1/orgs/my-cool-org/agents", {
+        axios.post(`/api/v1/orgs/${orgs.currentOrganization}/agents`, {
             name
         }).then(res => {
             let agentId = res.data.agent.id
@@ -36,6 +39,9 @@ const NewAgent = () => {
                 <TextField id="outlined-basic" label="Outlined" variant="outlined" value={name} onChange={(event) => {
                     setName(event.target.value)
                 }} />
+                <Button type={"submit"}>
+                    Create
+                </Button>
             </Box>
         </Paper>
 

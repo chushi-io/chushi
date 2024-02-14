@@ -22,6 +22,7 @@ import {ThemeProvider, createTheme} from "@mui/material/styles";
 import NewAgent from "./routes/NewAgent";
 import OrganizationProvider from "./providers/OrganizationProvider";
 import CreateWorkspace from "./routes/CreateWorkspace";
+import ListOrganizations from "./routes/ListOrganizations";
 
 const LinkBehavior = React.forwardRef((props, ref) => {
     const { href, ...other } = props;
@@ -46,6 +47,9 @@ const theme = createTheme({
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+            <Route path={"organizations"}>
+                <Route index={true} element={<ListOrganizations />} />
+            </Route>
             <Route path="workspaces">
                 <Route index={true} element={<ListWorkspaces />} />
                 <Route path={"new"} element={<CreateWorkspace />} />

@@ -1,6 +1,9 @@
 package organization
 
-import "gorm.io/gorm"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type OrganizationRepository interface {
 	Save(org *Organization) error
@@ -33,13 +36,20 @@ func (o OrganizationRepositoryImpl) Delete(organizationId string) {
 
 }
 
-func (o OrganizationRepositoryImpl) FindById(organizationId string) (*Organization, error) {
+func (o OrganizationRepositoryImpl) FindById(organizationIdOrName string) (*Organization, error) {
 	var org Organization
 
-	if result := o.Db.First(&org, "name = ?", organizationId); result.Error != nil {
-		return nil, result.Error
+	_, err := uuid.Parse(organizationIdOrName)
+	if err != nil {
+		result := o.Db.
+			Where("name = ?", organizationIdOrName).
+			First(&org)
+		return &org, result.Error
 	}
-	return &org, nil
+	result := o.Db.
+		Where("id = ?", organizationIdOrName).
+		First(&org)
+	return &org, result.Error
 }
 
 func (o OrganizationRepositoryImpl) All() ([]Organization, error) {

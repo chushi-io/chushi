@@ -10,15 +10,17 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import {Link} from "react-router-dom";
 import {Button} from "@mui/material";
+import {useOrganizations} from "../providers/OrganizationProvider";
 
 const ListAgents = () => {
     const [agents, setAgents] = useState([])
-
+    const orgs = useOrganizations()
     useEffect(() => {
-        axios.get("/api/v1/orgs/my-cool-org/agents").then(res => {
+        if (orgs.currentOrganization === undefined) return;
+        axios.get(`/api/v1/orgs/${orgs.currentOrganization}/agents`).then(res => {
             setAgents(res.data.agents)
         })
-    }, [])
+    }, [orgs.currentOrganization])
 
     return (
         <React.Fragment>

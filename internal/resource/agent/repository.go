@@ -1,11 +1,16 @@
 package agent
 
 import (
+	"errors"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/scopes"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+)
+
+const (
+	ErrAgentNameAlreadyInUse = "an agent already exists with this name"
 )
 
 type AgentRepository interface {
@@ -56,6 +61,13 @@ func (a AgentRepositoryImpl) FindByClientId(clientId string) (*Agent, error) {
 }
 
 func (a AgentRepositoryImpl) Create(agent *Agent) (*Agent, error) {
+	check := a.Db.
+		Where("organization_id = ?", agent.OrganizationID).
+		Where("name = ?", agent.Name).
+		First(&Agent{})
+	if check.Error == nil {
+		return nil, errors.New(ErrAgentNameAlreadyInUse)
+	}
 	err := a.Db.Transaction(func(tx *gorm.DB) error {
 		// Create an OAuth application
 		clientId := uuid.New()

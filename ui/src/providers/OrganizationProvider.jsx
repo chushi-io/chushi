@@ -14,12 +14,24 @@ const OrganizationProvider = ({ children }) => {
         })
     }, [])
 
+    const changeOrganization = (organizationId) => {
+        localStorage.setItem("organization", organizationId);
+        setCurrentOrganization(organizationId)
+    }
+
+    useEffect(() => {
+        const storedOrg = localStorage.getItem("organization")
+        if (storedOrg !== null) {
+            setCurrentOrganization(storedOrg)
+        }
+    }, [])
+
     return (
         <OrganizationContext.Provider value={{
             organizations,
             setOrganizations,
             currentOrganization,
-            setCurrentOrganization,
+            changeOrganization,
         }}>
             {children}
         </OrganizationContext.Provider>
