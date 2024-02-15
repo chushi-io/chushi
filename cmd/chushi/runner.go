@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/chushi-io/chushi/internal/installer"
 	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/hashicorp/go-version"
@@ -40,6 +41,7 @@ executions occuring for Chushi workspaces.'
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("Installing terraform")
 		install, err := installer.Install(ver, workingDir)
 		if err != nil {
 			log.Fatal(err)
@@ -50,6 +52,7 @@ executions occuring for Chushi workspaces.'
 			log.Fatal(err)
 		}
 
+		fmt.Println("OpenTofu installed, starting operation")
 		err = tf.Init(ctx, tfexec.Upgrade(false))
 		if err != nil {
 			log.Fatal(err)

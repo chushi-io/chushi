@@ -183,12 +183,14 @@ func (a *Agent) writeLine(line string) error {
 func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, presignedUrl string) *v1.Pod {
 	args := []string{
 		"runner",
-		"-d=/workspace/testdata",
+		fmt.Sprintf("-d=%s", workspace.Vcs.WorkingDirectory),
 		"-v=1.6.6",
 		run.Operation,
 	}
 
+	autoMount := false
 	podSpec := v1.PodSpec{
+		AutomountServiceAccountToken: &autoMount,
 		Containers: []v1.Container{
 			// Actual run container
 			{
@@ -223,14 +225,22 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 				},
 			},
 		},
+		// Container to download VCS repo
 		InitContainers: []v1.Container{
 			{
 				Name:  "git",
 				Image: "alpine/git",
-				Args: []string{
-					"clone",
-					"https://github.com/chushi-io/chushi",
-					"/workspace",
+				Command: []string{
+					"/bin/sh",
+					"-c",
+					fmt.Sprintf(`
+git clone -c credential.helper='!f() { echo username=chushi; echo "password=$GITHUB_PAT"; };f' %s /workspace
+`, workspace.Vcs.Source)},
+				Env: []v1.EnvVar{
+					{
+						Name:  "GITHUB_PAT",
+						Value: "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",
+					},
 				},
 				VolumeMounts: []v1.VolumeMount{
 					{
@@ -239,7 +249,6 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 					},
 				},
 			},
-			// Container to download VCS repo
 		},
 		Volumes: []v1.Volume{
 			{

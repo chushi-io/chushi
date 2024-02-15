@@ -46,7 +46,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
-	//authServer := factory.NewOauthServer()
+	authServer := factory.NewOauthServer()
 	agentCtrl := factory.NewAgentsController()
 	runsCtrl := factory.NewRunsController()
 	vcsCtrl := factory.NewVcsConnectionsController()
@@ -219,18 +219,18 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	}
 
-	//v1auth := r.Group("/auth/v1")
-	//{
-	//	v1auth.GET("/authorize", func(c *gin.Context) {
-	//		err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
-	//		if err != nil {
-	//			c.AbortWithError(http.StatusBadRequest, err)
-	//		}
-	//	})
-	//	v1auth.POST("/token", func(c *gin.Context) {
-	//		authServer.HandleTokenRequest(c.Writer, c.Request)
-	//	})
-	//}
+	v1auth := r.Group("/oauth/v1")
+	{
+		v1auth.GET("/authorize", func(c *gin.Context) {
+			err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
+			if err != nil {
+				c.AbortWithError(http.StatusBadRequest, err)
+			}
+		})
+		v1auth.POST("/token", func(c *gin.Context) {
+			authServer.HandleTokenRequest(c.Writer, c.Request)
+		})
+	}
 
 	r.Static("/ui", "./ui/build")
 	r.NoRoute(func(c *gin.Context) {

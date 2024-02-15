@@ -9,21 +9,33 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import {useOrganizations} from "../providers/OrganizationProvider";
+import Button from "@mui/material/Button";
 
 const ShowWorkspace = () => {
     const [workspace, setWorkspace] = useState({})
     const [runs, setRuns] = useState([])
+    const orgs = useOrganizations()
     let { workspaceId } = useParams();
 
     useEffect(() => {
-        axios.get(`/api/v1/orgs/my-cool-org/workspaces/${workspaceId}`).then(res => {
+        if (orgs.currentOrganization === undefined) {
+            return
+        }
+        axios.get(`/api/v1/orgs/${orgs.currentOrganization}/workspaces/${workspaceId}`).then(res => {
             setWorkspace(res.data.workspace)
-            axios.get(`/api/v1/orgs/my-cool-org/workspaces/${res.data.workspace.id}/runs`).then(res => {
+            axios.get(`/api/v1/orgs/${orgs.currentOrganization}/workspaces/${res.data.workspace.id}/runs`).then(res => {
                 setRuns(res.data.runs)
             })
         })
 
-    }, [])
+    }, [orgs.currentOrganization])
+
+    const triggerRun = () => {
+        axios.post(`/api/v1/orgs/${orgs.currentOrganization}/workspaces/${workspace.id}/runs`, {
+            operation: "plan"
+        }).then(res => console.log(res.data))
+    }
 
     return (
         <React.Fragment>
@@ -61,6 +73,7 @@ const ShowWorkspace = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Button variant="outlined" onClick={triggerRun}>Trigger Run</Button>
         </React.Fragment>
     )
 }

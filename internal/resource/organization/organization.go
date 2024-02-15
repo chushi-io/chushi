@@ -14,7 +14,8 @@ type Organization struct {
 	Type      string     `json:"type"`
 	Users     []*User    `json:"-" gorm:"many2many:organization_users;"`
 	// Features for the organization
-	AllowAutoCreateWorkspace bool `json:"allow_auto_create_workspace"`
+	AllowAutoCreateWorkspace bool      `json:"allow_auto_create_workspace"`
+	DefaultAgentId           uuid.UUID `json:"default_agent_id"`
 }
 
 type OrganizationUser struct {

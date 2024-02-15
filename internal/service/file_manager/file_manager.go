@@ -36,12 +36,37 @@ func (impl *FileManagerImpl) FetchPlan(organizationId uuid.UUID, runId uuid.UUID
 	return []byte{}, nil
 }
 
+func (impl *FileManagerImpl) ensureBucket(organizationId uuid.UUID) error {
+	_, err := impl.S3Client.HeadBucket(context.TODO(), &s3.HeadBucketInput{
+		Bucket: aws.String(organizationId.String()),
+	})
+	// Bucket exists, return
+	if err == nil {
+		return nil
+	}
+
+	var notFound *types.NotFound
+	if errors.As(err, &notFound) {
+		_, err := impl.S3Client.CreateBucket(context.TODO(), &s3.CreateBucketInput{
+			Bucket: aws.String(organizationId.String()),
+		})
+		return err
+	}
+	return err
+}
+
 func (impl *FileManagerImpl) UploadPlan(organizationId uuid.UUID, runId uuid.UUID, reader io.Reader) error {
+	if err := impl.ensureBucket(organizationId); err != nil {
+		return err
+	}
 	_, err := uploadObject(impl.S3Client, context.TODO(), organizationId.String(), planUrl(runId), reader)
 	return err
 }
 
 func (impl *FileManagerImpl) FetchState(organizationId uuid.UUID, workspaceId uuid.UUID) ([]byte, error) {
+	if err := impl.ensureBucket(organizationId); err != nil {
+		return []byte{}, err
+	}
 	output, err := impl.S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(organizationId.String()),
 		Key:    aws.String(workspaceId.String()),
@@ -59,6 +84,9 @@ func (impl *FileManagerImpl) FetchState(organizationId uuid.UUID, workspaceId uu
 }
 
 func (impl *FileManagerImpl) UploadState(organizationId uuid.UUID, workspaceId uuid.UUID, reader io.Reader) error {
+	if err := impl.ensureBucket(organizationId); err != nil {
+		return err
+	}
 	_, err := uploadObject(impl.S3Client, context.TODO(), organizationId.String(), workspaceId.String(), reader)
 	return err
 }

@@ -40,9 +40,18 @@ type WorkspaceResponse struct {
 }
 
 type Workspace struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Locked bool   `json:"locked"`
+	Id     string       `json:"id"`
+	Name   string       `json:"name"`
+	Locked bool         `json:"locked"`
+	Vcs    WorkspaceVcs `json:"vcs"`
+}
+
+type WorkspaceVcs struct {
+	Source           string   `json:"source"`
+	Branch           string   `json:"branch"`
+	Patterns         []string `json:"patterns,omitempty"`
+	Prefixes         []string `json:"prefixes,omitempty"`
+	WorkingDirectory string   `json:"working_directory,omitempty"`
 }
 
 func (s *Sdk) GetWorkspace(workspaceId string) (*WorkspaceResponse, error) {

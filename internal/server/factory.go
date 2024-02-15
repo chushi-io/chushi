@@ -52,7 +52,7 @@ type Factory struct {
 func NewFactory(database *gorm.DB) (*Factory, error) {
 	var client *s3.Client
 	if os.Getenv("USE_MINIO") != "" {
-		client = getMinioClient()
+		client = GetMinioClient()
 	} else {
 		sdkConfig, err := config.LoadDefaultConfig(context.TODO())
 		if err != nil {
@@ -210,7 +210,7 @@ func (f *Factory) NewAuthBoss() *authboss.Authboss {
 	return ab
 }
 
-func getMinioClient() *s3.Client {
+func GetMinioClient() *s3.Client {
 	key := os.Getenv("AWS_ACCESS_KEY_ID")
 	secret := os.Getenv("AWS_SECRET_ACCESS_KEY")
 

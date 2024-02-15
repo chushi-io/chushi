@@ -2,7 +2,6 @@ package installer
 
 import (
 	"archive/zip"
-	"fmt"
 	"github.com/hashicorp/go-version"
 	"io"
 	"io/ioutil"
@@ -44,9 +43,6 @@ func Install(v *version.Version, binDir string) (string, error) {
 		return "", err
 	}
 	defer r.Close()
-	for _, f := range r.File {
-		fmt.Println(f.Name)
-	}
 	for _, f := range r.File {
 		if f.Name != "tofu" {
 			continue
