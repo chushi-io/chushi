@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.2.1](https://github.com/chushi-io/chushi/compare/v1.2.0...v1.2.1) (2024-02-15)
+
+
+### Bug Fixes
+
+* **storage:** Auto create buckets if they dont exist ([3b4c080](https://github.com/chushi-io/chushi/commit/3b4c080a2c3c9cf05b8c478f3ace76f8788b8449))
+* **vcs:** Add configuration for VCS connections ([415be11](https://github.com/chushi-io/chushi/commit/415be11f3b7bc1caa42b491a3b8e1f8ec37348b5))
+
 ## [1.2.0](https://github.com/chushi-io/chushi/compare/v1.1.0...v1.2.0) (2024-02-14)
 
 
