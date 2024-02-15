@@ -239,7 +239,7 @@ git clone -c credential.helper='!f() { echo username=chushi; echo "password=$GIT
 				Env: []v1.EnvVar{
 					{
 						Name:  "GITHUB_PAT",
-						Value: "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",
+						Value: "<depro>",
 					},
 				},
 				VolumeMounts: []v1.VolumeMount{
