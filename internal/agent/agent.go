@@ -69,12 +69,12 @@ func (a *Agent) handle(run sdk.Run) error {
 		return errors.New("workspace is already locked")
 	}
 
-	url, err := a.Sdk.Runs().PresignedUrl(&sdk.GeneratePresignedUrlParams{
-		RunId: run.Id,
-	})
-	if err != nil {
-		return err
-	}
+	//url, err := a.Sdk.Runs().PresignedUrl(&sdk.GeneratePresignedUrlParams{
+	//	RunId: run.Id,
+	//})
+	//if err != nil {
+	//	return err
+	//}
 
 	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{})
 	if err != nil {
@@ -88,7 +88,12 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	pod, err := a.launchPod(run, ws.Workspace, token, url.Url)
+	creds, err := a.Sdk.Workspaces().GetConnectionCredentials(ws.Workspace.Vcs.ConnectionId)
+	if err != nil {
+		return err
+	}
+
+	pod, err := a.launchPod(run, ws.Workspace, token, creds.Credentials)
 	if err != nil {
 		return err
 	}
@@ -147,8 +152,8 @@ loop:
 	return true, nil
 }
 
-func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, presignedUrl string) (*v1.Pod, error) {
-	podManifest := a.podSpecForRun(run, workspace, token, presignedUrl)
+func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, credentials sdk.Credentials) (*v1.Pod, error) {
+	podManifest := a.podSpecForRun(run, workspace, token, credentials)
 	return a.Client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
@@ -181,10 +186,10 @@ func (a *Agent) writeLine(line string) error {
 	return nil
 }
 
-func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, presignedUrl string) *v1.Pod {
+func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, response sdk.Credentials) *v1.Pod {
 	args := []string{
 		"runner",
-		fmt.Sprintf("-d=%s", workspace.Vcs.WorkingDirectory),
+		fmt.Sprintf("-d=/workspace/%s", workspace.Vcs.WorkingDirectory),
 		"-v=1.6.6",
 		run.Operation,
 	}
@@ -240,7 +245,7 @@ git clone -c credential.helper='!f() { echo username=chushi; echo "password=$GIT
 				Env: []v1.EnvVar{
 					{
 						Name:  "GITHUB_PAT",
-						Value: "<depro>",
+						Value: response.Token,
 					},
 				},
 				VolumeMounts: []v1.VolumeMount{

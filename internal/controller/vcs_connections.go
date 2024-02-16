@@ -95,3 +95,36 @@ func (ctrl *VcsConnectionsController) Create(c *gin.Context) {
 func (ctrl *VcsConnectionsController) Delete(c *gin.Context) {
 
 }
+
+type CredentialsResponse struct {
+	GithubPersonalAccessToken string `json:"token"`
+}
+
+func (ctrl *VcsConnectionsController) Credentials(c *gin.Context) {
+	// TODO: Ensure that only agents are able to access this endpoint
+	orgId, err := helpers.GetOrganizationId(c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	connectionId, err := uuid.Parse(c.Param("vcs_connection"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	connection, err := ctrl.Repository.Get(orgId, connectionId)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	credentialsResponse := &CredentialsResponse{
+		GithubPersonalAccessToken: connection.Github.PersonalAccessToken,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"credentials": credentialsResponse,
+	})
+}

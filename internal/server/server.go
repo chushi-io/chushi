@@ -176,6 +176,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		vcsConnections.GET("", vcsCtrl.List)
 		vcsConnections.POST("", vcsCtrl.Create)
 		vcsConnections.GET(":vcs_connection", vcsCtrl.Get)
+		vcsConnections.GET(":vcs_connection/credentials", vcsCtrl.Credentials)
 		vcsConnections.DELETE(":vcs_connection", vcsCtrl.Delete)
 	}
 	runs := orgs.Group("/runs")
