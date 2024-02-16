@@ -182,3 +182,23 @@ func (ctrl *WorkspacesController) UploadState(c *gin.Context) {
 	}
 	c.Status(http.StatusOK)
 }
+
+func (ctrl *WorkspacesController) ListVariables(c *gin.Context) {
+	org := helpers.GetOrganization(c)
+
+	workspace, err := ctrl.Repository.FindById(org.ID, c.Param("workspace"))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	variables, err := ctrl.Repository.ListVariables(workspace.ID)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"variables": variables,
+	})
+}

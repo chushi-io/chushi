@@ -20,6 +20,10 @@ type WorkspacesRepository interface {
 	FindById(organizationId uuid.UUID, workspaceId string) (*Workspace, error)
 	FindAll() ([]Workspace, error)
 	FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error)
+	ListVariables(workspaceId uuid.UUID) ([]Variable, error)
+	GetVariable(variableId uuid.UUID) (*Variable, error)
+	SaveVariable(variable *Variable) error
+	DeleteVariable(variableId uuid.UUID) error
 }
 
 type UpdateWorkspaceParams struct {
@@ -115,4 +119,30 @@ func (w WorkspacesRepositoryImpl) FindAllForOrg(organizationId uuid.UUID) ([]Wor
 		return []Workspace{}, result.Error
 	}
 	return workspaces, nil
+}
+
+func (w WorkspacesRepositoryImpl) ListVariables(workspaceId uuid.UUID) ([]Variable, error) {
+	var variables []Variable
+	result := w.Db.Where("workspace_id = ?", workspaceId).Find(&variables)
+	if result.Error != nil {
+		return []Variable{}, result.Error
+	}
+	return variables, nil
+}
+
+func (w WorkspacesRepositoryImpl) GetVariable(variableId uuid.UUID) (*Variable, error) {
+	var variable Variable
+	result := w.Db.First(&variable, "id = ?", variableId)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &variable, nil
+}
+
+func (w WorkspacesRepositoryImpl) SaveVariable(variable *Variable) error {
+	return w.Db.Save(variable).Error
+}
+
+func (w WorkspacesRepositoryImpl) DeleteVariable(variableId uuid.UUID) error {
+	return w.Db.Delete(&Variable{}, "id = ?", variableId).Error
 }

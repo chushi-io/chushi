@@ -29,6 +29,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	if err := database.AutoMigrate(
 		&workspaces.Workspace{},
+		&workspaces.Variable{},
 		&organization.Organization{},
 		&oauth.OauthClient{},
 		&oauth.OauthToken{},
@@ -106,7 +107,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			workspace.GET("", workspaceCtrl.GetWorkspace)
 			workspace.POST("", workspaceCtrl.UpdateWorkspace)
 			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
-			workspace.GET("/variables", notImplemented)
+			workspace.GET("/variables", workspaceCtrl.ListVariables)
 			workspace.POST("/variables", notImplemented)
 			workspace.PATCH("/variables/:variable", notImplemented)
 			workspace.DELETE("/variables/:variable", notImplemented)

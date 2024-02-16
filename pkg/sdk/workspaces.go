@@ -57,3 +57,23 @@ func (w *Workspaces) GetConnectionCredentials(connectionId uuid.UUID) (*Credenti
 	}
 	return &response, nil
 }
+
+type WorkspaceVariablesResponse struct {
+	Variables []Variable `json:"variables"`
+}
+
+type Variable struct {
+	Type  string `json:"type"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+func (w *Workspaces) GetVariables(workspaceId string) ([]Variable, error) {
+	variablesUrl := w.sdk.GetOrganizationUrl(fmt.Sprintf("workspaces/%s/variables", workspaceId))
+	var response WorkspaceVariablesResponse
+	_, err := w.sdk.Client.Get(variablesUrl).ReceiveSuccess(&response)
+	if err != nil {
+		return nil, err
+	}
+	return response.Variables, nil
+}

@@ -50,7 +50,7 @@ func (r *Runs) List(params *ListRunsParams) (*ListRunsResponse, error) {
 
 	fullUrl := r.sdk.GetOrganizationUrl(runsUrl)
 	var data ListRunsResponse
-	_, err := r.sdk.Client.Get(fullUrl).ReceiveSuccess(&data)
+	_, err := r.sdk.Client.Get(fullUrl).QueryStruct(params).ReceiveSuccess(&data)
 	if err != nil {
 		return nil, err
 	}

@@ -93,7 +93,13 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	pod, err := a.launchPod(run, ws.Workspace, token, creds.Credentials)
+	variables, err := a.Sdk.Workspaces().GetVariables(ws.Workspace.Id)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(variables)
+	pod, err := a.launchPod(run, ws.Workspace, token, creds.Credentials, variables)
 	if err != nil {
 		return err
 	}
@@ -152,8 +158,8 @@ loop:
 	return true, nil
 }
 
-func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, credentials sdk.Credentials) (*v1.Pod, error) {
-	podManifest := a.podSpecForRun(run, workspace, token, credentials)
+func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, credentials sdk.Credentials, variables []sdk.Variable) (*v1.Pod, error) {
+	podManifest := a.podSpecForRun(run, workspace, token, credentials, variables)
 	return a.Client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
@@ -186,7 +192,7 @@ func (a *Agent) writeLine(line string) error {
 	return nil
 }
 
-func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, response sdk.Credentials) *v1.Pod {
+func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, response sdk.Credentials, variables []sdk.Variable) *v1.Pod {
 	args := []string{
 		"runner",
 		fmt.Sprintf("-d=/workspace/%s", workspace.Vcs.WorkingDirectory),
@@ -194,6 +200,32 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 		run.Operation,
 	}
 
+	envVars := []v1.EnvVar{
+		{
+			Name:  "CHUSHI_URL",
+			Value: os.Getenv("CHUSHI_URL"),
+		},
+		{
+			Name:  "CHUSHI_ORGANIZATION",
+			Value: a.Sdk.OrganizationId.String(),
+		},
+		{
+			Name:  "CHUSHI_RUN_ID",
+			Value: run.Id,
+		},
+		{
+			Name:  "RUNNER_TOKEN",
+			Value: token.AccessToken,
+		},
+	}
+	for _, variable := range variables {
+		if variable.Type == "environment" {
+			envVars = append(envVars, v1.EnvVar{
+				Name:  variable.Name,
+				Value: variable.Value,
+			})
+		}
+	}
 	autoMount := false
 	podSpec := v1.PodSpec{
 		AutomountServiceAccountToken: &autoMount,
@@ -205,24 +237,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 				ImagePullPolicy: "Never",
 				Command:         []string{"/chushi"},
 				Args:            args,
-				Env: []v1.EnvVar{
-					{
-						Name:  "CHUSHI_URL",
-						Value: os.Getenv("CHUSHI_URL"),
-					},
-					{
-						Name:  "CHUSHI_ORGANIZATION",
-						Value: a.Sdk.OrganizationId.String(),
-					},
-					{
-						Name:  "CHUSHI_RUN_ID",
-						Value: run.Id,
-					},
-					{
-						Name:  "RUNNER_TOKEN",
-						Value: token.AccessToken,
-					},
-				},
+				Env:             envVars,
 				VolumeMounts: []v1.VolumeMount{
 					{
 						MountPath: "/workspace",
