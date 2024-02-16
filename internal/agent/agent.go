@@ -88,7 +88,7 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	creds, err := a.Sdk.GetConnectionCredentials(ws.Workspace.Vcs.ConnectionId)
+	creds, err := a.Sdk.Workspaces().GetConnectionCredentials(ws.Workspace.Vcs.ConnectionId)
 	if err != nil {
 		return err
 	}

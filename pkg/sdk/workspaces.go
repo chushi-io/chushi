@@ -21,11 +21,12 @@ type Workspace struct {
 }
 
 type WorkspaceVcs struct {
-	Source           string   `json:"source"`
-	Branch           string   `json:"branch"`
-	Patterns         []string `json:"patterns,omitempty"`
-	Prefixes         []string `json:"prefixes,omitempty"`
-	WorkingDirectory string   `json:"working_directory,omitempty"`
+	Source           string    `json:"source"`
+	Branch           string    `json:"branch"`
+	Patterns         []string  `json:"patterns,omitempty"`
+	Prefixes         []string  `json:"prefixes,omitempty"`
+	WorkingDirectory string    `json:"working_directory,omitempty"`
+	ConnectionId     uuid.UUID `json:"connection_id,omitempty"`
 }
 
 type CredentialsResponse struct {
@@ -47,7 +48,8 @@ func (s *Sdk) GetWorkspace(workspaceId string) (*WorkspaceResponse, error) {
 }
 
 func (w *Workspaces) GetConnectionCredentials(connectionId uuid.UUID) (*CredentialsResponse, error) {
-	credentialsUrl := fmt.Sprintf("vcs_connections/%s/credentials", connectionId)
+	fmt.Println("Getting VCS connection credentials")
+	credentialsUrl := w.sdk.GetOrganizationUrl(fmt.Sprintf("vcs_connections/%s/credentials", connectionId))
 	var response CredentialsResponse
 	_, err := w.sdk.Client.Get(credentialsUrl).ReceiveSuccess(&response)
 	if err != nil {
