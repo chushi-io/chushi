@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
 	"github.com/chushi-io/chushi/internal/agent"
 	"github.com/chushi-io/chushi/pkg/sdk"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"golang.org/x/oauth2/clientcredentials"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
@@ -34,7 +33,7 @@ func init() {
 	agentCmd.Flags().Int("poll-interval", 2, "How often to poll the queue endpoint (seconds)")
 	agentCmd.Flags().String("agent-id", "", "ID of the agent")
 	agentCmd.Flags().String("token-url", "https://chushi.io/auth/v1/token", "Chushi Token URL")
-	agentCmd.Flags().String("api-url", "https://chushi.io/api/v1/", "Chushi API URL")
+	agentCmd.Flags().String("server", "", "Chushi API URL")
 	agentCmd.Flags().String("org-id", "", "ID of the organization")
 	agentCmd.Flags().String("kubeconfig", "", "Location of kubeconfig file")
 
@@ -42,20 +41,10 @@ func init() {
 }
 
 func runAgent(cmd *cobra.Command, args []string) {
-	clientId := os.Getenv("CHUSHI_CLIENT_ID")
-	clientSecret := os.Getenv("CHUSHI_CLIENT_SECRET")
-
 	agentId, _ := cmd.Flags().GetString("agent-id")
-	tokenUrl, _ := cmd.Flags().GetString("token-url")
-	apiUrl, _ := cmd.Flags().GetString("api-url")
-	orgId, _ := cmd.Flags().GetString("org-id")
+	server, _ := cmd.Flags().GetString("server")
+	rawOrgId, _ := cmd.Flags().GetString("org-id")
 	configFile, _ := cmd.Flags().GetString("kubeconfig")
-
-	client := clientcredentials.Config{
-		ClientID:     clientId,
-		ClientSecret: clientSecret,
-		TokenURL:     tokenUrl,
-	}
 
 	kubeClient, err := getKubeClient(configFile)
 	if err != nil {
@@ -63,10 +52,6 @@ func runAgent(cmd *cobra.Command, args []string) {
 	}
 
 	cnf := &agent.Config{
-		Server: &agent.ServerConfig{
-			TokenUrl: tokenUrl,
-			ApiUrl:   apiUrl,
-		},
 		Runner: &agent.RunnerConfig{
 			Image:   "chushi",
 			Version: "latest",
@@ -74,11 +59,17 @@ func runAgent(cmd *cobra.Command, args []string) {
 		AgentId: agentId,
 	}
 
-	chushiSdk := &sdk.Sdk{
-		Client:         client.Client(context.TODO()),
-		ApiUrl:         cnf.Server.ApiUrl,
-		TokenUrl:       cnf.Server.TokenUrl,
-		OrganizationId: orgId,
+	chushiSdk := sdk.New()
+
+	if rawOrgId != "" {
+		orgId, err := uuid.Parse(rawOrgId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		chushiSdk = chushiSdk.WithOrganizationId(orgId)
+	}
+	if server != "" {
+		chushiSdk = chushiSdk.WithBaseUrl(server)
 	}
 
 	ag, _ := agent.New(kubeClient, chushiSdk, cnf)

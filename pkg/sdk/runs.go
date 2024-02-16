@@ -2,13 +2,8 @@ package sdk
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/google/go-querystring/query"
 	"github.com/google/uuid"
-	"io"
-	"log"
-	"net/http"
 	"strings"
 	"time"
 )
@@ -46,33 +41,30 @@ type ListRunsResponse struct {
 func (r *Runs) List(params *ListRunsParams) (*ListRunsResponse, error) {
 	var runsUrl string
 	if params.AgentId != "" {
-		runsUrl = fmt.Sprintf("%sorgs/%s/agents/%s/runs", r.sdk.ApiUrl, r.sdk.OrganizationId, params.AgentId)
+		runsUrl = fmt.Sprintf("agents/%s/runs", params.AgentId)
 	} else if params.WorkspaceId != nil {
-		runsUrl = fmt.Sprintf("%sorgs/%s/workspaces/%s/runs", r.sdk.ApiUrl, r.sdk.OrganizationId, params.WorkspaceId)
+		runsUrl = fmt.Sprintf("workspaces/%s/runs", params.WorkspaceId)
 	} else {
-		runsUrl = fmt.Sprintf("%sorgs/%s/runs", r.sdk.ApiUrl, r.sdk.OrganizationId)
+		runsUrl = "runs"
 	}
 
-	v, _ := query.Values(params)
-	fullUrl := strings.Join([]string{runsUrl, v.Encode()}, "?")
-	res, err := r.sdk.Client.Get(fullUrl)
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
+	fullUrl := r.sdk.GetOrganizationUrl(runsUrl)
 	var data ListRunsResponse
-	if err = json.Unmarshal(b, &data); err != nil {
+	_, err := r.sdk.Client.Get(fullUrl).ReceiveSuccess(&data)
+	if err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
 func (r *Runs) UploadLogs(runId string, logs string) error {
-	logsUrl := fmt.Sprintf("%sorgs/%s/runs/%s/logs", r.sdk.ApiUrl, r.sdk.OrganizationId, runId)
+	logsUrl := r.sdk.GetOrganizationUrl(fmt.Sprintf("runs/%s/logs", runId))
 	reader := strings.NewReader(logs)
-	_, err := r.sdk.Client.Post(logsUrl, "", reader)
+	req, err := r.sdk.Client.Body(reader).Post(logsUrl).Request()
+	if err != nil {
+		return err
+	}
+	_, err = r.sdk.Client.Do(req, nil, nil)
 	return err
 }
 
@@ -90,22 +82,9 @@ type UpdateRunResponse struct {
 }
 
 func (r *Runs) Update(params *UpdateRunParams) (*UpdateRunResponse, error) {
-	runUrl := fmt.Sprintf("%sorgs/%s/runs/%s", r.sdk.ApiUrl, r.sdk.OrganizationId, params.RunId)
-	b := new(bytes.Buffer)
-	if err := json.NewEncoder(b).Encode(params); err != nil {
-		return nil, err
-	}
-
-	res, err := r.sdk.Client.Post(runUrl, "application/json", b)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(res.Body)
+	runUrl := r.sdk.GetOrganizationUrl("runs/" + params.RunId)
 	var response UpdateRunResponse
-	err = json.Unmarshal(buf.Bytes(), &response)
+	_, err := r.sdk.Client.Post(runUrl).BodyJSON(params).ReceiveSuccess(&response)
 	return &response, err
 }
 
@@ -119,19 +98,16 @@ type UploadPlanResponse struct {
 }
 
 func (r *Runs) UploadPlan(params *UploadPlanParams) (*UploadPlanResponse, error) {
-	runUrl := fmt.Sprintf("%sorgs/%s/runs/%s/plan", r.sdk.ApiUrl, r.sdk.OrganizationId, params.RunId)
+	runUrl := r.sdk.GetOrganizationUrl(
+		fmt.Sprintf("runs/%s/plan", r.sdk.OrganizationId, params.RunId),
+	)
 
-	req, err := http.NewRequest(http.MethodPut, runUrl, bytes.NewBuffer(params.Plan))
+	var response UploadPlanResponse
+	_, err := r.sdk.Client.Body(bytes.NewBuffer(params.Plan)).Post(runUrl).ReceiveSuccess(&response)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := r.sdk.Client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	var response UploadPlanResponse
-	return &response, err
+	return &response, nil
 }
 
 type GeneratePresignedUrlParams struct {
@@ -143,17 +119,13 @@ type GeneratePresignedUrlResponse struct {
 }
 
 func (r *Runs) PresignedUrl(params *GeneratePresignedUrlParams) (*GeneratePresignedUrlResponse, error) {
-	runUrl := fmt.Sprintf("%sorgs/%s/runs/%s/presigned_url", r.sdk.ApiUrl, r.sdk.OrganizationId, params.RunId)
-
-	res, err := r.sdk.Client.Post(runUrl, "application/json", nil)
+	runUrl := r.sdk.GetOrganizationUrl(
+		fmt.Sprintf("runs/%s/presigned_url", params.RunId),
+	)
+	var response GeneratePresignedUrlResponse
+	_, err := r.sdk.Client.Post(runUrl).ReceiveSuccess(&response)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(res.Body)
-	var response GeneratePresignedUrlResponse
-	err = json.Unmarshal(buf.Bytes(), &response)
 	return &response, err
 }

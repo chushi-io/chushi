@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/spf13/cobra"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 )
@@ -37,6 +36,7 @@ executions occuring for Chushi workspaces.'
 		tofuVersion, _ := cmd.Flags().GetString("version")
 		workingDir, _ := cmd.Flags().GetString("directory")
 
+		chushiSdk := sdk.New()
 		ver, err := version.NewVersion(tofuVersion)
 		if err != nil {
 			log.Fatal(err)
@@ -76,11 +76,6 @@ executions occuring for Chushi workspaces.'
 		}
 
 		if args[0] == "plan" && hasChanges {
-			chushiSdk := &sdk.Sdk{
-				Client:         &http.Client{},
-				ApiUrl:         os.Getenv("CHUSHI_API_URL"),
-				OrganizationId: os.Getenv("CHUSHI_ORGANIZATION"),
-			}
 			data, err := os.ReadFile(filepath.Join(workingDir, "tfplan"))
 			if err != nil {
 				log.Fatal(err)
