@@ -1,10 +1,5 @@
 package sdk
 
-import (
-	"bytes"
-	"encoding/json"
-)
-
 type Tokens struct {
 	sdk *Sdk
 }
@@ -20,20 +15,10 @@ type CreateRunnerTokenResponse struct {
 }
 
 func (t *Tokens) CreateRunnerToken(params *CreateRunnerTokenParams) (*CreateRunnerTokenResponse, error) {
-	data, err := json.Marshal(params)
-	if err != nil {
-		return nil, err
-	}
-	res, err := t.sdk.Client.Post(t.sdk.TokenUrl, "application/json", bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(res.Body)
 	var response CreateRunnerTokenResponse
-	err = json.Unmarshal(buf.Bytes(), &response)
+	_, err := t.sdk.Client.Post(t.sdk.TokenUrl).BodyJSON(params).ReceiveSuccess(&response)
+	if err != nil {
+		return nil, err
+	}
 	return &response, err
 }

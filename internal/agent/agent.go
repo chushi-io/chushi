@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -206,12 +207,12 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 				Args:            args,
 				Env: []v1.EnvVar{
 					{
-						Name:  "CHUSHI_API_URL",
-						Value: a.Config.GetApiUrl(),
+						Name:  "CHUSHI_URL",
+						Value: os.Getenv("CHUSHI_URL"),
 					},
 					{
 						Name:  "CHUSHI_ORGANIZATION",
-						Value: a.Sdk.OrganizationId,
+						Value: a.Sdk.OrganizationId.String(),
 					},
 					{
 						Name:  "CHUSHI_RUN_ID",

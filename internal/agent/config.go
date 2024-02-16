@@ -4,13 +4,7 @@ import "strings"
 
 type Config struct {
 	Runner  *RunnerConfig `yaml:"runner,omitempty"`
-	Server  *ServerConfig `yaml:"server,omitempty"`
 	AgentId string        `yaml:"agentId"`
-}
-
-type ServerConfig struct {
-	ApiUrl   string `yaml:"apiUrl,omitempty"`
-	TokenUrl string `yaml:"tokenUrl,omitempty"`
 }
 
 type RunnerConfig struct {
@@ -35,13 +29,6 @@ func (c *Config) GetImage() string {
 	}
 
 	return strings.Join([]string{image, version}, ":")
-}
-
-func (c *Config) GetApiUrl() string {
-	if c.Server != nil && c.Server.ApiUrl != "" {
-		return c.Server.ApiUrl
-	}
-	return "https://chushi.io/api/v1"
 }
 
 func (c *Config) GetNamespace() string {

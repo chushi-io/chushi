@@ -1,25 +1,95 @@
 package sdk
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	"github.com/dghubble/sling"
 	"github.com/google/uuid"
-	"io"
+	"golang.org/x/oauth2/clientcredentials"
 	"net/http"
+	"os"
 )
 
 type Sdk struct {
-	Client         *http.Client
-	ApiUrl         string
+	Client         *sling.Sling
 	TokenUrl       string
-	OrganizationId string
+	OrganizationId uuid.UUID
 
-	runs   *Runs
-	tokens *Tokens
+	runs       *Runs
+	tokens     *Tokens
+	workspaces *Workspaces
 }
 
-func New() {
+const (
+	ClientIdEnvVar       = "CHUSHI_CLIENT_ID"
+	ClientSecretEnvVar   = "CHUSHI_CLIENT_SECRET"
+	AccessTokenEnvVar    = "CHUSHI_ACCESS_TOKEN"
+	UrlEnvVar            = "CHUSHI_URL"
+	OrganizationIdEnvVar = "CHUSHI_ORGANIZATION_ID"
+)
 
+func New() *Sdk {
+	baseUrl := "https://chushi.io"
+	if url := os.Getenv(UrlEnvVar); url != "" {
+		baseUrl = url
+	}
+
+	client := sling.New().Base(baseUrl)
+	sdk := &Sdk{Client: client}
+
+	if organizationId := os.Getenv(OrganizationIdEnvVar); organizationId != "" {
+		if uid, err := uuid.Parse(organizationId); err == nil {
+			sdk.OrganizationId = uid
+		}
+	}
+
+	// Figure out our client auth mechanism
+	if clientSecret := os.Getenv(ClientSecretEnvVar); clientSecret != "" {
+		sdk.WithClientCredentials(
+			os.Getenv(ClientIdEnvVar),
+			clientSecret,
+			fmt.Sprintf("%s/oauth/v1/token", baseUrl),
+		)
+		return sdk
+	}
+
+	if token := os.Getenv(AccessTokenEnvVar); token != "" {
+		sdk = sdk.WithAccessToken(token)
+	}
+	return sdk
+}
+
+func (s *Sdk) WithBaseUrl(baseUrl string) *Sdk {
+	s.Client.Base(baseUrl)
+	return s
+}
+
+func (s *Sdk) WithClient(client *http.Client) *Sdk {
+	s.Client.Client(client)
+	return s
+}
+
+func (s *Sdk) WithAccessToken(accessToken string) *Sdk {
+	s.Client.Set("Authorization", "Bearer "+accessToken)
+	return s
+}
+
+func (s *Sdk) WithClientCredentials(clientId string, clientSecret string, tokenUrl string) *Sdk {
+	s.Client.Client((&clientcredentials.Config{
+		ClientID:     clientId,
+		ClientSecret: clientSecret,
+		TokenURL:     tokenUrl,
+	}).Client(context.TODO()))
+	return s
+}
+
+func (s *Sdk) WithOrganizationId(organizationId uuid.UUID) *Sdk {
+	s.OrganizationId = organizationId
+	return s
+}
+
+func (s *Sdk) GetOrganizationUrl(path string) string {
+	return fmt.Sprintf("/api/v1/orgs/%s/%s", s.OrganizationId, path)
 }
 
 func (s *Sdk) Runs() *Runs {
@@ -36,68 +106,9 @@ func (s *Sdk) Tokens() *Tokens {
 	return s.tokens
 }
 
-type WorkspaceResponse struct {
-	Workspace Workspace `json:"workspace"`
-}
-
-type Workspace struct {
-	Id     string       `json:"id"`
-	Name   string       `json:"name"`
-	Locked bool         `json:"locked"`
-	Vcs    WorkspaceVcs `json:"vcs"`
-}
-
-type WorkspaceVcs struct {
-	Source           string    `json:"source"`
-	Branch           string    `json:"branch"`
-	Patterns         []string  `json:"patterns,omitempty"`
-	Prefixes         []string  `json:"prefixes,omitempty"`
-	WorkingDirectory string    `json:"working_directory,omitempty"`
-	ConnectionId     uuid.UUID `json:"connection_id"`
-}
-
-func (s *Sdk) GetWorkspace(workspaceId string) (*WorkspaceResponse, error) {
-	workspaceUrl := fmt.Sprintf("%sorgs/%s/workspaces/%s", s.ApiUrl, s.OrganizationId, workspaceId)
-	res, err := s.Client.Get(workspaceUrl)
-	if err != nil {
-		return nil, err
+func (s *Sdk) Workspaces() *Workspaces {
+	if s.workspaces == nil {
+		s.workspaces = &Workspaces{sdk: s}
 	}
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var workspaceResponse WorkspaceResponse
-	if err := json.Unmarshal(b, &workspaceResponse); err != nil {
-		return nil, err
-	}
-	return &workspaceResponse, nil
-}
-
-type CredentialsResponse struct {
-	Credentials Credentials `json:"credentials"`
-}
-
-type Credentials struct {
-	Token string `json:"token"`
-}
-
-func (s *Sdk) GetConnectionCredentials(connectionId uuid.UUID) (*CredentialsResponse, error) {
-	credentialsUrl := fmt.Sprintf("%sorgs/%s/vcs_connections/%s/credentials", s.ApiUrl, s.OrganizationId, connectionId)
-	res, err := s.Client.Get(credentialsUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var credentialsResponse CredentialsResponse
-	if err := json.Unmarshal(b, &credentialsResponse); err != nil {
-		return nil, err
-	}
-	return &credentialsResponse, nil
+	return s.workspaces
 }

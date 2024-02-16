@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.2.2](https://github.com/chushi-io/chushi/compare/v1.2.1...v1.2.2) (2024-02-16)
+
+
+### Bug Fixes
+
+* **sdk:** Upgrade to use sling ([e79a89a](https://github.com/chushi-io/chushi/commit/e79a89a694cc3454f8626f021e795da4ec437497))
+
 ### [1.2.1](https://github.com/chushi-io/chushi/compare/v1.2.0...v1.2.1) (2024-02-15)
 
 
