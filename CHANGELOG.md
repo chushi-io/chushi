@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/chushi-io/chushi/compare/v1.2.2...v1.3.0) (2024-02-17)
+
+
+### Features
+
+* **variables:** Add V1 support for variables ([2a49dbd](https://github.com/chushi-io/chushi/commit/2a49dbdada81eb95232e733bb9cd4cf412deeb70))
+
 ### [1.2.2](https://github.com/chushi-io/chushi/compare/v1.2.1...v1.2.2) (2024-02-16)
 
 
