@@ -77,16 +77,3 @@ type WorkspaceLock struct {
 	// Lock ID
 	Id string `json:"id"`
 }
-
-type Variable struct {
-	ID        uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
-
-	Type        string     `json:"type"`
-	Name        string     `json:"name"`
-	Value       string     `json:"value"`
-	WorkspaceID uuid.UUID  `json:"workspace_id"`
-	Workspace   *Workspace `json:"-"`
-}
