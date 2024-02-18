@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0](https://github.com/chushi-io/chushi/compare/v1.4.0...v1.5.0) (2024-02-18)
+
+
+### Features
+
+* **grpc:** Add GRPC endpoints for receiving run requests ([26b6e0c](https://github.com/chushi-io/chushi/commit/26b6e0c7c2152d1d709f832d92918055d795323b))
+
 ## [1.4.0](https://github.com/chushi-io/chushi/compare/v1.3.0...v1.4.0) (2024-02-18)
 
 
