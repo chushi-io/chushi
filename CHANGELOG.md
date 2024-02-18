@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0](https://github.com/chushi-io/chushi/compare/v1.3.0...v1.4.0) (2024-02-18)
+
+
+### Features
+
+* **variable_sets:** Add variable sets ([5c4fcc1](https://github.com/chushi-io/chushi/commit/5c4fcc13e2117b545d43a7a9b3ba09c15737294a))
+
 ## [1.3.0](https://github.com/chushi-io/chushi/compare/v1.2.2...v1.3.0) (2024-02-17)
 
 
