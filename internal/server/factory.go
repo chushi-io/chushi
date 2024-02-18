@@ -13,6 +13,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/variables"
 	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
@@ -67,7 +68,6 @@ func NewFactory(database *gorm.DB) (*Factory, error) {
 }
 
 func (f *Factory) NewWorkspaceController() *controller.WorkspacesController {
-
 	return &controller.WorkspacesController{
 		Repository: workspaces.NewWorkspacesRepository(f.Database),
 		FileManager: &file_manager.FileManagerImpl{
@@ -83,6 +83,18 @@ func (f *Factory) NewVcsConnectionsController() *controller.VcsConnectionsContro
 func (f *Factory) NewOrganizationsController() *controller.OrganizationsController {
 	return &controller.OrganizationsController{
 		Repository: organization.NewOrganizationRepository(f.Database),
+	}
+}
+
+func (f *Factory) NewVariablesController() *controller.VariablesController {
+	return &controller.VariablesController{
+		Repository: &variables.RepositoryImpl{Db: f.Database},
+	}
+}
+
+func (f *Factory) NewVariableSetsController() *controller.VariableSetsController {
+	return &controller.VariableSetsController{
+		Repository: &variables.SetRepositoryImpl{Db: f.Database},
 	}
 }
 

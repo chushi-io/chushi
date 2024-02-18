@@ -5,6 +5,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
+	"github.com/chushi-io/chushi/internal/resource/variables"
 	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
@@ -29,7 +30,12 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	if err := database.AutoMigrate(
 		&workspaces.Workspace{},
-		&workspaces.Variable{},
+		&variables.Variable{},
+		&variables.VariableSet{},
+		&variables.OrganizationVariable{},
+		&variables.WorkspaceVariable{},
+		&variables.WorkspaceVariableSet{},
+		&variables.OrganizationVariableSet{},
 		&organization.Organization{},
 		&oauth.OauthClient{},
 		&oauth.OauthToken{},
@@ -51,6 +57,8 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	agentCtrl := factory.NewAgentsController()
 	runsCtrl := factory.NewRunsController()
 	vcsCtrl := factory.NewVcsConnectionsController()
+	variablesCtrl := factory.NewVariablesController()
+	variableSetsCtrl := factory.NewVariableSetsController()
 	ab := factory.NewAuthBoss()
 	meCtrl := factory.NewMeController(ab)
 
@@ -92,10 +100,35 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	v1api.GET("/orgs", organizationsCtrl.List)
 	v1api.POST("/orgs", organizationsCtrl.Create)
 	orgs := v1api.Group("/orgs/:organization")
+	orgs.Use(organizationsCtrl.SetContext)
 	{
 		orgs.GET("", organizationsCtrl.Get)
+		variables := orgs.Group("/variables")
+		{
+			variables.GET("", variablesCtrl.List)
+			variables.POST("", variablesCtrl.Create)
+			variables.GET(":variable", variablesCtrl.Get)
+			variables.PUT(":variable", variablesCtrl.Update)
+			variables.DELETE(":variable", variablesCtrl.Delete)
+		}
+
+		variableSets := orgs.Group("/variable_sets")
+		{
+			variableSets.GET("", variableSetsCtrl.List)
+			variableSets.POST("", variableSetsCtrl.Create)
+			variableSets.GET(":variable_set", variableSetsCtrl.Get)
+			variableSets.PUT(":variable_set", variableSetsCtrl.Update)
+			variableSets.DELETE(":variable_set", variableSetsCtrl.Delete)
+			variableSetVariables := variableSets.Group(":variable_set/variables")
+			{
+				variableSetVariables.GET("", variablesCtrl.List)
+				variableSetVariables.POST("", variablesCtrl.Create)
+				variableSetVariables.GET(":variable", variablesCtrl.Get)
+				variableSetVariables.PUT(":variable", variablesCtrl.Update)
+				variableSetVariables.DELETE(":variable", variablesCtrl.Delete)
+			}
+		}
 	}
-	orgs.Use(organizationsCtrl.SetContext)
 
 	// Workspaces
 	workspaces := orgs.Group("/workspaces")
@@ -107,10 +140,6 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			workspace.GET("", workspaceCtrl.GetWorkspace)
 			workspace.POST("", workspaceCtrl.UpdateWorkspace)
 			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
-			workspace.GET("/variables", workspaceCtrl.ListVariables)
-			workspace.POST("/variables", notImplemented)
-			workspace.PATCH("/variables/:variable", notImplemented)
-			workspace.DELETE("/variables/:variable", notImplemented)
 
 			// HTTP Backend handlers
 			workspace.GET("/state", workspaceCtrl.GetState)
@@ -125,6 +154,15 @@ func New(conf *config.Config) (*gin.Engine, error) {
 				runs.GET("/:run", notImplemented)
 				runs.POST("/:run", notImplemented)
 				runs.DELETE("/:run", notImplemented)
+			}
+
+			variables := workspace.Group("/variables")
+			{
+				variables.GET("", variablesCtrl.List)
+				variables.POST("", variablesCtrl.Create)
+				variables.GET(":variable", variablesCtrl.Get)
+				variables.PUT(":variable", variablesCtrl.Update)
+				variables.DELETE(":variable", variablesCtrl.Delete)
 			}
 		}
 	}
@@ -242,14 +280,6 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			c.AbortWithStatus(http.StatusNotFound)
 		}
 	})
-
-	fmt.Printf("- ab.Config.Paths.RootURL: %s\n", ab.Config.Paths.RootURL)
-	fmt.Printf("- ab.Config.Paths.Mount: %s\n", ab.Config.Paths.Mount)
-
-	routes := r.Routes()
-	for route := range routes {
-		fmt.Printf("- %s\n", routes[route].Path)
-	}
 
 	return r, nil
 }
