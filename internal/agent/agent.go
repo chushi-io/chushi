@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chushi-io/chushi/pkg/sdk"
+	pb "github.com/chushi-io/chushi/proto/api/v1"
+	"google.golang.org/grpc"
 	"io"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,15 +19,18 @@ import (
 
 type Agent struct {
 	Client *kubernetes.Clientset
+	Grpc   pb.RunsClient
 	Config *Config
 	Sdk    *sdk.Sdk
 	sinks  []io.Writer
 }
 
-func New(client *kubernetes.Clientset, sdk *sdk.Sdk, conf *Config) (*Agent, error) {
+func New(client *kubernetes.Clientset, sdk *sdk.Sdk, grpcClient *grpc.ClientConn, conf *Config) (*Agent, error) {
+	runClient := pb.NewRunsClient(grpcClient)
 	return &Agent{
 		Client: client,
 		Sdk:    sdk,
+		Grpc:   runClient,
 		Config: conf,
 	}, nil
 }
@@ -34,22 +39,34 @@ func New(client *kubernetes.Clientset, sdk *sdk.Sdk, conf *Config) (*Agent, erro
 // and exists. However, it should query the API (or stream)
 // and emit runners as needed
 func (a *Agent) Run() error {
-	runs, err := a.Sdk.Runs().List(&sdk.ListRunsParams{
-		AgentId: a.Config.GetAgentId(),
-		Status:  "pending",
+	stream, err := a.Grpc.Watch(context.Background(), &pb.WatchRunsRequest{
+		AgentId: a.Config.AgentId,
 	})
 	if err != nil {
 		return err
 	}
-	for _, run := range runs.Runs {
-		if err := a.handle(run); err != nil {
-			a.Sdk.Runs().Update(&sdk.UpdateRunParams{
-				RunId:  run.Id,
-				Status: "failed",
-			})
-			return err
+	for {
+		scheduledRun, err := stream.Recv()
+		if err == io.EOF {
+			break
 		}
+		if err != nil {
+			log.Fatalf("%v.Watch(_) = _, %v", a.Grpc, err)
+		}
+		log.Println(scheduledRun.Id)
+		run, err := a.Sdk.Runs().Get(&sdk.GetRunRequest{
+			RunId: scheduledRun.Id,
+		})
+		if err != nil {
+			// Handle the error?
+			log.Fatal(err)
+		}
+		if err := a.handle(*run.Run); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Run %s completed\n", run.Run.Id)
 	}
+
 	return nil
 }
 
@@ -81,8 +98,9 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	if _, err := a.Sdk.Runs().Update(&sdk.UpdateRunParams{
-		RunId:  run.Id,
+	fmt.Println(run.Id)
+	if _, err := a.Grpc.Update(context.TODO(), &pb.UpdateRunRequest{
+		Id:     run.Id,
 		Status: "running",
 	}); err != nil {
 		return err
@@ -98,13 +116,10 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	fmt.Println(variables)
 	pod, err := a.launchPod(run, ws.Workspace, token, creds.Credentials, variables)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(pod.Name)
 
 	success, err := a.waitForPodCompletion(pod)
 	if err != nil {
@@ -127,8 +142,8 @@ func (a *Agent) handle(run sdk.Run) error {
 	}
 
 	// Lastly, post updates back to the run
-	_, err = a.Sdk.Runs().Update(&sdk.UpdateRunParams{
-		RunId:  run.Id,
+	_, err = a.Grpc.Update(context.TODO(), &pb.UpdateRunRequest{
+		Id:     run.Id,
 		Status: "completed",
 	})
 	return err

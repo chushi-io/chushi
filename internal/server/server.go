@@ -10,22 +10,24 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
+	pb "github.com/chushi-io/chushi/proto/api/v1"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"net/http"
 	"strings"
 )
 
-func New(conf *config.Config) (*gin.Engine, error) {
+func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 
 	// Load and initialize our database
 	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		//Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := database.AutoMigrate(
@@ -44,12 +46,12 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		&organization.OrganizationUser{},
 		&vcs_connection.VcsConnection{},
 	); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	factory, err := NewFactory(database)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
@@ -62,6 +64,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	ab := factory.NewAuthBoss()
 	meCtrl := factory.NewMeController(ab)
 
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	//r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
 	r.GET("/ping", func(c *gin.Context) {
@@ -281,7 +284,12 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		}
 	})
 
-	return r, nil
+	// Register our GRPC server
+	srv := grpc.NewServer()
+	reflection.Register(srv)
+	pb.RegisterRunsServer(srv, factory.NewGrpcRunsServer())
+
+	return r, srv, nil
 }
 
 func notImplemented(c *gin.Context) {

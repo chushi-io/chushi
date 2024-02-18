@@ -77,6 +77,10 @@ executions occuring for Chushi workspaces.'
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			// TODO: We're going to do this from the agent pod instead
+			// That brings the responsibility of the runner back to
+			// "only handle opentofu"
 			if resp, err := chushiSdk.Runs().UploadPlan(&sdk.UploadPlanParams{
 				RunId: os.Getenv("CHUSHI_RUN_ID"),
 				Plan:  data,

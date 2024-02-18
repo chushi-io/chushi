@@ -6,6 +6,7 @@ import (
 	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/spf13/cobra"
 	"log"
+	"net"
 )
 
 var serverCmd = &cobra.Command{
@@ -19,7 +20,7 @@ var serverCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		srv, err := server.New(conf)
+		httpServer, grpcServer, err := server.New(conf)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -32,7 +33,17 @@ var serverCmd = &cobra.Command{
 		//	}
 		//	go ag.Run()
 		//}
-		if err := srv.Run(); err != nil {
+		go func() {
+			fmt.Println("Starting GRPC listener")
+			lis, err := net.Listen("tcp", fmt.Sprintf(":%s", "5001"))
+			if err != nil {
+				log.Fatal(err)
+			}
+			if err := grpcServer.Serve(lis); err != nil {
+				log.Fatal(err)
+			}
+		}()
+		if err := httpServer.Run(); err != nil {
 			log.Fatal(err)
 		}
 	},

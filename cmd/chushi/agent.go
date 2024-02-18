@@ -5,6 +5,8 @@ import (
 	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
@@ -33,7 +35,8 @@ func init() {
 	agentCmd.Flags().Int("poll-interval", 2, "How often to poll the queue endpoint (seconds)")
 	agentCmd.Flags().String("agent-id", "", "ID of the agent")
 	agentCmd.Flags().String("token-url", "https://chushi.io/auth/v1/token", "Chushi Token URL")
-	agentCmd.Flags().String("server", "", "Chushi API URL")
+	agentCmd.Flags().String("server-url", "", "Chushi API URL")
+	agentCmd.Flags().String("grpc-url", "localhost:5001", "Chushi GRPC URL")
 	agentCmd.Flags().String("org-id", "", "ID of the organization")
 	agentCmd.Flags().String("kubeconfig", "", "Location of kubeconfig file")
 
@@ -42,7 +45,8 @@ func init() {
 
 func runAgent(cmd *cobra.Command, args []string) {
 	agentId, _ := cmd.Flags().GetString("agent-id")
-	server, _ := cmd.Flags().GetString("server")
+	serverUrl, _ := cmd.Flags().GetString("server-url")
+	grpcUrl, _ := cmd.Flags().GetString("grpc-url")
 	rawOrgId, _ := cmd.Flags().GetString("org-id")
 	configFile, _ := cmd.Flags().GetString("kubeconfig")
 
@@ -68,11 +72,19 @@ func runAgent(cmd *cobra.Command, args []string) {
 		}
 		chushiSdk = chushiSdk.WithOrganizationId(orgId)
 	}
-	if server != "" {
-		chushiSdk = chushiSdk.WithBaseUrl(server)
+	if serverUrl != "" {
+		chushiSdk = chushiSdk.WithBaseUrl(serverUrl)
 	}
 
-	ag, _ := agent.New(kubeClient, chushiSdk, cnf)
+	conn, err := grpc.Dial(
+		grpcUrl,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+	ag, _ := agent.New(kubeClient, chushiSdk, conn, cnf)
 
 	err = ag.Run()
 	if err != nil {

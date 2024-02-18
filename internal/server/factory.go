@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/chushi-io/chushi/internal/controller"
+	"github.com/chushi-io/chushi/internal/grpc"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
@@ -251,6 +252,13 @@ func (f *Factory) NewCookieStore() abclientstate.CookieStorer {
 func (f *Factory) NewSessionStore() abclientstate.SessionStorer {
 	sessionStoreKey, _ := base64.StdEncoding.DecodeString(`AbfYwmmt8UCwUuhd9qvfNA9UCuN1cVcKJN1ofbiky6xCyyBj20whe40rJa3Su0WOWLWcPpO1taqJdsEI/65+JA==`)
 	return abclientstate.NewSessionStorer("test", sessionStoreKey, nil)
+}
+
+func (f *Factory) NewGrpcRunsServer() *grpc.RunServer {
+	return &grpc.RunServer{
+		RunRepository:   run.NewRunRepository(f.Database),
+		AgentRepository: agent.NewAgentRepository(f.Database, oauth.NewClientStore(f.Database)),
+	}
 }
 
 type smsLogSender struct {

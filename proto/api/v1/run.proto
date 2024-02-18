@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./chushi";
+
+service Runs {
+  rpc List(ListRunsRequest) returns (ListRunsResponse) {}
+  rpc Watch(WatchRunsRequest) returns (stream Run) {}
+  rpc Update(UpdateRunRequest) returns (Run) {}
+}
+
+message UpdateRunRequest {
+  string id = 1;
+  string status = 2;
+  int32 add = 3;
+  int32 change = 4;
+  int32 remove = 5;
+}
+
+message ListRunsRequest {
+  string agent_id = 1;
+}
+
+message ListRunsResponse {
+  repeated Run runs = 1;
+}
+
+message Run {
+  string id = 1;
+}
+
+message WatchRunsRequest {
+  string agent_id = 1;
+}

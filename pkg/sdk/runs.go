@@ -129,3 +129,18 @@ func (r *Runs) PresignedUrl(params *GeneratePresignedUrlParams) (*GeneratePresig
 	}
 	return &response, err
 }
+
+type GetRunRequest struct {
+	RunId string
+}
+
+type GetRunResponse struct {
+	Run *Run `json:"run"`
+}
+
+func (r *Runs) Get(params *GetRunRequest) (*GetRunResponse, error) {
+	runUrl := r.sdk.GetOrganizationUrl("runs/" + params.RunId)
+	var response GetRunResponse
+	_, err := r.sdk.Client.Get(runUrl).ReceiveSuccess(&response)
+	return &response, err
+}

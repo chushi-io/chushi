@@ -14,7 +14,7 @@ type Run struct {
 	UpdatedAt        time.Time            `json:"updated_at"`
 	DeletedAt        *time.Time           `sql:"index" json:"deleted_at"`
 	Status           types.RunStatus      `json:"status"`
-	WorkspaceID      string               `json:"workspace_id"`
+	WorkspaceID      uuid.UUID            `json:"workspace_id"`
 	Workspace        workspaces.Workspace `json:"-"`
 	Add              int                  `json:"add"`
 	Change           int                  `json:"change"`
