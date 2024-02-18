@@ -13,7 +13,9 @@ type SetRepository interface {
 	Delete(variableSetId uuid.UUID) error
 
 	AttachToOrganization(variableSetId uuid.UUID, organizationId uuid.UUID) error
+	DetachFromOrganization(variableSetId uuid.UUID, organizationId uuid.UUID) error
 	AttachToWorkspace(variableSetId uuid.UUID, workspaceId uuid.UUID) error
+	DetachFromWorkspace(variableSetId uuid.UUID, workspaceId uuid.UUID) error
 }
 
 type ListVariableSetParams struct {
@@ -25,8 +27,23 @@ type SetRepositoryImpl struct {
 	Db *gorm.DB
 }
 
+func (sri SetRepositoryImpl) List(params *ListVariableSetParams) ([]VariableSet, error) {
+	var variableSets []VariableSet
+	result := sri.Db.Where("organization_id = ?", params.OrganizationId).Find(&variableSets)
+	if result.Error != nil {
+		return []VariableSet{}, result.Error
+	}
+	return variableSets, nil
+}
+
 func (sri SetRepositoryImpl) Get(variableSetId uuid.UUID) (*VariableSet, error) {
-	return nil, nil
+	var variableSet VariableSet
+	result := sri.Db.Where("id = ?", variableSetId).Preload("Variables").Find(&variableSet)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &variableSet, nil
 }
 
 func (sri SetRepositoryImpl) Create(variableSet *VariableSet) (*VariableSet, error) {
@@ -36,7 +53,7 @@ func (sri SetRepositoryImpl) Create(variableSet *VariableSet) (*VariableSet, err
 	return variableSet, nil
 }
 
-func (sri SetRepositoryImpl) Update(set VariableSet) error {
+func (sri SetRepositoryImpl) Update(set *VariableSet) error {
 	//return sri.Db.
 	//	Model(&VariableSet{}).
 	//	Where("id = ?", set.).
@@ -54,9 +71,29 @@ func (sri SetRepositoryImpl) Delete(variableSetId uuid.UUID) error {
 }
 
 func (sri SetRepositoryImpl) AttachToOrganization(variableSetId uuid.UUID, organizationId uuid.UUID) error {
-	return nil
+	return sri.Db.Create(&OrganizationVariableSet{
+		OrganizationID: organizationId,
+		VariableSetID:  variableSetId,
+	}).Error
+}
+
+func (sri SetRepositoryImpl) DetachFromOrganization(variableSetId uuid.UUID, organizationId uuid.UUID) error {
+	return sri.Db.
+		Where("variable_set_id = ?", variableSetId).
+		Where("organization_id = ?", organizationId).
+		Delete(&OrganizationVariableSet{}).Error
 }
 
 func (sri SetRepositoryImpl) AttachToWorkspace(variableSetId uuid.UUID, workspaceId uuid.UUID) error {
-	return nil
+	return sri.Db.Create(&WorkspaceVariableSet{
+		WorkspaceID:   workspaceId,
+		VariableSetID: variableSetId,
+	}).Error
+}
+
+func (sri SetRepositoryImpl) DetachFromWorkspace(variableSetId uuid.UUID, workspaceId uuid.UUID) error {
+	return sri.Db.
+		Where("variable_set_id = ?", variableSetId).
+		Where("workspace_id = ?", workspaceId).
+		Delete(&WorkspaceVariableSet{}).Error
 }

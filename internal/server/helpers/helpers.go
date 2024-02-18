@@ -5,6 +5,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"net/http"
 )
 
 func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {
@@ -17,6 +18,15 @@ func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {
 }
 
 func GetOrganization(c *gin.Context) *organization.Organization {
-	org, _ := c.Get("organization")
+	org, exists := c.Get("organization")
+	if !exists {
+		c.AbortWithError(http.StatusUnauthorized, errors.New("unauthorized"))
+		return nil
+	}
 	return org.(*organization.Organization)
+}
+
+func GetUuid(input string) (uuid.UUID, error) {
+	uid, err := uuid.Parse(input)
+	return uid, err
 }

@@ -25,6 +25,10 @@ import CreateWorkspace from "./routes/CreateWorkspace";
 import ListOrganizations from "./routes/ListOrganizations";
 import ListVcsConnections from "./routes/ListVcsConnections";
 import CreateVcsConnection from "./routes/CreateVcsConnection";
+import ListVariableSets from "./routes/ListVariableSets";
+import NewVariableSet from "./routes/NewVariableSet";
+import ShowVariableSet from "./routes/ShowVariableSet";
+import NewVariable from "./routes/NewVariable";
 
 const LinkBehavior = React.forwardRef((props, ref) => {
     const { href, ...other } = props;
@@ -49,6 +53,7 @@ const theme = createTheme({
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+            <Route path={"variables/new"} element={<NewVariable attachment={"organization"} />} />
             <Route path={"organizations"}>
                 <Route index={true} element={<ListOrganizations />} />
             </Route>
@@ -56,6 +61,7 @@ const router = createBrowserRouter(
                 <Route index={true} element={<ListWorkspaces />} />
                 <Route path={"new"} element={<CreateWorkspace />} />
                 <Route path={":workspaceId"} element={<ShowWorkspace />} />
+                <Route path={":workspaceId/variables/new"} element={<NewVariable attachment={"workspace"} />} />
             </Route>
             <Route path={"agents"}>
                 <Route index={true} element={<ListAgents />} />
@@ -65,6 +71,12 @@ const router = createBrowserRouter(
             <Route path={"vcs_connections"}>
                 <Route index={true} element={<ListVcsConnections />} />
                 <Route path={"new"} element={<CreateVcsConnection />} />
+            </Route>
+            <Route path={"variable_sets"}>
+                <Route index={true} element={<ListVariableSets />} />
+                <Route path={"new"} element={<NewVariableSet />} />
+                <Route path={":variableSetId"} element={<ShowVariableSet />} />
+                <Route path={":variableSetId/variables/new"} element={<NewVariable attachment={"variable_set"} />} />
             </Route>
         </Route>
     ), {

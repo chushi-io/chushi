@@ -8,6 +8,7 @@ import (
 type Repository interface {
 	// Manage Variables
 	List(params *ListVariableParams) ([]Variable, error)
+	ListForWorkspace(workspaceId uuid.UUID) ([]Variable, error)
 	Get(variableId uuid.UUID) (*Variable, error)
 	Create(variable *Variable) (*Variable, error)
 	Update(variable *Variable) (*Variable, error)
@@ -17,38 +18,109 @@ type Repository interface {
 	DetachFromWorkspace(variableId uuid.UUID, workspaceId uuid.UUID) error
 }
 
-type ListVariableParams struct{}
+type ListVariableParams struct {
+	WorkspaceId   *uuid.UUID
+	VariableSetId *uuid.UUID
+}
 
 type RepositoryImpl struct {
 	Db *gorm.DB
 }
 
 func (v RepositoryImpl) List(params *ListVariableParams) ([]Variable, error) {
-	return []Variable{}, nil
+	var variables []Variable
+	query := v.Db.Where("organization_id = ?")
+	if params.WorkspaceId != nil {
+		query = query.Where("workspace_id = ?", params.WorkspaceId)
+	}
+	if params.VariableSetId != nil {
+		query = query.Where("variable_set_id = ?", params.VariableSetId)
+	}
+
+	result := query.Find(&variables)
+	if result.Error != nil {
+		return []Variable{}, result.Error
+	}
+
+	return variables, nil
+}
+
+func (v RepositoryImpl) ListForWorkspace(workspace uuid.UUID) ([]Variable, error) {
+	var directVariables []WorkspaceVariable
+	result := v.Db.Where("workspace_id = ?", workspace).Find(&directVariables)
+	if result.Error != nil {
+		return []Variable{}, result.Error
+	}
+
+	var workspaceVariableSets []WorkspaceVariableSet
+	result = v.Db.Where("workspace_id = ?", workspace).Find(&workspaceVariableSets)
+	if result.Error != nil {
+		return []Variable{}, result.Error
+	}
+
+	var variables []Variable
+	for _, set := range workspaceVariableSets {
+		var workspaceVars []Variable
+		result = v.Db.Where("variable_set_id = ?", set.VariableSetID).Find(&workspaceVars)
+		if result.Error != nil {
+			return []Variable{}, result.Error
+		}
+		for _, wv := range workspaceVars {
+			variables = append(variables, wv)
+		}
+	}
+
+	for _, directVar := range directVariables {
+		var workspaceVars []Variable
+		result = v.Db.Where("variable_id = ?", directVar.VariableID).Find(&workspaceVars)
+		if result.Error != nil {
+			return []Variable{}, result.Error
+		}
+		for _, wv := range workspaceVars {
+			variables = append(variables, wv)
+		}
+	}
+	return variables, nil
 }
 
 func (v RepositoryImpl) Get(variableId uuid.UUID) (*Variable, error) {
-	return nil, nil
+	var variable Variable
+	result := v.Db.Find(&variable, "id = ?", variableId)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &variable, nil
 }
 
 func (v RepositoryImpl) Create(variable *Variable) (*Variable, error) {
-	return nil, nil
+	result := v.Db.Create(variable)
+	return variable, result.Error
 }
 
 func (v RepositoryImpl) Update(variable *Variable) (*Variable, error) {
-	return nil, nil
+	result := v.Db.Where("id = ?", variable.ID).Updates(map[string]interface{}{
+		"value":       variable.Value,
+		"description": variable.Description,
+	})
+	return variable, result.Error
 }
 
 func (v RepositoryImpl) Delete(variableId uuid.UUID) error {
-	return nil
+	return v.Db.Delete(&Variable{}, "id = ?", variableId).Error
 }
 
 func (v RepositoryImpl) AttachToWorkspace(variableId uuid.UUID, workspaceId uuid.UUID) error {
-	return nil
+	return v.Db.Create(&WorkspaceVariable{
+		VariableID:  variableId,
+		WorkspaceID: workspaceId,
+	}).Error
 }
 
 func (v RepositoryImpl) DetachFromWorkspace(variableId uuid.UUID, workspaceId uuid.UUID) error {
-	return nil
+	return v.Db.
+		Where("workspace_id = ?").
+		Where("variable_id = ?").
+		Delete(&WorkspaceVariable{}).Error
 }
 
 //

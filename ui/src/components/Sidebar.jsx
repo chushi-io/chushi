@@ -46,6 +46,8 @@ const NavigationSidebar = () => {
                     <MenuItem> <Link to={"/settings"}>Settings</Link> </MenuItem>
                     <MenuItem> <Link to={"/organizations"}>Organizations</Link> </MenuItem>
                     <MenuItem> <Link to={"/vcs_connections"}>VCS Connections</Link> </MenuItem>
+                    <MenuItem> <Link to={"/variables"}>Variables</Link> </MenuItem>
+                    <MenuItem> <Link to={"/variable_sets"}>Variable Sets</Link> </MenuItem>
                 </Menu>
 
             </Sidebar>
