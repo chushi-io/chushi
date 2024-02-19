@@ -238,6 +238,10 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 			Name:  "TF_HTTP_PASSWORD",
 			Value: token.Token,
 		},
+		{
+			Name:  "TF_HTTP_USERNAME",
+			Value: "runner",
+		},
 	}
 	for _, variable := range variables {
 		if variable.Type == "environment" {
