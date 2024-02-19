@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/chushi-io/chushi/pkg/sdk"
 	pb "github.com/chushi-io/chushi/proto/api/v1"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
 	v1 "k8s.io/api/core/v1"
@@ -51,20 +52,21 @@ func (a *Agent) Run() error {
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.Watch(_) = _, %v", a.Grpc, err)
+			zap.L().Fatal(err.Error())
 		}
-		log.Println(scheduledRun.Id)
+		zap.L().Info("Starting run", zap.String("run.id", scheduledRun.Id))
 		run, err := a.Sdk.Runs().Get(&sdk.GetRunRequest{
 			RunId: scheduledRun.Id,
 		})
 		if err != nil {
 			// Handle the error?
-			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
 		if err := a.handle(*run.Run); err != nil {
 			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
-		fmt.Printf("Run %s completed\n", run.Run.Id)
+		zap.L().Info("Run completed", zap.String("run.id", scheduledRun.Id))
 	}
 
 	return nil
@@ -80,6 +82,7 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
+	fmt.Println(ws.Workspace.Vcs.WorkingDirectory)
 	// TODO: Should we just kick off the job, and let the
 	// runner itself just fail if its locked?
 	if ws.Workspace.Locked {

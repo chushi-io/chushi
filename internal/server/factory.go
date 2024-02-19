@@ -88,11 +88,13 @@ func (f *Factory) NewOrganizationsController() *controller.OrganizationsControll
 	}
 }
 
-func (f *Factory) NewOrganizationAccessMiddleware(ab *authboss.Authboss) *middleware.OrganizationAccessMiddleware {
+func (f *Factory) NewOrganizationAccessMiddleware(ab *authboss.Authboss, oauthSrv *server.Server) *middleware.OrganizationAccessMiddleware {
 	return &middleware.OrganizationAccessMiddleware{
 		OrganizationRepository: organization.NewOrganizationRepository(f.Database),
 		Auth:                   ab,
 		UserStore:              organization.NewUserStore(f.Database),
+		OauthServer:            oauthSrv,
+		ClientStore:            oauth.NewClientStore(f.Database),
 	}
 }
 

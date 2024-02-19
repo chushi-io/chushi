@@ -5,7 +5,7 @@ import (
 	"github.com/chushi-io/chushi/internal/server"
 	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/spf13/cobra"
-	"log"
+	"go.uber.org/zap"
 	"net"
 )
 
@@ -13,38 +13,30 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the Chushi server",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Running chushi server")
-
 		conf, err := config.Load()
 		if err != nil {
-			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
 
 		httpServer, grpcServer, err := server.New(conf)
 		if err != nil {
-			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
 
-		//runAgent, _ := cmd.Flags().GetBool("agent")
-		//if runAgent {
-		//	ag, err := agent.New(nil)
-		//	if err != nil {
-		//		log.Fatal(err)
-		//	}
-		//	go ag.Run()
-		//}
 		go func() {
-			fmt.Println("Starting GRPC listener")
+			zap.L().Info("Starting GRPC listener")
 			lis, err := net.Listen("tcp", fmt.Sprintf(":%s", "5001"))
 			if err != nil {
-				log.Fatal(err)
+				zap.L().Fatal(err.Error())
 			}
 			if err := grpcServer.Serve(lis); err != nil {
-				log.Fatal(err)
+				zap.L().Fatal(err.Error())
 			}
 		}()
+
+		zap.L().Info("Starting HTTP server")
 		if err := httpServer.Run(); err != nil {
-			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
 	},
 }
