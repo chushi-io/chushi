@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/grpc"
+	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
@@ -84,6 +85,14 @@ func (f *Factory) NewVcsConnectionsController() *controller.VcsConnectionsContro
 func (f *Factory) NewOrganizationsController() *controller.OrganizationsController {
 	return &controller.OrganizationsController{
 		Repository: organization.NewOrganizationRepository(f.Database),
+	}
+}
+
+func (f *Factory) NewOrganizationAccessMiddleware(ab *authboss.Authboss) *middleware.OrganizationAccessMiddleware {
+	return &middleware.OrganizationAccessMiddleware{
+		OrganizationRepository: organization.NewOrganizationRepository(f.Database),
+		Auth:                   ab,
+		UserStore:              organization.NewUserStore(f.Database),
 	}
 }
 

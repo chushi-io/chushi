@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
@@ -66,15 +67,14 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	//r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
 
-	meApi := r.Group("me").
-		Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	meApi := r.Group("me")
 	{
 		meApi.GET("orgs", meCtrl.ListOrganizations)
 	}
@@ -103,7 +103,8 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	v1api.GET("/orgs", organizationsCtrl.List)
 	v1api.POST("/orgs", organizationsCtrl.Create)
 	orgs := v1api.Group("/orgs/:organization")
-	orgs.Use(organizationsCtrl.SetContext)
+	// Authorize any requests to access the specified organization
+	orgs.Use(factory.NewOrganizationAccessMiddleware(ab).VerifyOrganizationAccess)
 	{
 		orgs.GET("", organizationsCtrl.Get)
 		variables := orgs.Group("/variables")
@@ -135,6 +136,7 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 
 	// Workspaces
 	workspaces := orgs.Group("/workspaces")
+	workspaces.Use(middleware.WorkspaceAccessMiddleware{}.VerifyWorkspaceAccess)
 	{
 		workspaces.POST("", workspaceCtrl.CreateWorkspace)
 		workspaces.GET("", workspaceCtrl.ListWorkspaces)
@@ -242,8 +244,7 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		}
 	}
 
-	authGroup := r.Group("/auth").
-		Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	authGroup := r.Group("/auth")
 	//Use(adapter.Wrap(confirm.Middleware(ab)))
 	{
 		// Hack to auto-create a personal organization for the user on registration success

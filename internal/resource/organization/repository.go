@@ -10,6 +10,7 @@ type OrganizationRepository interface {
 	Update(org Organization)
 	Delete(organizationId string)
 	FindById(organizationId string) (*Organization, error)
+	UserHasOrganization(userId string, organizationId string) (bool, error)
 	All() ([]Organization, error)
 }
 
@@ -58,4 +59,14 @@ func (o OrganizationRepositoryImpl) All() ([]Organization, error) {
 		return []Organization{}, result.Error
 	}
 	return orgs, nil
+}
+
+func (o OrganizationRepositoryImpl) UserHasOrganization(userId string, organizationId string) (bool, error) {
+	var ou OrganizationUser
+	check := o.Db.Where("organization_id = ?", organizationId).
+		Where("user_id = ?", userId).First(&ou)
+	if check.Error != nil {
+		return false, check.Error
+	}
+	return true, nil
 }

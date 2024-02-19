@@ -15,6 +15,12 @@ func NewUserStore(db *gorm.DB) *UserStore {
 	return &UserStore{Database: db}
 }
 
+func (s *UserStore) GetUserObject(pid string) (*User, error) {
+	var u User
+	result := s.Database.Where("email = ?", pid).First(&u)
+	return &u, result.Error
+}
+
 func (s *UserStore) Save(_ context.Context, user authboss.User) error {
 	u := user.(*User)
 	result := s.Database.Save(&u)
