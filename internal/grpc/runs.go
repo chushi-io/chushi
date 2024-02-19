@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/pkg/types"
@@ -50,9 +49,6 @@ func (s *RunServer) List(ctx context.Context, req *pb.ListRunsRequest) (*pb.List
 }
 
 func (s *RunServer) Update(ctx context.Context, req *pb.UpdateRunRequest) (*pb.Run, error) {
-	fmt.Println("Update received")
-	fmt.Println(req.Id)
-	fmt.Println("Update acknowledged")
 	runId, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, err

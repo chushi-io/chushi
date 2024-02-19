@@ -24,7 +24,6 @@ type OrganizationAccessMiddleware struct {
 }
 
 func (oam *OrganizationAccessMiddleware) VerifyOrganizationAccess(c *gin.Context) {
-	fmt.Println(c.Request.Header)
 	org, err := oam.OrganizationRepository.FindById(c.Param("organization"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -80,7 +79,6 @@ func (oam *OrganizationAccessMiddleware) handleToken(c *gin.Context) (bool, erro
 	}
 	authToken, _ := strings.CutPrefix(bearerToken, "Bearer ")
 
-	fmt.Println(authToken)
 	token, err := jwt.ParseWithClaims(authToken, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")

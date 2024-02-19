@@ -82,7 +82,6 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	fmt.Println(ws.Workspace.Vcs.WorkingDirectory)
 	// TODO: Should we just kick off the job, and let the
 	// runner itself just fail if its locked?
 	if ws.Workspace.Locked {
