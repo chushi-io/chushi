@@ -37,8 +37,14 @@ func (oam *OrganizationAccessMiddleware) VerifyOrganizationAccess(c *gin.Context
 			fmt.Println("No user found, falling back to token authentication")
 			authenticated, err := oam.handleToken(c)
 			if !authenticated {
-				c.AbortWithError(http.StatusUnauthorized, err)
-				return
+				// TODO: Disable auth for our state files for testing
+				if !strings.HasSuffix(c.Request.URL.Path, "/state") {
+					c.AbortWithError(http.StatusUnauthorized, err)
+					return
+				} else {
+					c.Set("organization", org)
+				}
+
 			} else {
 				c.Set("organization", org)
 			}
@@ -63,6 +69,7 @@ func (oam *OrganizationAccessMiddleware) VerifyOrganizationAccess(c *gin.Context
 		// They have access, set the org info
 		c.Set("organization", org)
 		c.Set("user_id", user.ID)
+		c.Set("auth_type", "user")
 	}
 }
 
@@ -93,5 +100,6 @@ func (oam *OrganizationAccessMiddleware) handleToken(c *gin.Context) (bool, erro
 
 	// For now, we'll assume we're an agent :shrug:
 	c.Set("client_id", client.GetID())
+	c.Set("auth_type", "agent")
 	return true, nil
 }

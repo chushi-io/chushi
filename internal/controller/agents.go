@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"net/http"
 	"os"
 	"strings"
@@ -19,6 +20,7 @@ type AgentsController struct {
 	Repository          agent.AgentRepository
 	RunsRepository      run.RunRepository
 	WorkspaceRepository workspaces.WorkspacesRepository
+	JwtSecretKey        string
 }
 
 func (ctrl *AgentsController) List(c *gin.Context) {
@@ -136,4 +138,35 @@ func (ctrl *AgentsController) AgentAccess(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
+}
+
+type CreateRunnerTokenInput struct {
+	WorkspaceId uuid.UUID `json:"workspace_id"`
+	RunId       uuid.UUID `json:"run_id"`
+}
+
+func (ctrl *AgentsController) GenerateRunnerToken(c *gin.Context) {
+	org := helpers.GetOrganization(c)
+
+	// Verify the agent / runner can access the workspace
+	var input CreateRunnerTokenInput
+	if err := c.BindJSON(&input); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"workspace":    input.WorkspaceId.String(),
+			"run":          input.RunId.String(),
+			"organization": org.ID.String(),
+		})
+	s, err := t.SignedString([]byte(ctrl.JwtSecretKey))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"token": s,
+	})
 }

@@ -154,10 +154,17 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
 
 			// HTTP Backend handlers
-			workspace.GET("/state", workspaceCtrl.GetState)
-			workspace.POST("/state", workspaceCtrl.UploadState)
-			workspace.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
-			workspace.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+			state := workspace.Group("/state")
+			state.Use(middleware.VerifyStateAccess(
+				os.Getenv("JWT_SECRET_KEY"),
+				factory.NewWorkspacesRepository(),
+			))
+			{
+				state.GET("", workspaceCtrl.GetState)
+				state.POST("", workspaceCtrl.UploadState)
+				state.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
+				state.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+			}
 
 			runs := workspace.Group("/runs")
 			{
@@ -192,6 +199,8 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 			agentRuns.Use(agentCtrl.AgentAccess)
 			agentRuns.GET("", agentCtrl.GetRuns)
 		}
+
+		agents.POST("/:agent/runner_token", agentCtrl.GenerateRunnerToken)
 	}
 
 	// Plans

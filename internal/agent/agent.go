@@ -96,12 +96,15 @@ func (a *Agent) handle(run sdk.Run) error {
 	//	return err
 	//}
 
-	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{})
+	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{
+		AgentId:     a.Config.AgentId,
+		WorkspaceId: ws.Workspace.Id,
+		RunId:       run.Id,
+	})
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(run.Id)
 	if _, err := a.Grpc.Update(context.TODO(), &pb.UpdateRunRequest{
 		Id:     run.Id,
 		Status: "running",
@@ -232,8 +235,8 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 			Value: run.Id,
 		},
 		{
-			Name:  "RUNNER_TOKEN",
-			Value: token.AccessToken,
+			Name:  "TF_HTTP_PASSWORD",
+			Value: token.Token,
 		},
 	}
 	for _, variable := range variables {

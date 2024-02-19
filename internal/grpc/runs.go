@@ -22,21 +22,21 @@ func (s *RunServer) Watch(request *pb.WatchRunsRequest, stream pb.Runs_WatchServ
 	if err != nil {
 		return err
 	}
-	agent, err := s.AgentRepository.FindById(orgId, request.AgentId)
+	ag, err := s.AgentRepository.FindById(orgId, request.AgentId)
 	if err != nil {
 		return err
 	}
 	for {
 		runs, err := s.RunRepository.List(&run.RunListParams{
 			OrganizationId: orgId,
-			AgentId:        agent.ID.String(),
+			AgentId:        ag.ID.String(),
 			Status:         "pending",
 		})
 		if err != nil {
 			return err
 		}
-		for _, run := range runs {
-			if err := stream.Send(&pb.Run{Id: run.ID.String()}); err != nil {
+		for _, r := range runs {
+			if err := stream.Send(&pb.Run{Id: r.ID.String()}); err != nil {
 				return err
 			}
 		}
