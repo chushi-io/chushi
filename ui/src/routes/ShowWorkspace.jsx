@@ -11,6 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import {useOrganizations} from "../providers/OrganizationProvider";
 import Button from "@mui/material/Button";
+import {Chip} from "@mui/material";
 
 const ShowWorkspace = () => {
     const [workspace, setWorkspace] = useState({})
@@ -53,23 +54,41 @@ const ShowWorkspace = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {runs.map((run) => (
-                            <TableRow
-                                key={run.id}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell component="th" scope="row">
-                                    <Link to={`/runs/${run.id}`}>
-                                        {run.id}
-                                    </Link>
-                                </TableCell>
-                                <TableCell align="right">{run.status}</TableCell>
-                                <TableCell align="right">{run.add}</TableCell>
-                                <TableCell align="right">{run.change}</TableCell>
-                                <TableCell align="right">{run.destroy}</TableCell>
-                                <TableCell align="right">{run.managed_resources}</TableCell>
-                            </TableRow>
-                        ))}
+                        {runs.map((run) => {
+                            let color = "default"
+                            let variant = "filled"
+                            switch (run.status) {
+                                case "completed":
+                                    color = "success"
+                                    break;
+                                case "pending":
+                                    color = "primary"
+                                    variant = "outlined"
+                                    break;
+                                case "failed":
+                                    color = "warning"
+                                    break;
+                            }
+                            return (
+                                <TableRow
+                                    key={run.id}
+                                    sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                                >
+                                    <TableCell component="th" scope="row">
+                                        <Link to={`/runs/${run.id}`}>
+                                            {run.id}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Chip size={"small"} label={run.status} color={color}/>
+                                    </TableCell>
+                                    <TableCell align="right">{run.add}</TableCell>
+                                    <TableCell align="right">{run.change}</TableCell>
+                                    <TableCell align="right">{run.destroy}</TableCell>
+                                    <TableCell align="right">{run.managed_resources}</TableCell>
+                                </TableRow>
+                            )
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>

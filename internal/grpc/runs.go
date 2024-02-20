@@ -7,7 +7,6 @@ import (
 	"github.com/chushi-io/chushi/pkg/types"
 	pb "github.com/chushi-io/chushi/proto/api/v1"
 	"github.com/google/uuid"
-	"time"
 )
 
 type RunServer struct {
@@ -39,8 +38,9 @@ func (s *RunServer) Watch(request *pb.WatchRunsRequest, stream pb.Runs_WatchServ
 				return err
 			}
 		}
-
-		time.Sleep(time.Second * 1)
+		// For now, we want to disable streaming. Just output the runs that exist,
+		// and we'll exit
+		return nil
 	}
 }
 

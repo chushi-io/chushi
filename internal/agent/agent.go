@@ -234,6 +234,10 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 			Value: run.Id,
 		},
 		{
+			Name:  "CHUSHI_ACCESS_TOKEN",
+			Value: token.Token,
+		},
+		{
 			Name:  "TF_HTTP_PASSWORD",
 			Value: token.Token,
 		},

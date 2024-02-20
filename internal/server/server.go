@@ -245,7 +245,10 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		runs.GET("/:run", runsCtrl.Get)
 		runs.POST("/:run", runsCtrl.Update)
 		runs.POST("/:run/presigned_url", runsCtrl.GeneratePresignedUrl)
-		runs.PUT("/:run/plan", runsCtrl.StorePlan)
+		runs.PUT("/:run/plan", runsCtrl.StorePlan).Use(middleware.VerifyStateAccess(
+			os.Getenv("JWT_SECRET_KEY"),
+			factory.NewWorkspacesRepository(),
+		))
 		runs.POST("/:run/apply", notImplemented)
 		runs.POST("/:run/discard", notImplemented)
 		runs.POST("/:run/cancel", notImplemented)
