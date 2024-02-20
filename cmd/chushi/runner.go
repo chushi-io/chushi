@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/chushi-io/chushi/internal/installer"
 	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/spf13/cobra"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -57,9 +59,10 @@ executions occuring for Chushi workspaces.'
 
 		var hasChanges bool
 		var buf bytes.Buffer
+		w := io.MultiWriter(&buf, os.Stdout)
 		switch args[0] {
 		case "plan":
-			hasChanges, err = tf.PlanJSON(ctx, &buf, tfexec.Out("tfplan"))
+			hasChanges, err = tf.PlanJSON(ctx, w, tfexec.Out("tfplan"))
 		case "apply":
 			err = tf.ApplyJSON(ctx, &buf)
 		case "destroy":
@@ -72,6 +75,7 @@ executions occuring for Chushi workspaces.'
 			log.Fatal(err)
 		}
 
+		fmt.Println(string(buf.Bytes()))
 		if args[0] == "plan" && hasChanges {
 			data, err := os.ReadFile(filepath.Join(workingDir, "tfplan"))
 			if err != nil {

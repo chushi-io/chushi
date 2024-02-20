@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/authboss/v3"
@@ -21,8 +20,6 @@ func (ctrl *MeController) ListOrganizations(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-
-	fmt.Println(currentUser.GetPID())
 
 	user, err := ctrl.Auth.Storage.Server.Load(context.TODO(), currentUser.GetPID())
 	if err != nil {

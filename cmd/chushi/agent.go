@@ -5,6 +5,7 @@ import (
 	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/client-go/kubernetes"
@@ -68,7 +69,7 @@ func runAgent(cmd *cobra.Command, args []string) {
 	if rawOrgId != "" {
 		orgId, err := uuid.Parse(rawOrgId)
 		if err != nil {
-			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
 		chushiSdk = chushiSdk.WithOrganizationId(orgId)
 	}
@@ -81,14 +82,14 @@ func runAgent(cmd *cobra.Command, args []string) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal(err.Error())
 	}
 	defer conn.Close()
 	ag, _ := agent.New(kubeClient, chushiSdk, conn, cnf)
 
 	err = ag.Run()
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal(err.Error())
 	}
 }
 

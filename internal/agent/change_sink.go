@@ -2,6 +2,7 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/chushi-io/chushi/pkg/sdk"
 )
 
@@ -24,6 +25,7 @@ type ChangeSummaryChange struct {
 }
 
 func (sink ChangeSink) Write(p []byte) (int, error) {
+	fmt.Println(string(p))
 	var summary ChangeSummary
 	if err := json.Unmarshal(p, &summary); err != nil {
 		return 0, err

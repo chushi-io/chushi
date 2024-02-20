@@ -2,13 +2,11 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/pkg/types"
 	pb "github.com/chushi-io/chushi/proto/api/v1"
 	"github.com/google/uuid"
-	"time"
 )
 
 type RunServer struct {
@@ -22,26 +20,27 @@ func (s *RunServer) Watch(request *pb.WatchRunsRequest, stream pb.Runs_WatchServ
 	if err != nil {
 		return err
 	}
-	agent, err := s.AgentRepository.FindById(orgId, request.AgentId)
+	ag, err := s.AgentRepository.FindById(orgId, request.AgentId)
 	if err != nil {
 		return err
 	}
 	for {
 		runs, err := s.RunRepository.List(&run.RunListParams{
 			OrganizationId: orgId,
-			AgentId:        agent.ID.String(),
+			AgentId:        ag.ID.String(),
 			Status:         "pending",
 		})
 		if err != nil {
 			return err
 		}
-		for _, run := range runs {
-			if err := stream.Send(&pb.Run{Id: run.ID.String()}); err != nil {
+		for _, r := range runs {
+			if err := stream.Send(&pb.Run{Id: r.ID.String()}); err != nil {
 				return err
 			}
 		}
-
-		time.Sleep(time.Second * 1)
+		// For now, we want to disable streaming. Just output the runs that exist,
+		// and we'll exit
+		return nil
 	}
 }
 
@@ -50,9 +49,6 @@ func (s *RunServer) List(ctx context.Context, req *pb.ListRunsRequest) (*pb.List
 }
 
 func (s *RunServer) Update(ctx context.Context, req *pb.UpdateRunRequest) (*pb.Run, error) {
-	fmt.Println("Update received")
-	fmt.Println(req.Id)
-	fmt.Println("Update acknowledged")
 	runId, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, err

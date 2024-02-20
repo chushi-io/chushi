@@ -26,4 +26,6 @@ type Run struct {
 	// Agent configuration
 	AgentID *uuid.UUID  `json:"-" gorm:"default:null"`
 	Agent   agent.Agent `json:"agent,omitempty"`
+
+	SourceRunID *uuid.UUID `json:"source_run_id"`
 }

@@ -88,11 +88,13 @@ func (f *Factory) NewOrganizationsController() *controller.OrganizationsControll
 	}
 }
 
-func (f *Factory) NewOrganizationAccessMiddleware(ab *authboss.Authboss) *middleware.OrganizationAccessMiddleware {
+func (f *Factory) NewOrganizationAccessMiddleware(ab *authboss.Authboss, oauthSrv *server.Server) *middleware.OrganizationAccessMiddleware {
 	return &middleware.OrganizationAccessMiddleware{
 		OrganizationRepository: organization.NewOrganizationRepository(f.Database),
 		Auth:                   ab,
 		UserStore:              organization.NewUserStore(f.Database),
+		OauthServer:            oauthSrv,
+		ClientStore:            oauth.NewClientStore(f.Database),
 	}
 }
 
@@ -117,9 +119,15 @@ func (f *Factory) NewMeController(ab *authboss.Authboss) *controller.MeControlle
 
 func (f *Factory) NewAgentsController() *controller.AgentsController {
 	return &controller.AgentsController{
-		Repository:     agent.NewAgentRepository(f.Database, oauth.NewClientStore(f.Database)),
-		RunsRepository: run.NewRunRepository(f.Database),
+		Repository:          agent.NewAgentRepository(f.Database, oauth.NewClientStore(f.Database)),
+		RunsRepository:      run.NewRunRepository(f.Database),
+		WorkspaceRepository: workspaces.NewWorkspacesRepository(f.Database),
+		JwtSecretKey:        os.Getenv("JWT_SECRET_KEY"),
 	}
+}
+
+func (f *Factory) NewWorkspacesRepository() workspaces.WorkspacesRepository {
+	return &workspaces.WorkspacesRepositoryImpl{Db: f.Database}
 }
 
 func (f *Factory) NewRunsController() *controller.RunsController {

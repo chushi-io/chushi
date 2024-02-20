@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
@@ -12,21 +11,29 @@ import (
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
 	pb "github.com/chushi-io/chushi/proto/api/v1"
+	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"net/http"
+	"os"
 	"strings"
 )
 
 func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 
 	// Load and initialize our database
-	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), &gorm.Config{
-		//Logger: logger.Default.LogMode(logger.Info),
-	})
+	gormConfig := &gorm.Config{}
+	if os.Getenv("APP_ENV") == "development" {
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), gormConfig)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -65,19 +72,23 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	ab := factory.NewAuthBoss()
 	meCtrl := factory.NewMeController(ab)
 
-	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.Use(requestid.New())
+	// Start Global middleware
+	// - Authboss middleware
 	r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	// - Set our logger
+	//r.Use(logger.SetLogger(
+	//	logger.WithLogger(func(context *gin.Context, z zerolog.Logger) zerolog.Logger {
+	//
+	//	})))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
 
-	meApi := r.Group("me")
-	{
-		meApi.GET("orgs", meCtrl.ListOrganizations)
-	}
 	v1api := r.Group("/api/v1")
 
 	v1api.GET("/healthz", func(c *gin.Context) {
@@ -91,20 +102,15 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	})
 	v1api.GET("/metrics", notImplemented)
 
-	v1api.Any("/terraform", func(context *gin.Context) {
-		fmt.Println(context.Request)
+	v1api.Use(func(context *gin.Context) {
+
 	})
-	v1api.Any("/lock", func(context *gin.Context) {
-		fmt.Println(context.Request)
-	})
-	v1api.Any("/unlock", func(context *gin.Context) {
-		fmt.Println(context.Request)
-	})
+
 	v1api.GET("/orgs", organizationsCtrl.List)
 	v1api.POST("/orgs", organizationsCtrl.Create)
 	orgs := v1api.Group("/orgs/:organization")
 	// Authorize any requests to access the specified organization
-	orgs.Use(factory.NewOrganizationAccessMiddleware(ab).VerifyOrganizationAccess)
+	orgs.Use(factory.NewOrganizationAccessMiddleware(ab, authServer).VerifyOrganizationAccess)
 	{
 		orgs.GET("", organizationsCtrl.Get)
 		variables := orgs.Group("/variables")
@@ -136,7 +142,8 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 
 	// Workspaces
 	workspaces := orgs.Group("/workspaces")
-	workspaces.Use(middleware.WorkspaceAccessMiddleware{}.VerifyWorkspaceAccess)
+	wam := &middleware.WorkspaceAccessMiddleware{}
+	workspaces.Use(wam.VerifyWorkspaceAccess)
 	{
 		workspaces.POST("", workspaceCtrl.CreateWorkspace)
 		workspaces.GET("", workspaceCtrl.ListWorkspaces)
@@ -147,10 +154,17 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
 
 			// HTTP Backend handlers
-			workspace.GET("/state", workspaceCtrl.GetState)
-			workspace.POST("/state", workspaceCtrl.UploadState)
-			workspace.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
-			workspace.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+			state := workspace.Group("/state")
+			state.Use(middleware.VerifyStateAccess(
+				os.Getenv("JWT_SECRET_KEY"),
+				factory.NewWorkspacesRepository(),
+			))
+			{
+				state.GET("", workspaceCtrl.GetState)
+				state.POST("", workspaceCtrl.UploadState)
+				state.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
+				state.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+			}
 
 			runs := workspace.Group("/runs")
 			{
@@ -185,6 +199,8 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 			agentRuns.Use(agentCtrl.AgentAccess)
 			agentRuns.GET("", agentCtrl.GetRuns)
 		}
+
+		agents.POST("/:agent/runner_token", agentCtrl.GenerateRunnerToken)
 	}
 
 	// Plans
@@ -229,7 +245,10 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		runs.GET("/:run", runsCtrl.Get)
 		runs.POST("/:run", runsCtrl.Update)
 		runs.POST("/:run/presigned_url", runsCtrl.GeneratePresignedUrl)
-		runs.PUT("/:run/plan", runsCtrl.StorePlan)
+		runs.PUT("/:run/plan", runsCtrl.StorePlan).Use(middleware.VerifyStateAccess(
+			os.Getenv("JWT_SECRET_KEY"),
+			factory.NewWorkspacesRepository(),
+		))
 		runs.POST("/:run/apply", notImplemented)
 		runs.POST("/:run/discard", notImplemented)
 		runs.POST("/:run/cancel", notImplemented)
@@ -244,21 +263,14 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		}
 	}
 
+	meApi := r.Group("me")
+	{
+		meApi.GET("orgs", meCtrl.ListOrganizations)
+	}
+
 	authGroup := r.Group("/auth")
 	//Use(adapter.Wrap(confirm.Middleware(ab)))
 	{
-		// Hack to auto-create a personal organization for the user on registration success
-		authGroup.Use(func(c *gin.Context) {
-			// Process the request
-			c.Next()
-
-			//// If request was POST /auth/register, and it was successful
-			//if c.Request.Method == http.MethodPost && c.Request.URL.Path == "/auth/register" {
-			//	org := &organization.Organization{
-			//		Name:
-			//	}
-			//}
-		})
 		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", ab.Config.Core.Router)))
 
 	}

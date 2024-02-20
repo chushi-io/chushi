@@ -48,7 +48,6 @@ func (s *Sdk) GetWorkspace(workspaceId string) (*WorkspaceResponse, error) {
 }
 
 func (w *Workspaces) GetConnectionCredentials(connectionId uuid.UUID) (*CredentialsResponse, error) {
-	fmt.Println("Getting VCS connection credentials")
 	credentialsUrl := w.sdk.GetOrganizationUrl(fmt.Sprintf("vcs_connections/%s/credentials", connectionId))
 	var response CredentialsResponse
 	_, err := w.sdk.Client.Get(credentialsUrl).ReceiveSuccess(&response)

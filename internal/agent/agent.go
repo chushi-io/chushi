@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/chushi-io/chushi/pkg/sdk"
 	pb "github.com/chushi-io/chushi/proto/api/v1"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
 	v1 "k8s.io/api/core/v1"
@@ -51,20 +52,21 @@ func (a *Agent) Run() error {
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.Watch(_) = _, %v", a.Grpc, err)
+			zap.L().Fatal(err.Error())
 		}
-		log.Println(scheduledRun.Id)
+		zap.L().Info("Starting run", zap.String("run.id", scheduledRun.Id))
 		run, err := a.Sdk.Runs().Get(&sdk.GetRunRequest{
 			RunId: scheduledRun.Id,
 		})
 		if err != nil {
 			// Handle the error?
-			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
 		if err := a.handle(*run.Run); err != nil {
 			log.Fatal(err)
+			zap.L().Fatal(err.Error())
 		}
-		fmt.Printf("Run %s completed\n", run.Run.Id)
+		zap.L().Info("Run completed", zap.String("run.id", scheduledRun.Id))
 	}
 
 	return nil
@@ -93,12 +95,15 @@ func (a *Agent) handle(run sdk.Run) error {
 	//	return err
 	//}
 
-	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{})
+	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{
+		AgentId:     a.Config.AgentId,
+		WorkspaceId: ws.Workspace.Id,
+		RunId:       run.Id,
+	})
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(run.Id)
 	if _, err := a.Grpc.Update(context.TODO(), &pb.UpdateRunRequest{
 		Id:     run.Id,
 		Status: "running",
@@ -229,8 +234,16 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 			Value: run.Id,
 		},
 		{
-			Name:  "RUNNER_TOKEN",
-			Value: token.AccessToken,
+			Name:  "CHUSHI_ACCESS_TOKEN",
+			Value: token.Token,
+		},
+		{
+			Name:  "TF_HTTP_PASSWORD",
+			Value: token.Token,
+		},
+		{
+			Name:  "TF_HTTP_USERNAME",
+			Value: "runner",
 		},
 	}
 	for _, variable := range variables {
