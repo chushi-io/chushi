@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0](https://github.com/chushi-io/chushi/compare/v1.5.0...v1.6.0) (2024-02-20)
+
+
+### Features
+
+* **auth:** Generate runner tokens, and verify them on state operations ([3cab7b1](https://github.com/chushi-io/chushi/commit/3cab7b1520ca6af0c2bf3764bb41a80dd9fb251b))
+
 ## [1.5.0](https://github.com/chushi-io/chushi/compare/v1.4.0...v1.5.0) (2024-02-18)
 
 
