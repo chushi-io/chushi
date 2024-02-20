@@ -14,6 +14,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
+	"github.com/chushi-io/chushi/internal/resource/registry"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/internal/resource/variables"
 	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
@@ -123,6 +124,13 @@ func (f *Factory) NewAgentsController() *controller.AgentsController {
 		RunsRepository:      run.NewRunRepository(f.Database),
 		WorkspaceRepository: workspaces.NewWorkspacesRepository(f.Database),
 		JwtSecretKey:        os.Getenv("JWT_SECRET_KEY"),
+	}
+}
+
+func (f *Factory) NewRegistryController() *controller.RegistryController {
+	return &controller.RegistryController{
+		Repository: registry.RepositoryImpl{Database: f.Database},
+		FileStore:  registry.StorageImpl{S3Client: f.S3Client},
 	}
 }
 

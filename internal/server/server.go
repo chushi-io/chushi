@@ -69,6 +69,7 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	vcsCtrl := factory.NewVcsConnectionsController()
 	variablesCtrl := factory.NewVariablesController()
 	variableSetsCtrl := factory.NewVariableSetsController()
+	registryCtrl := factory.NewRegistryController()
 	ab := factory.NewAuthBoss()
 	meCtrl := factory.NewMeController(ab)
 
@@ -212,22 +213,15 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	// Cost Estimates
 	orgs.GET("/estimates/:id", notImplemented)
 
-	// Registry (Modules / Providers)
+	// Module Registry
 	registry := orgs.Group("/registry/:id")
 	{
 		modules := registry.Group("/modules")
 		{
-			modules.GET("/:namespace/:name/:provider", notImplemented)
-			modules.DELETE("/:namespace/:name/:provider", notImplemented)
-			modules.POST("/:namespace/:name/:provider/versions", notImplemented)
-			modules.DELETE("/:namespace/:name/:provider/:version", notImplemented)
-		}
-		providers := registry.Group("/providers")
-		{
-			providers.GET("", notImplemented)
-			providers.POST("", notImplemented)
-			providers.GET("/:namespace/:name", notImplemented)
-			providers.DELETE("/:namespace/:name", notImplemented)
+			modules.GET("/:namespace/:name/:provider", registryCtrl.Get)
+			modules.DELETE("/:namespace/:name/:provider", registryCtrl.Delete)
+			modules.POST("/:namespace/:name/:provider/versions", registryCtrl.GetModuleVersions)
+			modules.DELETE("/:namespace/:name/:provider/:version", registryCtrl.GetModuleVersion)
 		}
 	}
 
