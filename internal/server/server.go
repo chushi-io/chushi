@@ -213,18 +213,6 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	// Cost Estimates
 	orgs.GET("/estimates/:id", notImplemented)
 
-	// Module Registry
-	registry := orgs.Group("/registry/:id")
-	{
-		modules := registry.Group("/modules")
-		{
-			modules.GET("/:namespace/:name/:provider", registryCtrl.Get)
-			modules.DELETE("/:namespace/:name/:provider", registryCtrl.Delete)
-			modules.POST("/:namespace/:name/:provider/versions", registryCtrl.GetModuleVersions)
-			modules.DELETE("/:namespace/:name/:provider/:version", registryCtrl.GetModuleVersion)
-		}
-	}
-
 	vcsConnections := orgs.Group("/vcs_connections")
 	{
 		vcsConnections.GET("", vcsCtrl.List)
@@ -257,6 +245,18 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		}
 	}
 
+	registryApi := v1api.Group("registry")
+	{
+		modules := registryApi.Group("/modules")
+		{
+			modules.GET("/:namespace/:name/:provider", registryCtrl.Get)
+			modules.DELETE("/:namespace/:name/:provider", registryCtrl.Delete)
+			modules.POST("/:namespace/:name/:provider/versions", registryCtrl.GetModuleVersions)
+			modules.GET("/:namespace/:name/:provider/versions", registryCtrl.GetModuleVersions)
+			modules.DELETE("/:namespace/:name/:provider/:version", registryCtrl.GetModuleVersion)
+			modules.GET("/:namespace/:name/:provider/:version/download", registryCtrl.DownloadModuleVersion)
+		}
+	}
 	meApi := r.Group("me")
 	{
 		meApi.GET("orgs", meCtrl.ListOrganizations)
@@ -289,6 +289,16 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		} else {
 			c.AbortWithStatus(http.StatusNotFound)
 		}
+	})
+
+	r.GET("/.well-known/terraform.json", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"modules.v1":   "/api/v1/registry/modules/",
+			"providers.v1": "/api/v1/registry/providers/",
+			"motd.v1":      "",
+			"state.v2":     "",
+			"versions.v1":  "",
+		})
 	})
 
 	// Register our GRPC server
