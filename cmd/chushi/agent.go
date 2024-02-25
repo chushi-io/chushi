@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
 	"os"
 )
 
@@ -40,7 +39,8 @@ func init() {
 	agentCmd.Flags().String("grpc-url", "localhost:5001", "Chushi GRPC URL")
 	agentCmd.Flags().String("org-id", "", "ID of the organization")
 	agentCmd.Flags().String("kubeconfig", "", "Location of kubeconfig file")
-
+	agentCmd.Flags().Bool("proxy", false, "Run the proxy service instead")
+	agentCmd.Flags().String("proxy-addr", "localhost:5002", "Address for proxy to bind on")
 	rootCmd.AddCommand(agentCmd)
 }
 
@@ -51,9 +51,10 @@ func runAgent(cmd *cobra.Command, args []string) {
 	rawOrgId, _ := cmd.Flags().GetString("org-id")
 	configFile, _ := cmd.Flags().GetString("kubeconfig")
 
+	logger := zap.L()
 	kubeClient, err := getKubeClient(configFile)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 
 	cnf := &agent.Config{
@@ -69,7 +70,7 @@ func runAgent(cmd *cobra.Command, args []string) {
 	if rawOrgId != "" {
 		orgId, err := uuid.Parse(rawOrgId)
 		if err != nil {
-			zap.L().Fatal(err.Error())
+			logger.Fatal(err.Error())
 		}
 		chushiSdk = chushiSdk.WithOrganizationId(orgId)
 	}
@@ -82,14 +83,20 @@ func runAgent(cmd *cobra.Command, args []string) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		zap.L().Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 	defer conn.Close()
 	ag, _ := agent.New(kubeClient, chushiSdk, conn, cnf)
 
-	err = ag.Run()
+	proxy, _ := cmd.Flags().GetBool("proxy")
+	if proxy {
+		proxyAddr, _ := cmd.Flags().GetString("proxy-addr")
+		err = ag.Proxy(proxyAddr)
+	} else {
+		err = ag.Run()
+	}
 	if err != nil {
-		zap.L().Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 }
 

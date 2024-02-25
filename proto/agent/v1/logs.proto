@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package agent.v1;
+
+service Logs {
+  rpc StreamLogs(StreamLogsRequest) returns (StreamLogsResponse) {}
+  rpc UploadLogs(UploadLogsRequest) returns (UploadLogsResponse) {}
+}
+
+message StreamLogsRequest {
+  string content = 1;
+}
+
+message StreamLogsResponse {
+  bool success = 1;
+}
+
+message UploadLogsRequest {
+  string content = 1;
+}
+
+message UploadLogsResponse {
+  bool success = 1;
+}

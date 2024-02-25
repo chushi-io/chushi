@@ -1,19 +1,26 @@
 package main
 
 import (
-	"bytes"
+	"connectrpc.com/connect"
 	"context"
+	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	v1 "github.com/chushi-io/chushi/gen/agent/v1"
+	agentv1 "github.com/chushi-io/chushi/gen/agent/v1/agentv1connect"
 	"github.com/chushi-io/chushi/internal/installer"
-	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"golang.org/x/net/http2"
 	"io"
-	"log"
+	"net"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var runnerCmd = &cobra.Command{
@@ -30,67 +37,71 @@ executions occuring for Chushi workspaces.'
 	// The JSON output should be streamed to the Chushi server (as well
 	// as cached somewhere locally in the event of issues), and then exit.
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := zap.L()
 		if len(args) == 0 {
-			log.Fatal("Please provider a command to run")
+			logger.Fatal("Please provider a command to run")
 		}
 		ctx := context.Background()
+
+		grpcUrl, _ := cmd.Flags().GetString("grpc-url")
 		tofuVersion, _ := cmd.Flags().GetString("version")
 		workingDir, _ := cmd.Flags().GetString("directory")
 
-		chushiSdk := sdk.New()
+		logAdapter := NewLogAdapter(grpcUrl)
+		writer := io.MultiWriter(logAdapter, os.Stdout)
+
+		logger.Info("installing tofu", zap.String("version", tofuVersion))
 		ver, err := version.NewVersion(tofuVersion)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err.Error())
 		}
 		install, err := installer.Install(ver, workingDir)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err.Error())
 		}
 
 		tf, err := tfexec.NewTerraform(workingDir, install)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err.Error())
 		}
 
+		logger.Info("intializing tofu")
 		err = tf.Init(ctx, tfexec.Upgrade(false))
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err.Error())
 		}
 
 		var hasChanges bool
-		var buf bytes.Buffer
-		w := io.MultiWriter(&buf, os.Stdout)
+
 		switch args[0] {
 		case "plan":
-			hasChanges, err = tf.PlanJSON(ctx, w, tfexec.Out("tfplan"))
+			hasChanges, err = tf.PlanJSON(ctx, writer, tfexec.Out("tfplan"))
 		case "apply":
-			err = tf.ApplyJSON(ctx, &buf)
+			err = tf.ApplyJSON(ctx, writer)
 		case "destroy":
-			err = tf.DestroyJSON(ctx, &buf)
+			err = tf.DestroyJSON(ctx, writer)
 		default:
 			err = errors.New("command not found")
 		}
 
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			logger.Fatal(err.Error())
 		}
 
-		fmt.Println(string(buf.Bytes()))
+		if err = logAdapter.Flush(); err != nil {
+			logger.Warn(err.Error())
+		}
+
 		if args[0] == "plan" && hasChanges {
+
 			data, err := os.ReadFile(filepath.Join(workingDir, "tfplan"))
 			if err != nil {
-				log.Fatal(err)
+				logger.Fatal(err.Error())
 			}
 
-			// TODO: We're going to do this from the agent pod instead
-			// That brings the responsibility of the runner back to
-			// "only handle opentofu"
-			if resp, err := chushiSdk.Runs().UploadPlan(&sdk.UploadPlanParams{
-				RunId: os.Getenv("CHUSHI_RUN_ID"),
-				Plan:  data,
-			}); err != nil {
-				log.Println(resp.Run)
-				log.Fatal(err)
+			if err := uploadPlan(grpcUrl, data); err != nil {
+				logger.Error(err.Error())
 			}
 		}
 	},
@@ -100,6 +111,66 @@ func init() {
 	runnerCmd.Flags().StringP("directory", "d", "/workspace", "The working directory")
 	runnerCmd.Flags().IntP("parallellism", "p", 10, "Parallel terraform threads to run")
 	runnerCmd.Flags().StringP("version", "v", "", "Terraform version to use")
+	runnerCmd.Flags().String("grpc-url", "localhost:5002", "GRPC Url for streaming logs / plans")
 
 	rootCmd.AddCommand(runnerCmd)
+}
+
+type GRPCLogAdapter struct {
+	Logs   agentv1.LogsClient
+	output [][]byte
+}
+
+func NewLogAdapter(grpcUrl string) *GRPCLogAdapter {
+	logsClient := agentv1.NewLogsClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
+	adapter := &GRPCLogAdapter{Logs: logsClient}
+	return adapter
+}
+
+func (adapter *GRPCLogAdapter) Write(p []byte) (n int, err error) {
+	adapter.output = append(adapter.output, p)
+	_, err = adapter.Logs.StreamLogs(context.TODO(), connect.NewRequest(&v1.StreamLogsRequest{Content: string(p)}))
+	if err != nil {
+		return 0, err
+	}
+	return len(p), nil
+}
+
+func (adapter *GRPCLogAdapter) Flush() error {
+	var lines []string
+	for _, log := range adapter.output {
+		lines = append(lines, string(log))
+	}
+
+	_, err := adapter.Logs.UploadLogs(context.TODO(), connect.NewRequest(&v1.UploadLogsRequest{
+		Content: strings.Join(lines, "\n"),
+	}))
+	return err
+}
+
+func newInsecureClient() *http.Client {
+	return &http.Client{
+		Transport: &http2.Transport{
+			AllowHTTP: true,
+			DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
+				// If you're also using this client for non-h2c traffic, you may want
+				// to delegate to tls.Dial if the network isn't TCP or the addr isn't
+				// in an allowlist.
+				return net.Dial(network, addr)
+			},
+			// Don't forget timeouts!
+		},
+	}
+}
+
+func uploadPlan(grpcUrl string, p []byte) error {
+	planClient := agentv1.NewPlansClient(
+		newInsecureClient(),
+		grpcUrl,
+		connect.WithGRPC(),
+	)
+	_, err := planClient.UploadPlan(context.TODO(), connect.NewRequest(&v1.UploadPlanRequest{
+		Content: base64.StdEncoding.EncodeToString(p),
+	}))
+	return err
 }

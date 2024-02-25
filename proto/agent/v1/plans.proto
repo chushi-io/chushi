@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package agent.v1;
+
+service Plans {
+  rpc UploadPlan(UploadPlanRequest) returns (UploadPlanResponse) {}
+}
+
+message UploadPlanRequest {
+  string content = 1;
+}
+
+message UploadPlanResponse {
+  bool success = 1;
+}

@@ -4,8 +4,6 @@ package api.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "./chushi";
-
 service Runs {
   rpc List(ListRunsRequest) returns (ListRunsResponse) {}
   rpc Watch(WatchRunsRequest) returns (stream Run) {}

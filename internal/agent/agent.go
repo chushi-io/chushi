@@ -4,15 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chushi-io/chushi/gen/agent/v1/agentv1connect"
+	"github.com/chushi-io/chushi/internal/agent/proxy"
 	"github.com/chushi-io/chushi/pkg/sdk"
 	pb "github.com/chushi-io/chushi/proto/api/v1"
 	"go.uber.org/zap"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"io"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -40,35 +45,60 @@ func New(client *kubernetes.Clientset, sdk *sdk.Sdk, grpcClient *grpc.ClientConn
 // and exists. However, it should query the API (or stream)
 // and emit runners as needed
 func (a *Agent) Run() error {
-	stream, err := a.Grpc.Watch(context.Background(), &pb.WatchRunsRequest{
-		AgentId: a.Config.AgentId,
-	})
-	if err != nil {
-		return err
-	}
 	for {
-		scheduledRun, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			zap.L().Fatal(err.Error())
-		}
-		zap.L().Info("Starting run", zap.String("run.id", scheduledRun.Id))
-		run, err := a.Sdk.Runs().Get(&sdk.GetRunRequest{
-			RunId: scheduledRun.Id,
+		stream, err := a.Grpc.Watch(context.Background(), &pb.WatchRunsRequest{
+			AgentId: a.Config.AgentId,
 		})
 		if err != nil {
-			// Handle the error?
-			zap.L().Fatal(err.Error())
+			return err
 		}
-		if err := a.handle(*run.Run); err != nil {
-			log.Fatal(err)
-			zap.L().Fatal(err.Error())
+		for {
+			scheduledRun, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				zap.L().Fatal(err.Error())
+			}
+			zap.L().Info("Starting run", zap.String("run.id", scheduledRun.Id))
+			run, err := a.Sdk.Runs().Get(&sdk.GetRunRequest{
+				RunId: scheduledRun.Id,
+			})
+			if err != nil {
+				// Handle the error?
+				zap.L().Fatal(err.Error())
+			}
+			if err := a.handle(*run.Run); err != nil {
+				log.Fatal(err)
+				zap.L().Fatal(err.Error())
+			}
+			zap.L().Info("Run completed", zap.String("run.id", scheduledRun.Id))
 		}
-		zap.L().Info("Run completed", zap.String("run.id", scheduledRun.Id))
+		zap.L().Info("Sleeping before invocation")
+		time.Sleep(time.Second)
 	}
 
+	return nil
+}
+
+func (a *Agent) Proxy(addr string) error {
+	// Initialize the client connection to Chushi.io
+	// Start the server component to handle requests
+	// from runner instances
+	srv := proxy.New()
+	mux := http.NewServeMux()
+	mux.Handle(agentv1connect.NewLogsHandler(srv))
+	mux.Handle(agentv1connect.NewPlansHandler(srv))
+
+	fmt.Println("Starting proxy handler")
+	fmt.Println(addr)
+	if err := http.ListenAndServe(
+		addr,
+		// Use h2c so we can serve HTTP/2 without TLS.
+		h2c.NewHandler(mux, &http2.Server{}),
+	); err != nil {
+		panic(err)
+	}
 	return nil
 }
 

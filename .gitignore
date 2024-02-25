@@ -7,4 +7,4 @@ testdata/.terraform*
 testdata/terraform*
 testdata/*.tfstate
 
-agent
+/agent

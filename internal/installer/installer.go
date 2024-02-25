@@ -15,7 +15,7 @@ type Installer struct {
 // Install a given version of OpenTofu
 func Install(v *version.Version, binDir string) (string, error) {
 	// TODO: Build this dynamically given the environment we run on
-	downloadUrl := "https://github.com/opentofu/opentofu/releases/download/v1.6.1/tofu_1.6.1_linux_amd64.zip"
+	downloadUrl := "https://github.com/opentofu/opentofu/releases/download/v1.6.1/tofu_1.6.1_darwin_arm64.zip"
 	pkgFile, err := os.CreateTemp(os.TempDir(), "tofu")
 	if err != nil {
 		return "", err
