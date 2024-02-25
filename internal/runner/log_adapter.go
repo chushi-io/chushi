@@ -14,12 +14,13 @@ import (
 
 type logAdapter struct {
 	Logs   agentv1.LogsClient
+	RunId  string
 	output [][]byte
 }
 
-func newLogAdapter(grpcUrl string) *logAdapter {
+func newLogAdapter(grpcUrl string, runId string) *logAdapter {
 	logsClient := agentv1.NewLogsClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
-	adapter := &logAdapter{Logs: logsClient}
+	adapter := &logAdapter{Logs: logsClient, RunId: runId}
 	return adapter
 }
 
@@ -40,6 +41,7 @@ func (adapter *logAdapter) Flush() error {
 
 	_, err := adapter.Logs.UploadLogs(context.TODO(), connect.NewRequest(&v1.UploadLogsRequest{
 		Content: strings.Join(lines, "\n"),
+		RunId:   adapter.RunId,
 	}))
 	return err
 }

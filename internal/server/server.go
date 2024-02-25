@@ -10,11 +10,8 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
-	pb "github.com/chushi-io/chushi/proto/api/v1"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,7 +20,7 @@ import (
 	"strings"
 )
 
-func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
+func New(conf *config.Config) (*gin.Engine, error) {
 
 	// Load and initialize our database
 	gormConfig := &gorm.Config{}
@@ -35,7 +32,7 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 
 	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), gormConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if err := database.AutoMigrate(
@@ -54,12 +51,12 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		&organization.OrganizationUser{},
 		&vcs_connection.VcsConnection{},
 	); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	factory, err := NewFactory(database)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
@@ -73,6 +70,7 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 	meCtrl := factory.NewMeController(ab)
 
 	r := gin.Default()
+	r.UseH2C = true
 	r.Use(requestid.New())
 	// Start Global middleware
 	// - Authboss middleware
@@ -297,12 +295,14 @@ func New(conf *config.Config) (*gin.Engine, *grpc.Server, error) {
 		}
 	})
 
-	// Register our GRPC server
-	srv := grpc.NewServer()
-	reflection.Register(srv)
-	pb.RegisterRunsServer(srv, factory.NewGrpcRunsServer())
+	grpcApi := r.Group("/grpc")
+	{
+		grpcApi.Any(factory.NewGrpcRunsServer())
+		grpcApi.Any(factory.NewGrpcLogsServer())
+		grpcApi.Any(factory.NewGrpcPlansServer())
+	}
 
-	return r, srv, nil
+	return r, nil
 }
 
 func notImplemented(c *gin.Context) {

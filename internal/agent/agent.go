@@ -1,22 +1,23 @@
 package agent
 
 import (
+	"connectrpc.com/connect"
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/chushi-io/chushi/gen/agent/v1/agentv1connect"
+	apiv1 "github.com/chushi-io/chushi/gen/api/v1"
+	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
 	"github.com/chushi-io/chushi/internal/agent/proxy"
 	"github.com/chushi-io/chushi/pkg/sdk"
-	pb "github.com/chushi-io/chushi/proto/api/v1"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-	"google.golang.org/grpc"
 	"io"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -24,90 +25,141 @@ import (
 )
 
 type Agent struct {
-	Client *kubernetes.Clientset
-	Grpc   pb.RunsClient
-	Config *Config
-	Sdk    *sdk.Sdk
-	sinks  []io.Writer
+	sdk                   *sdk.Sdk
+	sinks                 []io.Writer
+	id                    string
+	proxy                 *proxy.Proxy
+	grpcUrl               string
+	runnerImage           string
+	runnerImagePullPolicy string
+	client                *kubernetes.Clientset
+	runsClient            apiv1connect.RunsClient
+	logger                zap.Logger
+	organizationId        string
 }
 
-func New(client *kubernetes.Clientset, sdk *sdk.Sdk, grpcClient *grpc.ClientConn, conf *Config) (*Agent, error) {
-	runClient := pb.NewRunsClient(grpcClient)
-	return &Agent{
-		Client: client,
-		Sdk:    sdk,
-		Grpc:   runClient,
-		Config: conf,
-	}, nil
+func New(options ...func(*Agent)) *Agent {
+	agent := &Agent{}
+	for _, o := range options {
+		o(agent)
+	}
+	return agent
 }
+
+func WithOrganizationId(organizationId string) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.organizationId = organizationId
+	}
+}
+
+func WithSdk(sdk *sdk.Sdk) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.sdk = sdk
+	}
+}
+
+func WithKubeClient(client *kubernetes.Clientset) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.client = client
+	}
+}
+
+func WithAgentId(agentId string) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.id = agentId
+	}
+}
+
+func WithProxy(serverUrl string, addr string) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.proxy = proxy.New(
+			proxy.WithServerUrl(serverUrl),
+			proxy.WithAddr(addr),
+		)
+	}
+}
+
+func WithGrpc(grpcUrl string) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.runsClient = apiv1connect.NewRunsClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
+		agent.grpcUrl = grpcUrl
+	}
+}
+
+func WithRunnerImage(runnerImage string, pullPolicy string) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.runnerImage = runnerImage
+		agent.runnerImagePullPolicy = pullPolicy
+	}
+}
+
+func WithLogger(logger zap.Logger) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.logger = logger
+	}
+}
+
+//func New(client *kubernetes.Clientset, sdk *sdk.Sdk, grpcClient *grpc.ClientConn, conf *Config) (*Agent, error) {
+//	runClient := pb.NewRunsClient(grpcClient)
+//	return &Agent{
+//		Client: client,
+//		Sdk:    sdk,
+//		Grpc:   runClient,
+//		Config: conf,
+//	}, nil
+//}
 
 // For now, this just queries the current list of runs,
 // and exists. However, it should query the API (or stream)
 // and emit runners as needed
 func (a *Agent) Run() error {
 	for {
-		stream, err := a.Grpc.Watch(context.Background(), &pb.WatchRunsRequest{
-			AgentId: a.Config.AgentId,
-		})
+		stream, err := a.runsClient.Watch(context.Background(), connect.NewRequest(&apiv1.WatchRunsRequest{
+			AgentId: a.id,
+		}))
 		if err != nil {
 			return err
 		}
 		for {
-			scheduledRun, err := stream.Recv()
-			if err == io.EOF {
-				break
+			rcv := stream.Receive()
+			if !rcv {
+				time.Sleep(time.Second)
+				continue
 			}
-			if err != nil {
-				zap.L().Fatal(err.Error())
-			}
-			zap.L().Info("Starting run", zap.String("run.id", scheduledRun.Id))
-			run, err := a.Sdk.Runs().Get(&sdk.GetRunRequest{
+
+			scheduledRun := stream.Msg()
+
+			a.logger.Info("Starting run", zap.String("run.id", scheduledRun.Id))
+			run, err := a.sdk.Runs().Get(&sdk.GetRunRequest{
 				RunId: scheduledRun.Id,
 			})
 			if err != nil {
 				// Handle the error?
-				zap.L().Fatal(err.Error())
+				a.logger.Fatal(err.Error())
 			}
 			if err := a.handle(*run.Run); err != nil {
-				log.Fatal(err)
-				zap.L().Fatal(err.Error())
+				a.logger.Fatal(err.Error())
 			}
-			zap.L().Info("Run completed", zap.String("run.id", scheduledRun.Id))
+			a.logger.Info("Run completed", zap.String("run.id", scheduledRun.Id))
 		}
-		zap.L().Info("Sleeping before invocation")
+		a.logger.Info("Sleeping before invocation")
 		time.Sleep(time.Second)
 	}
 
 	return nil
 }
 
-func (a *Agent) Proxy(addr string) error {
-	// Initialize the client connection to Chushi.io
-	// Start the server component to handle requests
-	// from runner instances
-	srv := proxy.New()
-	mux := http.NewServeMux()
-	mux.Handle(agentv1connect.NewLogsHandler(srv))
-	mux.Handle(agentv1connect.NewPlansHandler(srv))
-
-	fmt.Println("Starting proxy handler")
-	fmt.Println(addr)
-	if err := http.ListenAndServe(
-		addr,
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	); err != nil {
-		panic(err)
-	}
-	return nil
+// Handler to start proxy
+func (a *Agent) Proxy() error {
+	return a.proxy.Run()
 }
 
 func (a *Agent) handle(run sdk.Run) error {
 	a.sinks = []io.Writer{ChangeSink{
 		RunId: run.Id,
-		Sdk:   a.Sdk,
+		Sdk:   a.sdk,
 	}}
-	ws, err := a.Sdk.GetWorkspace(run.WorkspaceId)
+	ws, err := a.sdk.GetWorkspace(run.WorkspaceId)
 	if err != nil {
 		return err
 	}
@@ -125,8 +177,8 @@ func (a *Agent) handle(run sdk.Run) error {
 	//	return err
 	//}
 
-	token, err := a.Sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{
-		AgentId:     a.Config.AgentId,
+	token, err := a.sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{
+		AgentId:     a.id,
 		WorkspaceId: ws.Workspace.Id,
 		RunId:       run.Id,
 	})
@@ -134,19 +186,19 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	if _, err := a.Grpc.Update(context.TODO(), &pb.UpdateRunRequest{
+	if _, err := a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
 		Id:     run.Id,
 		Status: "running",
-	}); err != nil {
+	})); err != nil {
 		return err
 	}
 
-	creds, err := a.Sdk.Workspaces().GetConnectionCredentials(ws.Workspace.Vcs.ConnectionId)
+	creds, err := a.sdk.Workspaces().GetConnectionCredentials(ws.Workspace.Vcs.ConnectionId)
 	if err != nil {
 		return err
 	}
 
-	variables, err := a.Sdk.Workspaces().GetVariables(ws.Workspace.Id)
+	variables, err := a.sdk.Workspaces().GetVariables(ws.Workspace.Id)
 	if err != nil {
 		return err
 	}
@@ -166,7 +218,7 @@ func (a *Agent) handle(run sdk.Run) error {
 	}
 
 	podLogOpts := v1.PodLogOptions{}
-	req := a.Client.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
+	req := a.client.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream(context.TODO())
 	if err != nil {
 		return err
@@ -177,17 +229,17 @@ func (a *Agent) handle(run sdk.Run) error {
 	}
 
 	// Lastly, post updates back to the run
-	_, err = a.Grpc.Update(context.TODO(), &pb.UpdateRunRequest{
+	_, err = a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
 		Id:     run.Id,
 		Status: "completed",
-	})
+	}))
 	return err
 }
 
 func (a *Agent) waitForPodCompletion(pod *v1.Pod) (bool, error) {
 loop:
 	for {
-		pod, err := a.Client.CoreV1().
+		pod, err := a.client.CoreV1().
 			Pods(pod.Namespace).
 			Get(context.TODO(), pod.Name, metav1.GetOptions{})
 		if err != nil {
@@ -210,7 +262,7 @@ loop:
 
 func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, credentials sdk.Credentials, variables []sdk.Variable) (*v1.Pod, error) {
 	podManifest := a.podSpecForRun(run, workspace, token, credentials, variables)
-	return a.Client.CoreV1().
+	return a.client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
 }
@@ -257,7 +309,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 		},
 		{
 			Name:  "CHUSHI_ORGANIZATION",
-			Value: a.Sdk.OrganizationId.String(),
+			Value: a.sdk.OrganizationId.String(),
 		},
 		{
 			Name:  "CHUSHI_RUN_ID",
@@ -290,9 +342,10 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 		Containers: []v1.Container{
 			// Actual run container
 			{
-				Name:            "chushi",
-				Image:           a.Config.GetImage(),
-				ImagePullPolicy: "Never",
+				Name:  "chushi",
+				Image: a.getRunnerImage(),
+				// TODO: This needs to be managed
+				ImagePullPolicy: v1.PullNever,
 				Command:         []string{"/chushi"},
 				Args:            args,
 				Env:             envVars,
@@ -342,10 +395,43 @@ git clone -c credential.helper='!f() { echo username=chushi; echo "password=$GIT
 
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    a.Config.GetNamespace(),
+			Namespace:    a.organizationId,
 			GenerateName: "chushi-runner-",
 			Labels:       map[string]string{},
 		},
 		Spec: podSpec,
+	}
+}
+
+func (a *Agent) getRunnerImage() string {
+	if a.runnerImage != "" {
+		return a.runnerImage
+	}
+	return "ghcr.io/chushi-io/chushi:latest"
+}
+
+func (a *Agent) getImagePullPolicy() v1.PullPolicy {
+	switch a.runnerImagePullPolicy {
+	case "Never":
+		return v1.PullNever
+	case "Always":
+		return v1.PullAlways
+	default:
+		return v1.PullIfNotPresent
+	}
+}
+
+func newInsecureClient() *http.Client {
+	return &http.Client{
+		Transport: &http2.Transport{
+			AllowHTTP: true,
+			DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
+				// If you're also using this client for non-h2c traffic, you may want
+				// to delegate to tls.Dial if the network isn't TCP or the addr isn't
+				// in an allowlist.
+				return net.Dial(network, addr)
+			},
+			// Don't forget timeouts!
+		},
 	}
 }

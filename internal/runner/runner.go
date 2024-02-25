@@ -25,6 +25,7 @@ type Runner struct {
 	workingDirectory string
 	version          string
 	operation        string
+	runId            string
 
 	writer io.Writer
 }
@@ -66,8 +67,15 @@ func WithOperation(operation string) func(runner *Runner) {
 		runner.operation = operation
 	}
 }
+
+func WithRunId(runId string) func(runner *Runner) {
+	return func(runner *Runner) {
+		runner.runId = runId
+	}
+}
+
 func (r *Runner) Run(ctx context.Context, out io.Writer) error {
-	adapter := newLogAdapter(r.grpcUrl)
+	adapter := newLogAdapter(r.grpcUrl, r.runId)
 	r.writer = io.MultiWriter(adapter, out)
 
 	r.logger.Info("installing tofu", zap.String("version", r.version))
@@ -134,6 +142,7 @@ func (r *Runner) uploadPlan(p []byte) error {
 	)
 	_, err := planClient.UploadPlan(context.TODO(), connect.NewRequest(&v1.UploadPlanRequest{
 		Content: base64.StdEncoding.EncodeToString(p),
+		RunId:   r.runId,
 	}))
 	return err
 }

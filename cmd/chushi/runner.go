@@ -38,6 +38,7 @@ executions occuring for Chushi workspaces.'
 			runner.WithWorkingDirectory(workingDir),
 			runner.WithVersion(tofuVersion),
 			runner.WithOperation(args[0]),
+			runner.WithRunId(os.Getenv("CHUSHI_RUN_ID")),
 		)
 
 		if err := rnr.Run(ctx, os.Stdout); err != nil {
