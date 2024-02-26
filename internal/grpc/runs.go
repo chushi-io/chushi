@@ -3,6 +3,7 @@ package grpc
 import (
 	"connectrpc.com/connect"
 	"context"
+	"errors"
 	"fmt"
 	v1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/internal/resource/agent"
@@ -21,17 +22,17 @@ func (s *RunServer) Watch(
 	req *connect.Request[v1.WatchRunsRequest],
 	stream *connect.ServerStream[v1.Run],
 ) error {
-	orgId, err := uuid.Parse("51e03fca-ef9d-4c55-93a4-ebf4dc4b1b4e")
-	if err != nil {
-		return err
+
+	check := ctx.Value("agent")
+	if check == nil {
+		return errors.New("agent not found")
 	}
-	ag, err := s.AgentRepository.FindById(orgId, req.Msg.AgentId)
-	if err != nil {
-		return err
-	}
+
+	ag := ctx.Value("agent").(*agent.Agent)
+
 	for {
 		runs, err := s.RunRepository.List(&run.RunListParams{
-			OrganizationId: orgId,
+			OrganizationId: ag.OrganizationID,
 			AgentId:        ag.ID.String(),
 			Status:         "pending",
 		})
@@ -61,6 +62,13 @@ func (s *RunServer) List(
 func (s *RunServer) Update(
 	ctx context.Context, req *connect.Request[v1.UpdateRunRequest],
 ) (*connect.Response[v1.Run], error) {
+	check := ctx.Value("agent")
+	if check == nil {
+		return nil, errors.New("agent not found")
+	}
+
+	ag := ctx.Value("agent").(*agent.Agent)
+
 	runId, err := uuid.Parse(req.Msg.Id)
 	if err != nil {
 		return nil, err
@@ -69,8 +77,13 @@ func (s *RunServer) Update(
 		UuidValue: runId,
 		Type:      types.Uuid,
 	})
+
 	if err != nil {
 		return nil, err
+	}
+
+	if r.Agent.ID != ag.ID {
+		return nil, errors.New("unauthorized")
 	}
 
 	if req.Msg.Status != "" {

@@ -11,6 +11,7 @@ import (
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
+	"golang.org/x/oauth2/clientcredentials"
 	"net"
 	"net/http"
 )
@@ -22,6 +23,8 @@ type Proxy struct {
 	address     string
 	logsClient  apiv1connect.LogsClient
 	plansClient apiv1connect.PlansClient
+	auth        *clientcredentials.Config
+	httpClient  *http.Client
 }
 
 func New(options ...func(*Proxy)) *Proxy {
@@ -32,6 +35,12 @@ func New(options ...func(*Proxy)) *Proxy {
 		o(agent)
 	}
 	return agent
+}
+
+func WithHttpClient(httpClient *http.Client) func(proxy *Proxy) {
+	return func(proxy *Proxy) {
+		proxy.httpClient = httpClient
+	}
 }
 
 func WithServerUrl(serverUrl string) func(proxy *Proxy) {

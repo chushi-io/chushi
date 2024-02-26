@@ -36,6 +36,7 @@ type Agent struct {
 	runsClient            apiv1connect.RunsClient
 	logger                zap.Logger
 	organizationId        string
+	httpClient            *http.Client
 }
 
 func New(options ...func(*Agent)) *Agent {
@@ -44,6 +45,12 @@ func New(options ...func(*Agent)) *Agent {
 		o(agent)
 	}
 	return agent
+}
+
+func WithHttpClient(client *http.Client) func(agent *Agent) {
+	return func(agent *Agent) {
+		agent.httpClient = client
+	}
 }
 
 func WithOrganizationId(organizationId string) func(agent *Agent) {
@@ -75,6 +82,7 @@ func WithProxy(serverUrl string, addr string) func(agent *Agent) {
 		agent.proxy = proxy.New(
 			proxy.WithServerUrl(serverUrl),
 			proxy.WithAddr(addr),
+			proxy.WithHttpClient(agent.httpClient),
 		)
 	}
 }

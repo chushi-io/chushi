@@ -8,3 +8,4 @@ testdata/terraform*
 testdata/*.tfstate
 
 /agent
+certs

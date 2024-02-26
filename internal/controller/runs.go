@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"github.com/chushi-io/chushi/internal/helpers"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
-	"github.com/chushi-io/chushi/internal/server/helpers"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
 	"github.com/chushi-io/chushi/internal/service/run_manager"
 	"github.com/chushi-io/chushi/pkg/types"

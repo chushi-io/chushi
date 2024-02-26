@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
+	"github.com/chushi-io/chushi/internal/auth"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/grpc"
 	"github.com/chushi-io/chushi/internal/middleware"
@@ -281,7 +282,12 @@ func (f *Factory) Interceptors() connect.Option {
 	if interceptors, ok := f.static["Interceptors"]; ok {
 		return interceptors.(connect.Option)
 	}
-	interceptors := connect.WithInterceptors(grpc.NewAuthInterceptor())
+
+	clientStore := oauth.NewClientStore(f.Database)
+	interceptors := connect.WithInterceptors(auth.NewAuthInterceptor(
+		clientStore,
+		agent.NewAgentRepository(f.Database, clientStore),
+	))
 	f.static["Interceptors"] = interceptors
 	return interceptors
 }
@@ -301,7 +307,6 @@ func (f *Factory) NewGrpcLogsServer() (string, gin.HandlerFunc) {
 
 func (f *Factory) NewGrpcPlansServer() (string, gin.HandlerFunc) {
 	path, handler := apiv1connect.NewPlansHandler(&grpc.PlanServer{}, f.Interceptors())
-	fmt.Println(path)
 	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
 }
 

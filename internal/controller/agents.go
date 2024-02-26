@@ -2,10 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"github.com/chushi-io/chushi/internal/helpers"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
-	"github.com/chushi-io/chushi/internal/server/helpers"
 	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/generates"
