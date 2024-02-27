@@ -310,6 +310,16 @@ func (f *Factory) NewGrpcPlansServer() (string, gin.HandlerFunc) {
 	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
 }
 
+func (f *Factory) NewGrpcAuthServer() (string, gin.HandlerFunc) {
+	path, handler := apiv1connect.NewAuthHandler(
+		grpc.NewAuthServer(
+			os.Getenv("JWT_SECRET"),
+		),
+		f.Interceptors(),
+	)
+	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
+}
+
 type smsLogSender struct {
 }
 

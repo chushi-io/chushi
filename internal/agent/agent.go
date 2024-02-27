@@ -34,6 +34,7 @@ type Agent struct {
 	runnerImagePullPolicy string
 	client                *kubernetes.Clientset
 	runsClient            apiv1connect.RunsClient
+	authClient            apiv1connect.AuthClient
 	logger                zap.Logger
 	organizationId        string
 	httpClient            *http.Client
@@ -87,9 +88,12 @@ func WithProxy(serverUrl string, addr string) func(agent *Agent) {
 	}
 }
 
-func WithGrpc(grpcUrl string) func(agent *Agent) {
+// TODO: This should be updated to accept clientcredentials.Config to support
+// rotation of expired tokens. For now, we will accept failure
+func WithGrpc(grpcUrl string, token string) func(agent *Agent) {
 	return func(agent *Agent) {
 		agent.runsClient = apiv1connect.NewRunsClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
+		agent.authClient = apiv1connect.NewAuthClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
 		agent.grpcUrl = grpcUrl
 	}
 }
@@ -106,16 +110,6 @@ func WithLogger(logger zap.Logger) func(agent *Agent) {
 		agent.logger = logger
 	}
 }
-
-//func New(client *kubernetes.Clientset, sdk *sdk.Sdk, grpcClient *grpc.ClientConn, conf *Config) (*Agent, error) {
-//	runClient := pb.NewRunsClient(grpcClient)
-//	return &Agent{
-//		Client: client,
-//		Sdk:    sdk,
-//		Grpc:   runClient,
-//		Config: conf,
-//	}, nil
-//}
 
 // For now, this just queries the current list of runs,
 // and exists. However, it should query the API (or stream)
@@ -157,11 +151,6 @@ func (a *Agent) Run() error {
 	return nil
 }
 
-// Handler to start proxy
-func (a *Agent) Proxy() error {
-	return a.proxy.Run()
-}
-
 func (a *Agent) handle(run sdk.Run) error {
 	a.sinks = []io.Writer{ChangeSink{
 		RunId: run.Id,
@@ -178,18 +167,7 @@ func (a *Agent) handle(run sdk.Run) error {
 		return errors.New("workspace is already locked")
 	}
 
-	//url, err := a.Sdk.Runs().PresignedUrl(&sdk.GeneratePresignedUrlParams{
-	//	RunId: run.Id,
-	//})
-	//if err != nil {
-	//	return err
-	//}
-
-	token, err := a.sdk.Tokens().CreateRunnerToken(&sdk.CreateRunnerTokenParams{
-		AgentId:     a.id,
-		WorkspaceId: ws.Workspace.Id,
-		RunId:       run.Id,
-	})
+	token, err := a.generateToken(ws.Workspace.Id, run.Id, a.organizationId)
 	if err != nil {
 		return err
 	}
@@ -268,7 +246,7 @@ loop:
 	return true, nil
 }
 
-func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, credentials sdk.Credentials, variables []sdk.Variable) (*v1.Pod, error) {
+func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token string, credentials sdk.Credentials, variables []sdk.Variable) (*v1.Pod, error) {
 	podManifest := a.podSpecForRun(run, workspace, token, credentials, variables)
 	return a.client.CoreV1().
 		Pods("default").
@@ -302,7 +280,7 @@ func (a *Agent) writeLine(line string) error {
 	return nil
 }
 
-func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.CreateRunnerTokenResponse, response sdk.Credentials, variables []sdk.Variable) *v1.Pod {
+func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token string, response sdk.Credentials, variables []sdk.Variable) *v1.Pod {
 	args := []string{
 		"runner",
 		fmt.Sprintf("-d=/workspace/%s", workspace.Vcs.WorkingDirectory),
@@ -325,11 +303,11 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token *sdk.C
 		},
 		{
 			Name:  "CHUSHI_ACCESS_TOKEN",
-			Value: token.Token,
+			Value: token,
 		},
 		{
 			Name:  "TF_HTTP_PASSWORD",
-			Value: token.Token,
+			Value: token,
 		},
 		{
 			Name:  "TF_HTTP_USERNAME",
@@ -442,4 +420,16 @@ func newInsecureClient() *http.Client {
 			// Don't forget timeouts!
 		},
 	}
+}
+
+func (a *Agent) generateToken(workspaceId string, runId string, orgId string) (string, error) {
+	resp, err := a.authClient.GenerateRunnerToken(context.TODO(), connect.NewRequest(&apiv1.GenerateRunnerTokenRequest{
+		WorkspaceId:    workspaceId,
+		RunId:          runId,
+		OrganizationId: orgId,
+	}))
+	if err != nil {
+		return "", err
+	}
+	return resp.Msg.Token, nil
 }

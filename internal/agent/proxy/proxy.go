@@ -25,6 +25,7 @@ type Proxy struct {
 	plansClient apiv1connect.PlansClient
 	auth        *clientcredentials.Config
 	httpClient  *http.Client
+	token       string
 }
 
 func New(options ...func(*Proxy)) *Proxy {
@@ -43,10 +44,16 @@ func WithHttpClient(httpClient *http.Client) func(proxy *Proxy) {
 	}
 }
 
+func WithToken(token string) func(proxy *Proxy) {
+	return func(proxy *Proxy) {
+		proxy.token = token
+	}
+}
+
 func WithServerUrl(serverUrl string) func(proxy *Proxy) {
 	return func(proxy *Proxy) {
-		proxy.logsClient = apiv1connect.NewLogsClient(newInsecureClient(), serverUrl, connect.WithGRPC())
-		proxy.plansClient = apiv1connect.NewPlansClient(newInsecureClient(), serverUrl, connect.WithGRPC())
+		proxy.logsClient = apiv1connect.NewLogsClient(proxy.httpClient, serverUrl, connect.WithGRPC())
+		proxy.plansClient = apiv1connect.NewPlansClient(proxy.httpClient, serverUrl, connect.WithGRPC())
 		proxy.serverUrl = serverUrl
 	}
 }
@@ -84,7 +91,7 @@ func (s *Proxy) UploadLogs(
 	request := connect.NewRequest(&v1.UploadLogsRequest{
 		Content: req.Msg.Content,
 	})
-	request.Header().Set("Authorization", "example")
+	request.Header().Set("Authorization", s.token)
 	_, err := s.logsClient.UploadLogs(context.TODO(), request)
 	if err != nil {
 		return connect.NewResponse(&agentv1.UploadLogsResponse{
@@ -105,7 +112,7 @@ func (s *Proxy) UploadPlan(
 	request := connect.NewRequest(&v1.UploadPlanRequest{
 		Content: req.Msg.Content,
 	})
-	request.Header().Set("Authorization", "example")
+	request.Header().Set("Authorization", s.token)
 	_, err := s.plansClient.UploadPlan(context.TODO(), request)
 	if err != nil {
 		return connect.NewResponse(&agentv1.UploadPlanResponse{
@@ -133,7 +140,7 @@ func (s *Proxy) Run() error {
 	return nil
 }
 
-func newInsecureClient() *http.Client {
+func NewInsecureClient() *http.Client {
 	return &http.Client{
 		Transport: &http2.Transport{
 			AllowHTTP: true,

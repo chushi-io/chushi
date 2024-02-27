@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api.v1;
+
+service Workspaces {
+  rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse) {}
+  rpc GetVcsConnection(GetVcsConnectionRequest) returns (GetVcsConnectionResponse) {}
+}
+
+message GetWorkspaceRequest {
+  string id = 1;
+}
+
+message GetWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message Workspace {
+  string id = 1;
+  string name = 2;
+  bool locked = 3;
+  WorkspaceVcs vcs = 4;
+}
+
+message WorkspaceVcs {
+  string source = 1;
+  string branch = 2;
+  repeated string patterns = 3;
+  repeated string prefixes = 4;
+  string working_directory = 5;
+  string connection_id = 6;
+}
+
+message GetVcsConnectionRequest {
+  string workspace_id = 1;
+  string connection_id = 2;
+}
+
+message GetVcsConnectionResponse {
+  string token = 1;
+}

@@ -37,8 +37,6 @@ func init() {
 	agentCmd.Flags().String("grpc-url", "http://localhost:5000/grpc", "Chushi GRPC URL")
 	agentCmd.Flags().String("org-id", "", "ID of the organization")
 	agentCmd.Flags().String("kubeconfig", "", "Location of kubeconfig file")
-	agentCmd.Flags().Bool("proxy", false, "Run the proxy service instead")
-	agentCmd.Flags().String("proxy-addr", "localhost:5002", "Address for proxy to bind on")
 	agentCmd.Flags().String("runner-image", "", "Image to use for runner")
 	agentCmd.Flags().String("runner-image-pull-policy", "", "Pull policy for image")
 	rootCmd.AddCommand(agentCmd)
@@ -74,7 +72,7 @@ func runAgent(cmd *cobra.Command, args []string) {
 		agent.WithAgentId(agentId),
 		agent.WithSdk(chushiSdk),
 		agent.WithKubeClient(kubeClient),
-		agent.WithGrpc(grpcUrl),
+		agent.WithGrpc(grpcUrl, ""),
 	}
 
 	proxyAddr, _ := cmd.Flags().GetString("proxy-addr")
@@ -89,16 +87,9 @@ func runAgent(cmd *cobra.Command, args []string) {
 	}
 
 	ag := agent.New(opts...)
-	if proxyAddr != "" {
-		if err := ag.Proxy(); err != nil {
-			logger.Fatal(err.Error())
-		}
-	} else {
-		if err := ag.Run(); err != nil {
-			logger.Fatal(err.Error())
-		}
+	if err := ag.Run(); err != nil {
+		logger.Fatal(err.Error())
 	}
-
 }
 
 func getKubeClient(configFile string) (*kubernetes.Clientset, error) {
