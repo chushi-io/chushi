@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service Auth {
+  rpc GenerateRunnerToken(GenerateRunnerTokenRequest) returns (GenerateRunnerTokenResponse) {}
+}
+
+message GenerateRunnerTokenRequest {
+  string run_id = 1;
+  string workspace_id = 2;
+  string organization_id = 3;
+}
+
+message GenerateRunnerTokenResponse {
+  string token = 1;
+}

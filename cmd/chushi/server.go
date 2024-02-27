@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/chushi-io/chushi/internal/server"
 	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"net"
 )
 
 var serverCmd = &cobra.Command{
@@ -18,21 +16,21 @@ var serverCmd = &cobra.Command{
 			zap.L().Fatal(err.Error())
 		}
 
-		httpServer, grpcServer, err := server.New(conf)
+		httpServer, err := server.New(conf)
 		if err != nil {
 			zap.L().Fatal(err.Error())
 		}
 
-		go func() {
-			zap.L().Info("Starting GRPC listener")
-			lis, err := net.Listen("tcp", fmt.Sprintf(":%s", "5001"))
-			if err != nil {
-				zap.L().Fatal(err.Error())
-			}
-			if err := grpcServer.Serve(lis); err != nil {
-				zap.L().Fatal(err.Error())
-			}
-		}()
+		//go func() {
+		//	zap.L().Info("Starting GRPC listener")
+		//	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", "5001"))
+		//	if err != nil {
+		//		zap.L().Fatal(err.Error())
+		//	}
+		//	if err := grpcServer.Serve(lis); err != nil {
+		//		zap.L().Fatal(err.Error())
+		//	}
+		//}()
 
 		zap.L().Info("Starting HTTP server")
 		if err := httpServer.Run(); err != nil {

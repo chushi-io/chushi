@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"strings"
 )
 
 func GetOrganizationId(c *gin.Context) (uuid.UUID, error) {
@@ -29,4 +30,12 @@ func GetOrganization(c *gin.Context) *organization.Organization {
 func GetUuid(input string) (uuid.UUID, error) {
 	uid, err := uuid.Parse(input)
 	return uid, err
+}
+
+func GetTokenFromHeader(header string) (string, error) {
+	if !strings.HasPrefix(header, "Bearer ") {
+		return "", errors.New("invalid header provided")
+	}
+	authToken, _ := strings.CutPrefix(header, "Bearer ")
+	return authToken, nil
 }

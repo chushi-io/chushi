@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"github.com/chushi-io/chushi/internal/helpers"
 	"github.com/chushi-io/chushi/internal/resource/variables"
-	"github.com/chushi-io/chushi/internal/server/helpers"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

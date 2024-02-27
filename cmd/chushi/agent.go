@@ -6,8 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
@@ -36,11 +34,11 @@ func init() {
 	agentCmd.Flags().String("agent-id", "", "ID of the agent")
 	agentCmd.Flags().String("token-url", "https://chushi.io/auth/v1/token", "Chushi Token URL")
 	agentCmd.Flags().String("server-url", "", "Chushi API URL")
-	agentCmd.Flags().String("grpc-url", "localhost:5001", "Chushi GRPC URL")
+	agentCmd.Flags().String("grpc-url", "http://localhost:5000/grpc", "Chushi GRPC URL")
 	agentCmd.Flags().String("org-id", "", "ID of the organization")
 	agentCmd.Flags().String("kubeconfig", "", "Location of kubeconfig file")
-	agentCmd.Flags().Bool("proxy", false, "Run the proxy service instead")
-	agentCmd.Flags().String("proxy-addr", "localhost:5002", "Address for proxy to bind on")
+	agentCmd.Flags().String("runner-image", "", "Image to use for runner")
+	agentCmd.Flags().String("runner-image-pull-policy", "", "Pull policy for image")
 	rootCmd.AddCommand(agentCmd)
 }
 
@@ -57,14 +55,6 @@ func runAgent(cmd *cobra.Command, args []string) {
 		logger.Fatal(err.Error())
 	}
 
-	cnf := &agent.Config{
-		Runner: &agent.RunnerConfig{
-			Image:   "chushi",
-			Version: "latest",
-		},
-		AgentId: agentId,
-	}
-
 	chushiSdk := sdk.New()
 
 	if rawOrgId != "" {
@@ -78,24 +68,26 @@ func runAgent(cmd *cobra.Command, args []string) {
 		chushiSdk = chushiSdk.WithBaseUrl(serverUrl)
 	}
 
-	conn, err := grpc.Dial(
-		grpcUrl,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		logger.Fatal(err.Error())
+	opts := []func(a *agent.Agent){
+		agent.WithAgentId(agentId),
+		agent.WithSdk(chushiSdk),
+		agent.WithKubeClient(kubeClient),
+		agent.WithGrpc(grpcUrl, ""),
 	}
-	defer conn.Close()
-	ag, _ := agent.New(kubeClient, chushiSdk, conn, cnf)
 
-	proxy, _ := cmd.Flags().GetBool("proxy")
-	if proxy {
-		proxyAddr, _ := cmd.Flags().GetString("proxy-addr")
-		err = ag.Proxy(proxyAddr)
-	} else {
-		err = ag.Run()
+	proxyAddr, _ := cmd.Flags().GetString("proxy-addr")
+	if proxyAddr != "" {
+		opts = append(opts, agent.WithProxy(grpcUrl, proxyAddr))
 	}
-	if err != nil {
+
+	runnerImage, _ := cmd.Flags().GetString("runner-image")
+	pullPolicy, _ := cmd.Flags().GetString("runner-image-pull-policy")
+	if runnerImage != "" || pullPolicy != "" {
+		opts = append(opts, agent.WithRunnerImage(runnerImage, pullPolicy))
+	}
+
+	ag := agent.New(opts...)
+	if err := ag.Run(); err != nil {
 		logger.Fatal(err.Error())
 	}
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -8,6 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
+	"github.com/chushi-io/chushi/internal/auth"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/grpc"
 	"github.com/chushi-io/chushi/internal/middleware"
@@ -20,6 +23,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
 	"github.com/chushi-io/chushi/internal/service/run_manager"
+	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
@@ -50,6 +54,8 @@ import (
 type Factory struct {
 	Database *gorm.DB
 	S3Client *s3.Client
+
+	static map[string]interface{}
 }
 
 func NewFactory(database *gorm.DB) (*Factory, error) {
@@ -66,6 +72,7 @@ func NewFactory(database *gorm.DB) (*Factory, error) {
 	return &Factory{
 		Database: database,
 		S3Client: client,
+		static:   map[string]interface{}{},
 	}, nil
 }
 
@@ -271,11 +278,46 @@ func (f *Factory) NewSessionStore() abclientstate.SessionStorer {
 	return abclientstate.NewSessionStorer("test", sessionStoreKey, nil)
 }
 
-func (f *Factory) NewGrpcRunsServer() *grpc.RunServer {
-	return &grpc.RunServer{
+func (f *Factory) Interceptors() connect.Option {
+	if interceptors, ok := f.static["Interceptors"]; ok {
+		return interceptors.(connect.Option)
+	}
+
+	clientStore := oauth.NewClientStore(f.Database)
+	interceptors := connect.WithInterceptors(auth.NewAuthInterceptor(
+		clientStore,
+		agent.NewAgentRepository(f.Database, clientStore),
+	))
+	f.static["Interceptors"] = interceptors
+	return interceptors
+}
+
+func (f *Factory) NewGrpcRunsServer() (string, gin.HandlerFunc) {
+	path, handler := apiv1connect.NewRunsHandler(&grpc.RunServer{
 		RunRepository:   run.NewRunRepository(f.Database),
 		AgentRepository: agent.NewAgentRepository(f.Database, oauth.NewClientStore(f.Database)),
-	}
+	}, f.Interceptors())
+	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
+}
+
+func (f *Factory) NewGrpcLogsServer() (string, gin.HandlerFunc) {
+	path, handler := apiv1connect.NewLogsHandler(&grpc.LogsServer{}, f.Interceptors())
+	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
+}
+
+func (f *Factory) NewGrpcPlansServer() (string, gin.HandlerFunc) {
+	path, handler := apiv1connect.NewPlansHandler(&grpc.PlanServer{}, f.Interceptors())
+	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
+}
+
+func (f *Factory) NewGrpcAuthServer() (string, gin.HandlerFunc) {
+	path, handler := apiv1connect.NewAuthHandler(
+		grpc.NewAuthServer(
+			os.Getenv("JWT_SECRET"),
+		),
+		f.Interceptors(),
+	)
+	return path + "*action", gin.WrapH(http.StripPrefix("/grpc", handler))
 }
 
 type smsLogSender struct {
