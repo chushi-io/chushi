@@ -2,6 +2,9 @@ package server
 
 import (
 	"github.com/chushi-io/chushi/internal/middleware"
+	"github.com/chushi-io/chushi/internal/middleware/auth"
+	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/session"
+	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/token"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/run"
@@ -58,6 +61,7 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	workspaceCtrl := factory.NewWorkspaceController()
 	organizationsCtrl := factory.NewOrganizationsController()
 	authServer := factory.NewOauthServer()
@@ -69,17 +73,15 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	ab := factory.NewAuthBoss()
 	meCtrl := factory.NewMeController(ab)
 
+	middlewareFactory := auth.WithStrategies(
+		session.New(ab, factory.NewUserStore()),
+		token.New(os.Getenv("JWT_SECRET_KEY")),
+	)
+
 	r := gin.Default()
 	r.UseH2C = true
 	r.Use(requestid.New())
-	// Start Global middleware
-	// - Authboss middleware
 	r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
-	// - Set our logger
-	//r.Use(logger.SetLogger(
-	//	logger.WithLogger(func(context *gin.Context, z zerolog.Logger) zerolog.Logger {
-	//
-	//	})))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -87,22 +89,36 @@ func New(conf *config.Config) (*gin.Engine, error) {
 		})
 	})
 
+	api := r.Group("/api")
+	{
+		api.GET("/healthz", func(c *gin.Context) {
+			c.Data(http.StatusOK, "", []byte("OK"))
+		})
+		api.GET("/readyz", func(c *gin.Context) {
+			c.Data(http.StatusOK, "", []byte("OK"))
+		})
+		api.GET("/status", func(c *gin.Context) {
+			c.Data(http.StatusOK, "", []byte("OK"))
+		})
+		api.GET("/metrics", notImplemented)
+	}
+
+	// Hoist state to top level routing
+	state := r.Group("/:orgId/:workspace/state")
+	state.Use(middleware.VerifyStateAccess(
+		os.Getenv("JWT_SECRET_KEY"),
+		factory.NewWorkspacesRepository(),
+	))
+	{
+		state.GET("", workspaceCtrl.GetState)
+		state.POST("", workspaceCtrl.UploadState)
+		state.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
+		state.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+	}
+
 	v1api := r.Group("/api/v1")
-
-	v1api.GET("/healthz", func(c *gin.Context) {
-		c.Data(http.StatusOK, "", []byte("OK"))
-	})
-	v1api.GET("/readyz", func(c *gin.Context) {
-		c.Data(http.StatusOK, "", []byte("OK"))
-	})
-	v1api.GET("/status", func(c *gin.Context) {
-		c.Data(http.StatusOK, "", []byte("OK"))
-	})
-	v1api.GET("/metrics", notImplemented)
-
-	v1api.Use(func(context *gin.Context) {
-
-	})
+	// Apply our auth to all API endpoints
+	v1api.Use(middlewareFactory.Handle)
 
 	v1api.GET("/orgs", organizationsCtrl.List)
 	v1api.POST("/orgs", organizationsCtrl.Create)
@@ -152,17 +168,6 @@ func New(conf *config.Config) (*gin.Engine, error) {
 			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
 
 			// HTTP Backend handlers
-			state := workspace.Group("/state")
-			state.Use(middleware.VerifyStateAccess(
-				os.Getenv("JWT_SECRET_KEY"),
-				factory.NewWorkspacesRepository(),
-			))
-			{
-				state.GET("", workspaceCtrl.GetState)
-				state.POST("", workspaceCtrl.UploadState)
-				state.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
-				state.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
-			}
 
 			runs := workspace.Group("/runs")
 			{

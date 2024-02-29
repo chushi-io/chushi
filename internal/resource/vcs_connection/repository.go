@@ -8,6 +8,7 @@ import (
 type Repository interface {
 	List(organizationId uuid.UUID) ([]VcsConnection, error)
 	Get(organizationId uuid.UUID, connectionId uuid.UUID) (*VcsConnection, error)
+	GetByWebhookId(webhookId uuid.UUID) (*VcsConnection, error)
 	Create(connection *VcsConnection) (*VcsConnection, error)
 	Delete(organizationId uuid.UUID, connectionId uuid.UUID) error
 }
@@ -32,6 +33,12 @@ func (vcr *RepositoryImpl) List(organizationId uuid.UUID) ([]VcsConnection, erro
 func (vcr *RepositoryImpl) Get(organizationId uuid.UUID, connectionId uuid.UUID) (*VcsConnection, error) {
 	var connection VcsConnection
 	result := vcr.Db.Where("organization_id = ?", organizationId).Find(&connection, "id = ?", connectionId)
+	return &connection, result.Error
+}
+
+func (vcr *RepositoryImpl) GetByWebhookId(webhookId uuid.UUID) (*VcsConnection, error) {
+	var connection VcsConnection
+	result := vcr.Db.Where("webhook_id = ?", webhookId).First(&connection)
 	return &connection, result.Error
 }
 
