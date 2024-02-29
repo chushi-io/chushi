@@ -115,5 +115,21 @@ func (s *RunServer) Get(
 	ctx context.Context,
 	req *connect.Request[v1.GetRunRequest],
 ) (*connect.Response[v1.Run], error) {
-	return nil, nil
+	ag := ctx.Value("agent").(*agent.Agent)
+
+	runId, err := uuid.Parse(req.Msg.RunId)
+	if err != nil {
+		return nil, err
+	}
+	r, err := s.RunRepository.Get(&types.UuidOrString{
+		UuidValue: runId,
+		Type:      types.Uuid,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&v1.Run{
+		Id:          r.ID.String(),
+		WorkspaceId: r.WorkspaceID.String(),
+	}), nil
 }
