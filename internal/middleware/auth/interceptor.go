@@ -48,6 +48,7 @@ func NewAuthInterceptor(
 			}
 
 			ctx = context.WithValue(ctx, "agent", agent)
+			ctx = context.WithValue(ctx, "organization_id", agent.OrganizationID)
 			return next(ctx, req)
 		}
 	}

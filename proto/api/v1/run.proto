@@ -8,6 +8,7 @@ service Runs {
   rpc List(ListRunsRequest) returns (ListRunsResponse) {}
   rpc Watch(WatchRunsRequest) returns (stream Run) {}
   rpc Update(UpdateRunRequest) returns (Run) {}
+  rpc Get(GetRunRequest) returns (Run) {}
 }
 
 message UpdateRunRequest {
@@ -16,6 +17,10 @@ message UpdateRunRequest {
   int32 add = 3;
   int32 change = 4;
   int32 remove = 5;
+}
+
+message GetRunRequest {
+  string run_id = 1;
 }
 
 message ListRunsRequest {
@@ -28,6 +33,8 @@ message ListRunsResponse {
 
 message Run {
   string id = 1;
+  string workspace_id = 2;
+  string operation = 3;
 }
 
 message WatchRunsRequest {

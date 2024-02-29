@@ -70,9 +70,9 @@ func runAgent(cmd *cobra.Command, args []string) {
 
 	opts := []func(a *agent.Agent){
 		agent.WithAgentId(agentId),
-		agent.WithSdk(chushiSdk),
 		agent.WithKubeClient(kubeClient),
 		agent.WithGrpc(grpcUrl, ""),
+		agent.WithOrganizationId(rawOrgId),
 	}
 
 	proxyAddr, _ := cmd.Flags().GetString("proxy-addr")
