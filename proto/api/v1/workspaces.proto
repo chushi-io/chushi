@@ -5,6 +5,7 @@ package api.v1;
 service Workspaces {
   rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse) {}
   rpc GetVcsConnection(GetVcsConnectionRequest) returns (GetVcsConnectionResponse) {}
+  rpc GetVariables(GetVariablesRequest) returns (GetVariablesResponse) {}
 }
 
 message GetWorkspaceRequest {
@@ -13,6 +14,20 @@ message GetWorkspaceRequest {
 
 message GetWorkspaceResponse {
   Workspace workspace = 1;
+}
+
+message GetVariablesRequest {
+  string workspace_id = 1;
+}
+
+message GetVariablesResponse {
+  repeated Variable variables = 1;
+}
+
+message Variable {
+  string key = 1;
+  string value = 2;
+  string type = 3;
 }
 
 message Workspace {

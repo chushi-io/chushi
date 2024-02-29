@@ -39,6 +39,8 @@ const (
 	RunsWatchProcedure = "/api.v1.Runs/Watch"
 	// RunsUpdateProcedure is the fully-qualified name of the Runs's Update RPC.
 	RunsUpdateProcedure = "/api.v1.Runs/Update"
+	// RunsGetProcedure is the fully-qualified name of the Runs's Get RPC.
+	RunsGetProcedure = "/api.v1.Runs/Get"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -47,6 +49,7 @@ var (
 	runsListMethodDescriptor   = runsServiceDescriptor.Methods().ByName("List")
 	runsWatchMethodDescriptor  = runsServiceDescriptor.Methods().ByName("Watch")
 	runsUpdateMethodDescriptor = runsServiceDescriptor.Methods().ByName("Update")
+	runsGetMethodDescriptor    = runsServiceDescriptor.Methods().ByName("Get")
 )
 
 // RunsClient is a client for the api.v1.Runs service.
@@ -54,6 +57,7 @@ type RunsClient interface {
 	List(context.Context, *connect.Request[v1.ListRunsRequest]) (*connect.Response[v1.ListRunsResponse], error)
 	Watch(context.Context, *connect.Request[v1.WatchRunsRequest]) (*connect.ServerStreamForClient[v1.Run], error)
 	Update(context.Context, *connect.Request[v1.UpdateRunRequest]) (*connect.Response[v1.Run], error)
+	Get(context.Context, *connect.Request[v1.GetRunRequest]) (*connect.Response[v1.Run], error)
 }
 
 // NewRunsClient constructs a client for the api.v1.Runs service. By default, it uses the Connect
@@ -84,6 +88,12 @@ func NewRunsClient(httpClient connect.HTTPClient, baseURL string, opts ...connec
 			connect.WithSchema(runsUpdateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		get: connect.NewClient[v1.GetRunRequest, v1.Run](
+			httpClient,
+			baseURL+RunsGetProcedure,
+			connect.WithSchema(runsGetMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -92,6 +102,7 @@ type runsClient struct {
 	list   *connect.Client[v1.ListRunsRequest, v1.ListRunsResponse]
 	watch  *connect.Client[v1.WatchRunsRequest, v1.Run]
 	update *connect.Client[v1.UpdateRunRequest, v1.Run]
+	get    *connect.Client[v1.GetRunRequest, v1.Run]
 }
 
 // List calls api.v1.Runs.List.
@@ -109,11 +120,17 @@ func (c *runsClient) Update(ctx context.Context, req *connect.Request[v1.UpdateR
 	return c.update.CallUnary(ctx, req)
 }
 
+// Get calls api.v1.Runs.Get.
+func (c *runsClient) Get(ctx context.Context, req *connect.Request[v1.GetRunRequest]) (*connect.Response[v1.Run], error) {
+	return c.get.CallUnary(ctx, req)
+}
+
 // RunsHandler is an implementation of the api.v1.Runs service.
 type RunsHandler interface {
 	List(context.Context, *connect.Request[v1.ListRunsRequest]) (*connect.Response[v1.ListRunsResponse], error)
 	Watch(context.Context, *connect.Request[v1.WatchRunsRequest], *connect.ServerStream[v1.Run]) error
 	Update(context.Context, *connect.Request[v1.UpdateRunRequest]) (*connect.Response[v1.Run], error)
+	Get(context.Context, *connect.Request[v1.GetRunRequest]) (*connect.Response[v1.Run], error)
 }
 
 // NewRunsHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -140,6 +157,12 @@ func NewRunsHandler(svc RunsHandler, opts ...connect.HandlerOption) (string, htt
 		connect.WithSchema(runsUpdateMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	runsGetHandler := connect.NewUnaryHandler(
+		RunsGetProcedure,
+		svc.Get,
+		connect.WithSchema(runsGetMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/api.v1.Runs/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RunsListProcedure:
@@ -148,6 +171,8 @@ func NewRunsHandler(svc RunsHandler, opts ...connect.HandlerOption) (string, htt
 			runsWatchHandler.ServeHTTP(w, r)
 		case RunsUpdateProcedure:
 			runsUpdateHandler.ServeHTTP(w, r)
+		case RunsGetProcedure:
+			runsGetHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -167,4 +192,8 @@ func (UnimplementedRunsHandler) Watch(context.Context, *connect.Request[v1.Watch
 
 func (UnimplementedRunsHandler) Update(context.Context, *connect.Request[v1.UpdateRunRequest]) (*connect.Response[v1.Run], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.Runs.Update is not implemented"))
+}
+
+func (UnimplementedRunsHandler) Get(context.Context, *connect.Request[v1.GetRunRequest]) (*connect.Response[v1.Run], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.Runs.Get is not implemented"))
 }

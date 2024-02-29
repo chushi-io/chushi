@@ -110,3 +110,10 @@ func (s *RunServer) Update(
 	})
 	return res, nil
 }
+
+func (s *RunServer) Get(
+	ctx context.Context,
+	req *connect.Request[v1.GetRunRequest],
+) (*connect.Response[v1.Run], error) {
+	return nil, nil
+}

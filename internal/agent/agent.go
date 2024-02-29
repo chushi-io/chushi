@@ -9,10 +9,8 @@ import (
 	apiv1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
 	"github.com/chushi-io/chushi/internal/agent/proxy"
-	"github.com/chushi-io/chushi/pkg/sdk"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
-	"io"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -20,13 +18,10 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
 type Agent struct {
-	sdk                   *sdk.Sdk
-	sinks                 []io.Writer
 	id                    string
 	proxy                 *proxy.Proxy
 	grpcUrl               string
@@ -35,6 +30,7 @@ type Agent struct {
 	client                *kubernetes.Clientset
 	runsClient            apiv1connect.RunsClient
 	authClient            apiv1connect.AuthClient
+	wsClient              apiv1connect.WorkspacesClient
 	logger                zap.Logger
 	organizationId        string
 	httpClient            *http.Client
@@ -57,12 +53,6 @@ func WithHttpClient(client *http.Client) func(agent *Agent) {
 func WithOrganizationId(organizationId string) func(agent *Agent) {
 	return func(agent *Agent) {
 		agent.organizationId = organizationId
-	}
-}
-
-func WithSdk(sdk *sdk.Sdk) func(agent *Agent) {
-	return func(agent *Agent) {
-		agent.sdk = sdk
 	}
 }
 
@@ -131,15 +121,14 @@ func (a *Agent) Run() error {
 
 			scheduledRun := stream.Msg()
 
-			a.logger.Info("Starting run", zap.String("run.id", scheduledRun.Id))
-			run, err := a.sdk.Runs().Get(&sdk.GetRunRequest{
+			run, err := a.runsClient.Get(context.Background(), connect.NewRequest(&apiv1.GetRunRequest{
 				RunId: scheduledRun.Id,
-			})
+			}))
 			if err != nil {
 				// Handle the error?
 				a.logger.Fatal(err.Error())
 			}
-			if err := a.handle(*run.Run); err != nil {
+			if err := a.handle(run.Msg); err != nil {
 				a.logger.Fatal(err.Error())
 			}
 			a.logger.Info("Run completed", zap.String("run.id", scheduledRun.Id))
@@ -151,23 +140,22 @@ func (a *Agent) Run() error {
 	return nil
 }
 
-func (a *Agent) handle(run sdk.Run) error {
-	a.sinks = []io.Writer{ChangeSink{
-		RunId: run.Id,
-		Sdk:   a.sdk,
-	}}
-	ws, err := a.sdk.GetWorkspace(run.WorkspaceId)
+func (a *Agent) handle(run *apiv1.Run) error {
+
+	ws, err := a.wsClient.GetWorkspace(context.TODO(), connect.NewRequest(&apiv1.GetWorkspaceRequest{
+		Id: run.WorkspaceId,
+	}))
 	if err != nil {
 		return err
 	}
 
 	// TODO: Should we just kick off the job, and let the
 	// runner itself just fail if its locked?
-	if ws.Workspace.Locked {
+	if ws.Msg.Workspace.Locked {
 		return errors.New("workspace is already locked")
 	}
 
-	token, err := a.generateToken(ws.Workspace.Id, run.Id, a.organizationId)
+	token, err := a.generateToken(ws.Msg.Workspace.Id, run.Id, a.organizationId)
 	if err != nil {
 		return err
 	}
@@ -179,17 +167,21 @@ func (a *Agent) handle(run sdk.Run) error {
 		return err
 	}
 
-	creds, err := a.sdk.Workspaces().GetConnectionCredentials(ws.Workspace.Vcs.ConnectionId)
+	creds, err := a.wsClient.GetVcsConnection(context.TODO(), connect.NewRequest(&apiv1.GetVcsConnectionRequest{
+		ConnectionId: ws.Msg.Workspace.Vcs.ConnectionId,
+	}))
 	if err != nil {
 		return err
 	}
 
-	variables, err := a.sdk.Workspaces().GetVariables(ws.Workspace.Id)
+	variables, err := a.wsClient.GetVariables(context.TODO(), connect.NewRequest(&apiv1.GetVariablesRequest{
+		WorkspaceId: ws.Msg.Workspace.Id,
+	}))
 	if err != nil {
 		return err
 	}
 
-	pod, err := a.launchPod(run, ws.Workspace, token, creds.Credentials, variables)
+	pod, err := a.launchPod(run, ws.Msg.Workspace, token, creds.Msg.Token, variables.Msg.Variables)
 	if err != nil {
 		return err
 	}
@@ -201,17 +193,6 @@ func (a *Agent) handle(run sdk.Run) error {
 
 	if !success {
 		return errors.New("workspace failed")
-	}
-
-	podLogOpts := v1.PodLogOptions{}
-	req := a.client.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-	podLogs, err := req.Stream(context.TODO())
-	if err != nil {
-		return err
-	}
-	defer podLogs.Close()
-	if err = a.PollLogs(podLogs); err != nil {
-		return err
 	}
 
 	// Lastly, post updates back to the run
@@ -246,41 +227,14 @@ loop:
 	return true, nil
 }
 
-func (a *Agent) launchPod(run sdk.Run, workspace sdk.Workspace, token string, credentials sdk.Credentials, variables []sdk.Variable) (*v1.Pod, error) {
+func (a *Agent) launchPod(run *apiv1.Run, workspace *apiv1.Workspace, token string, credentials string, variables []*apiv1.Variable) (*v1.Pod, error) {
 	podManifest := a.podSpecForRun(run, workspace, token, credentials, variables)
 	return a.client.CoreV1().
 		Pods("default").
 		Create(context.TODO(), podManifest, metav1.CreateOptions{})
 }
 
-func (a *Agent) RegisterSink(sink io.Writer) {
-	a.sinks = append(a.sinks, sink)
-}
-
-func (a *Agent) PollLogs(closer io.ReadCloser) error {
-	_, err := io.Copy(a, closer)
-	return err
-}
-
-func (a *Agent) Write(p []byte) (int, error) {
-	// TODO: We'll probably have to do some buffering
-	// here or something. Depending on the length of the
-	// chunk, we may end up with partial lines
-	lines := strings.Split(string(p), "\n")
-	for _, line := range lines {
-		_ = a.writeLine(line)
-	}
-	return len(p), nil
-}
-
-func (a *Agent) writeLine(line string) error {
-	for _, sink := range a.sinks {
-		sink.Write([]byte(line))
-	}
-	return nil
-}
-
-func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token string, response sdk.Credentials, variables []sdk.Variable) *v1.Pod {
+func (a *Agent) podSpecForRun(run *apiv1.Run, workspace *apiv1.Workspace, token string, response string, variables []*apiv1.Variable) *v1.Pod {
 	args := []string{
 		"runner",
 		fmt.Sprintf("-d=/workspace/%s", workspace.Vcs.WorkingDirectory),
@@ -295,7 +249,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token string
 		},
 		{
 			Name:  "CHUSHI_ORGANIZATION",
-			Value: a.sdk.OrganizationId.String(),
+			Value: a.organizationId,
 		},
 		{
 			Name:  "CHUSHI_RUN_ID",
@@ -317,7 +271,7 @@ func (a *Agent) podSpecForRun(run sdk.Run, workspace sdk.Workspace, token string
 	for _, variable := range variables {
 		if variable.Type == "environment" {
 			envVars = append(envVars, v1.EnvVar{
-				Name:  variable.Name,
+				Name:  variable.Key,
 				Value: variable.Value,
 			})
 		}
@@ -357,7 +311,7 @@ git clone -c credential.helper='!f() { echo username=chushi; echo "password=$GIT
 				Env: []v1.EnvVar{
 					{
 						Name:  "GITHUB_PAT",
-						Value: response.Token,
+						Value: token,
 					},
 				},
 				VolumeMounts: []v1.VolumeMount{

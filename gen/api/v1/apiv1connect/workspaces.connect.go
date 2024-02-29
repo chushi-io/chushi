@@ -38,6 +38,8 @@ const (
 	// WorkspacesGetVcsConnectionProcedure is the fully-qualified name of the Workspaces's
 	// GetVcsConnection RPC.
 	WorkspacesGetVcsConnectionProcedure = "/api.v1.Workspaces/GetVcsConnection"
+	// WorkspacesGetVariablesProcedure is the fully-qualified name of the Workspaces's GetVariables RPC.
+	WorkspacesGetVariablesProcedure = "/api.v1.Workspaces/GetVariables"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -45,12 +47,14 @@ var (
 	workspacesServiceDescriptor                = v1.File_api_v1_workspaces_proto.Services().ByName("Workspaces")
 	workspacesGetWorkspaceMethodDescriptor     = workspacesServiceDescriptor.Methods().ByName("GetWorkspace")
 	workspacesGetVcsConnectionMethodDescriptor = workspacesServiceDescriptor.Methods().ByName("GetVcsConnection")
+	workspacesGetVariablesMethodDescriptor     = workspacesServiceDescriptor.Methods().ByName("GetVariables")
 )
 
 // WorkspacesClient is a client for the api.v1.Workspaces service.
 type WorkspacesClient interface {
 	GetWorkspace(context.Context, *connect.Request[v1.GetWorkspaceRequest]) (*connect.Response[v1.GetWorkspaceResponse], error)
 	GetVcsConnection(context.Context, *connect.Request[v1.GetVcsConnectionRequest]) (*connect.Response[v1.GetVcsConnectionResponse], error)
+	GetVariables(context.Context, *connect.Request[v1.GetVariablesRequest]) (*connect.Response[v1.GetVariablesResponse], error)
 }
 
 // NewWorkspacesClient constructs a client for the api.v1.Workspaces service. By default, it uses
@@ -75,6 +79,12 @@ func NewWorkspacesClient(httpClient connect.HTTPClient, baseURL string, opts ...
 			connect.WithSchema(workspacesGetVcsConnectionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		getVariables: connect.NewClient[v1.GetVariablesRequest, v1.GetVariablesResponse](
+			httpClient,
+			baseURL+WorkspacesGetVariablesProcedure,
+			connect.WithSchema(workspacesGetVariablesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -82,6 +92,7 @@ func NewWorkspacesClient(httpClient connect.HTTPClient, baseURL string, opts ...
 type workspacesClient struct {
 	getWorkspace     *connect.Client[v1.GetWorkspaceRequest, v1.GetWorkspaceResponse]
 	getVcsConnection *connect.Client[v1.GetVcsConnectionRequest, v1.GetVcsConnectionResponse]
+	getVariables     *connect.Client[v1.GetVariablesRequest, v1.GetVariablesResponse]
 }
 
 // GetWorkspace calls api.v1.Workspaces.GetWorkspace.
@@ -94,10 +105,16 @@ func (c *workspacesClient) GetVcsConnection(ctx context.Context, req *connect.Re
 	return c.getVcsConnection.CallUnary(ctx, req)
 }
 
+// GetVariables calls api.v1.Workspaces.GetVariables.
+func (c *workspacesClient) GetVariables(ctx context.Context, req *connect.Request[v1.GetVariablesRequest]) (*connect.Response[v1.GetVariablesResponse], error) {
+	return c.getVariables.CallUnary(ctx, req)
+}
+
 // WorkspacesHandler is an implementation of the api.v1.Workspaces service.
 type WorkspacesHandler interface {
 	GetWorkspace(context.Context, *connect.Request[v1.GetWorkspaceRequest]) (*connect.Response[v1.GetWorkspaceResponse], error)
 	GetVcsConnection(context.Context, *connect.Request[v1.GetVcsConnectionRequest]) (*connect.Response[v1.GetVcsConnectionResponse], error)
+	GetVariables(context.Context, *connect.Request[v1.GetVariablesRequest]) (*connect.Response[v1.GetVariablesResponse], error)
 }
 
 // NewWorkspacesHandler builds an HTTP handler from the service implementation. It returns the path
@@ -118,12 +135,20 @@ func NewWorkspacesHandler(svc WorkspacesHandler, opts ...connect.HandlerOption) 
 		connect.WithSchema(workspacesGetVcsConnectionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	workspacesGetVariablesHandler := connect.NewUnaryHandler(
+		WorkspacesGetVariablesProcedure,
+		svc.GetVariables,
+		connect.WithSchema(workspacesGetVariablesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/api.v1.Workspaces/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case WorkspacesGetWorkspaceProcedure:
 			workspacesGetWorkspaceHandler.ServeHTTP(w, r)
 		case WorkspacesGetVcsConnectionProcedure:
 			workspacesGetVcsConnectionHandler.ServeHTTP(w, r)
+		case WorkspacesGetVariablesProcedure:
+			workspacesGetVariablesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -139,4 +164,8 @@ func (UnimplementedWorkspacesHandler) GetWorkspace(context.Context, *connect.Req
 
 func (UnimplementedWorkspacesHandler) GetVcsConnection(context.Context, *connect.Request[v1.GetVcsConnectionRequest]) (*connect.Response[v1.GetVcsConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.Workspaces.GetVcsConnection is not implemented"))
+}
+
+func (UnimplementedWorkspacesHandler) GetVariables(context.Context, *connect.Request[v1.GetVariablesRequest]) (*connect.Response[v1.GetVariablesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.Workspaces.GetVariables is not implemented"))
 }
