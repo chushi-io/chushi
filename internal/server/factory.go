@@ -10,10 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
-	"github.com/chushi-io/chushi/internal/auth"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/grpc"
 	"github.com/chushi-io/chushi/internal/middleware"
+	auth2 "github.com/chushi-io/chushi/internal/middleware/auth"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
@@ -99,10 +99,14 @@ func (f *Factory) NewOrganizationAccessMiddleware(ab *authboss.Authboss, oauthSr
 	return &middleware.OrganizationAccessMiddleware{
 		OrganizationRepository: organization.NewOrganizationRepository(f.Database),
 		Auth:                   ab,
-		UserStore:              organization.NewUserStore(f.Database),
+		UserStore:              f.NewUserStore(),
 		OauthServer:            oauthSrv,
 		ClientStore:            oauth.NewClientStore(f.Database),
 	}
+}
+
+func (f *Factory) NewUserStore() *organization.UserStore {
+	return organization.NewUserStore(f.Database)
 }
 
 func (f *Factory) NewVariablesController() *controller.VariablesController {
@@ -284,7 +288,7 @@ func (f *Factory) Interceptors() connect.Option {
 	}
 
 	clientStore := oauth.NewClientStore(f.Database)
-	interceptors := connect.WithInterceptors(auth.NewAuthInterceptor(
+	interceptors := connect.WithInterceptors(auth2.NewAuthInterceptor(
 		clientStore,
 		agent.NewAgentRepository(f.Database, clientStore),
 	))

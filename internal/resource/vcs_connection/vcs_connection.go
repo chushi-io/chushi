@@ -20,6 +20,13 @@ type VcsConnection struct {
 	Git            GitConnection             `gorm:"embedded;embeddedPrefix:git_" json:"git,omitempty"`
 	OrganizationID uuid.UUID                 `json:"organization_id"`
 	Organization   organization.Organization `json:"-"`
+
+	Webhook Webhook `gorm:"embedded;embeddedPrefix:webhook_" json:"webhook,omitempty"`
+}
+
+type Webhook struct {
+	Id     uuid.UUID `json:"id"`
+	Secret string    `json:"secret"`
 }
 
 type GitConnection struct {
