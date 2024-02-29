@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0](https://github.com/chushi-io/chushi/compare/v1.6.0...v1.7.0) (2024-02-29)
+
+
+### Features
+
+* **agent:** All agent requests now go over GRPC ([5804090](https://github.com/chushi-io/chushi/commit/58040904a93f4aaa43f09245f99aeff0b5ffe7f9))
+
 ## [1.6.0](https://github.com/chushi-io/chushi/compare/v1.5.0...v1.6.0) (2024-02-20)
 
 
