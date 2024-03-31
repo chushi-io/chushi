@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.7.1](https://github.com/chushi-io/chushi/compare/v1.7.0...v1.7.1) (2024-02-29)
+
+
+### Bug Fixes
+
+* **runs:** Return response for grpc runs request ([a6b41c1](https://github.com/chushi-io/chushi/commit/a6b41c1c293beeaa8a26aae6a876a30ef56ebfc0))
+
 ## [1.7.0](https://github.com/chushi-io/chushi/compare/v1.6.0...v1.7.0) (2024-02-29)
 
 
