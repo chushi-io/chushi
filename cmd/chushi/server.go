@@ -1,25 +1,21 @@
 package main
 
 import (
-	"github.com/chushi-io/chushi/internal/server"
-	"github.com/chushi-io/chushi/internal/server/config"
+	"github.com/chushi-io/chushi/internal/chushi"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the Chushi server",
 	Run: func(cmd *cobra.Command, args []string) {
-		conf, err := config.Load()
-		if err != nil {
-			zap.L().Fatal(err.Error())
-		}
+		// Do some other configuration?
+		chushi.Server().Run()
 
-		httpServer, err := server.New(conf)
-		if err != nil {
-			zap.L().Fatal(err.Error())
-		}
+		//httpServer, err := server.New(conf)
+		//if err != nil {
+		//	zap.L().Fatal(err.Error())
+		//}
 
 		//go func() {
 		//	zap.L().Info("Starting GRPC listener")
@@ -32,10 +28,10 @@ var serverCmd = &cobra.Command{
 		//	}
 		//}()
 
-		zap.L().Info("Starting HTTP server")
-		if err := httpServer.Run(); err != nil {
-			zap.L().Fatal(err.Error())
-		}
+		//zap.L().Info("Starting HTTP server")
+		//if err := httpServer.Run(); err != nil {
+		//	zap.L().Fatal(err.Error())
+		//}
 	},
 }
 

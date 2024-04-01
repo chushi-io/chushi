@@ -1,6 +1,9 @@
 package types
 
-import "github.com/google/uuid"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
 
 type Type int64
 
@@ -41,4 +44,56 @@ func FromString(input string) (*UuidOrString, error) {
 		StringValue: uid.String(),
 		UuidValue:   uid,
 	}, nil
+}
+
+type Module interface {
+	Middleware() []gin.HandlerFunc
+	Routes() []Route
+}
+
+type Route interface {
+	// Pattern reports the path at which this is registered.
+	Pattern() string
+	Method() string
+	Handlers() []gin.HandlerFunc
+}
+
+type RouteImpl struct {
+	pattern  string
+	method   string
+	handlers []gin.HandlerFunc
+}
+
+func (r RouteImpl) Pattern() string             { return r.pattern }
+func (r RouteImpl) Method() string              { return r.method }
+func (r RouteImpl) Handlers() []gin.HandlerFunc { return r.handlers }
+
+func RouteRegistration(method string, pattern string, handlers []gin.HandlerFunc) Route {
+	return RouteImpl{
+		pattern:  pattern,
+		method:   method,
+		handlers: handlers,
+	}
+}
+
+type GrpcRoute interface {
+	Pattern() string
+	Handler() gin.HandlerFunc
+}
+
+type grpcRouteImpl struct {
+	pattern string
+	handler gin.HandlerFunc
+}
+
+func GrpcRouteRegistration(pattern string, handler gin.HandlerFunc) GrpcRoute {
+	return grpcRouteImpl{pattern, handler}
+}
+
+func (g grpcRouteImpl) Pattern() string {
+	return g.pattern
+}
+
+func (g grpcRouteImpl) Handler() gin.HandlerFunc {
+	return g.handler
 }

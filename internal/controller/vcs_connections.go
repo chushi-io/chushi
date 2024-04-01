@@ -12,6 +12,12 @@ type VcsConnectionsController struct {
 	Repository vcs_connection.Repository
 }
 
+func NewVcsConnectionsController(
+	repo vcs_connection.Repository,
+) *VcsConnectionsController {
+	return &VcsConnectionsController{Repository: repo}
+}
+
 func (ctrl *VcsConnectionsController) List(c *gin.Context) {
 	orgId, err := helpers.GetOrganizationId(c)
 	if err != nil {

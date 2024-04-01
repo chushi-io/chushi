@@ -14,6 +14,13 @@ type WorkspacesController struct {
 	FileManager file_manager.FileManager
 }
 
+func NewWorkspacesController(repo workspaces.WorkspacesRepository, fileManager file_manager.FileManager) *WorkspacesController {
+	return &WorkspacesController{
+		Repository:  repo,
+		FileManager: fileManager,
+	}
+}
+
 func (ctrl *WorkspacesController) CreateWorkspace(c *gin.Context) {
 	var workspace workspaces.Workspace
 

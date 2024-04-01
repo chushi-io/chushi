@@ -115,7 +115,7 @@ func (s *RunServer) Get(
 	ctx context.Context,
 	req *connect.Request[v1.GetRunRequest],
 ) (*connect.Response[v1.Run], error) {
-	ag := ctx.Value("agent").(*agent.Agent)
+	//ag := ctx.Value("agent").(*agent.Agent)
 
 	runId, err := uuid.Parse(req.Msg.RunId)
 	if err != nil {

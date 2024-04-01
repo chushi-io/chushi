@@ -20,6 +20,20 @@ type RunsController struct {
 	FileManager file_manager.FileManager
 }
 
+func NewRunsController(
+	repo run.RunRepository,
+	workspaceRepo workspaces.WorkspacesRepository,
+	runManager run_manager.RunManager,
+	fileManager file_manager.FileManager,
+) *RunsController {
+	return &RunsController{
+		Runs:        repo,
+		Workspaces:  workspaceRepo,
+		RunManager:  runManager,
+		FileManager: fileManager,
+	}
+}
+
 func (ctrl *RunsController) List(c *gin.Context) {
 	params := &run.RunListParams{
 		OrganizationId: helpers.GetOrganization(c).ID,

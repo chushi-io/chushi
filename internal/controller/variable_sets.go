@@ -11,6 +11,10 @@ type VariableSetsController struct {
 	Repository variables.SetRepository
 }
 
+func NewVariableSetsController(repo variables.SetRepository) *VariableSetsController {
+	return &VariableSetsController{Repository: repo}
+}
+
 func (ctrl *VariableSetsController) List(c *gin.Context) {
 	org := helpers.GetOrganization(c)
 	variableSets, err := ctrl.Repository.List(&variables.ListVariableSetParams{

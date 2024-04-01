@@ -1,87 +1,62 @@
 package server
 
 import (
+	"context"
+	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/middleware/auth"
 	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/session"
 	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/token"
-	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
-	"github.com/chushi-io/chushi/internal/resource/run"
-	"github.com/chushi-io/chushi/internal/resource/variables"
-	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
+	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/go-oauth2/oauth2/v4/server"
+	"github.com/volatiletech/authboss/v3"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+	"net"
 	"net/http"
-	"os"
 	"strings"
 )
 
-func New(conf *config.Config) (*gin.Engine, error) {
+type Params struct {
+	fx.In
+	Config                       *config.Config
+	Logger                       *zap.Logger
+	WorkspacesController         *controller.WorkspacesController
+	OrganizationsController      *controller.OrganizationsController
+	AgentsController             *controller.AgentsController
+	RunsController               *controller.RunsController
+	VcsController                *controller.VcsConnectionsController
+	VariablesController          *controller.VariablesController
+	VariablesSetsController      *controller.VariableSetsController
+	MeController                 *controller.MeController
+	AuthServer                   *server.Server
+	AuthBoss                     *authboss.Authboss
+	UserStore                    *organization.UserStore
+	WorkspacesRepository         workspaces.WorkspacesRepository
+	OrganizationAccessMiddleware *middleware.OrganizationAccessMiddleware
+	GrpcAuthServer               types.GrpcRoute `name:"grpc_auth"`
+	GrpcPlanServer               types.GrpcRoute `name:"grpc_plans"`
+	GrpcLogsServer               types.GrpcRoute `name:"grpc_logs"`
+	GrpcRunsServer               types.GrpcRoute `name:"grpc_runs"`
+}
 
-	// Load and initialize our database
-	gormConfig := &gorm.Config{}
-	if os.Getenv("APP_ENV") == "development" {
-		gormConfig.Logger = logger.Default.LogMode(logger.Info)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), gormConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := database.AutoMigrate(
-		&workspaces.Workspace{},
-		&variables.Variable{},
-		&variables.VariableSet{},
-		&variables.OrganizationVariable{},
-		&variables.WorkspaceVariable{},
-		&variables.WorkspaceVariableSet{},
-		&variables.OrganizationVariableSet{},
-		&organization.Organization{},
-		&oauth.OauthClient{},
-		&oauth.OauthToken{},
-		&run.Run{},
-		&organization.User{},
-		&organization.OrganizationUser{},
-		&vcs_connection.VcsConnection{},
-	); err != nil {
-		return nil, err
-	}
-
-	factory, err := NewFactory(database)
-	if err != nil {
-		return nil, err
-	}
-
-	workspaceCtrl := factory.NewWorkspaceController()
-	organizationsCtrl := factory.NewOrganizationsController()
-	authServer := factory.NewOauthServer()
-	agentCtrl := factory.NewAgentsController()
-	runsCtrl := factory.NewRunsController()
-	vcsCtrl := factory.NewVcsConnectionsController()
-	variablesCtrl := factory.NewVariablesController()
-	variableSetsCtrl := factory.NewVariableSetsController()
-	ab := factory.NewAuthBoss()
-	meCtrl := factory.NewMeController(ab)
+func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 
 	middlewareFactory := auth.WithStrategies(
-		session.New(ab, factory.NewUserStore()),
-		token.New(os.Getenv("JWT_SECRET_KEY")),
+		session.New(params.AuthBoss, params.UserStore),
+		token.New(params.Config.JwtSecretKey),
 	)
 
 	r := gin.Default()
 	r.UseH2C = true
 	r.Use(requestid.New())
-	r.Use(adapter.Wrap(ab.LoadClientStateMiddleware))
+	r.Use(adapter.Wrap(params.AuthBoss.LoadClientStateMiddleware))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -106,50 +81,50 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	// Hoist state to top level routing
 	state := r.Group("/:orgId/:workspace/state")
 	state.Use(middleware.VerifyStateAccess(
-		os.Getenv("JWT_SECRET_KEY"),
-		factory.NewWorkspacesRepository(),
+		params.Config.JwtSecretKey,
+		params.WorkspacesRepository,
 	))
 	{
-		state.GET("", workspaceCtrl.GetState)
-		state.POST("", workspaceCtrl.UploadState)
-		state.Handle("LOCK", "", workspaceCtrl.LockWorkspace)
-		state.Handle("UNLOCK", "", workspaceCtrl.UnlockWorkspace)
+		state.GET("", params.WorkspacesController.GetState)
+		state.POST("", params.WorkspacesController.UploadState)
+		state.Handle("LOCK", "", params.WorkspacesController.LockWorkspace)
+		state.Handle("UNLOCK", "", params.WorkspacesController.UnlockWorkspace)
 	}
 
 	v1api := r.Group("/api/v1")
 	// Apply our auth to all API endpoints
 	v1api.Use(middlewareFactory.Handle)
 
-	v1api.GET("/orgs", organizationsCtrl.List)
-	v1api.POST("/orgs", organizationsCtrl.Create)
+	v1api.GET("/orgs", params.OrganizationsController.List)
+	v1api.POST("/orgs", params.OrganizationsController.Create)
 	orgs := v1api.Group("/orgs/:organization")
 	// Authorize any requests to access the specified organization
-	orgs.Use(factory.NewOrganizationAccessMiddleware(ab, authServer).VerifyOrganizationAccess)
+	orgs.Use(params.OrganizationAccessMiddleware.VerifyOrganizationAccess)
 	{
-		orgs.GET("", organizationsCtrl.Get)
+		orgs.GET("", params.OrganizationsController.Get)
 		variables := orgs.Group("/variables")
 		{
-			variables.GET("", variablesCtrl.List)
-			variables.POST("", variablesCtrl.Create)
-			variables.GET(":variable", variablesCtrl.Get)
-			variables.PUT(":variable", variablesCtrl.Update)
-			variables.DELETE(":variable", variablesCtrl.Delete)
+			variables.GET("", params.VariablesController.List)
+			variables.POST("", params.VariablesController.Create)
+			variables.GET(":variable", params.VariablesController.Get)
+			variables.PUT(":variable", params.VariablesController.Update)
+			variables.DELETE(":variable", params.VariablesController.Delete)
 		}
 
 		variableSets := orgs.Group("/variable_sets")
 		{
-			variableSets.GET("", variableSetsCtrl.List)
-			variableSets.POST("", variableSetsCtrl.Create)
-			variableSets.GET(":variable_set", variableSetsCtrl.Get)
-			variableSets.PUT(":variable_set", variableSetsCtrl.Update)
-			variableSets.DELETE(":variable_set", variableSetsCtrl.Delete)
+			variableSets.GET("", params.VariablesSetsController.List)
+			variableSets.POST("", params.VariablesSetsController.Create)
+			variableSets.GET(":variable_set", params.VariablesSetsController.Get)
+			variableSets.PUT(":variable_set", params.VariablesSetsController.Update)
+			variableSets.DELETE(":variable_set", params.VariablesSetsController.Delete)
 			variableSetVariables := variableSets.Group(":variable_set/variables")
 			{
-				variableSetVariables.GET("", variablesCtrl.List)
-				variableSetVariables.POST("", variablesCtrl.Create)
-				variableSetVariables.GET(":variable", variablesCtrl.Get)
-				variableSetVariables.PUT(":variable", variablesCtrl.Update)
-				variableSetVariables.DELETE(":variable", variablesCtrl.Delete)
+				variableSetVariables.GET("", params.VariablesController.List)
+				variableSetVariables.POST("", params.VariablesController.Create)
+				variableSetVariables.GET(":variable", params.VariablesController.Get)
+				variableSetVariables.PUT(":variable", params.VariablesController.Update)
+				variableSetVariables.DELETE(":variable", params.VariablesController.Delete)
 			}
 		}
 	}
@@ -159,20 +134,20 @@ func New(conf *config.Config) (*gin.Engine, error) {
 	wam := &middleware.WorkspaceAccessMiddleware{}
 	workspaces.Use(wam.VerifyWorkspaceAccess)
 	{
-		workspaces.POST("", workspaceCtrl.CreateWorkspace)
-		workspaces.GET("", workspaceCtrl.ListWorkspaces)
+		workspaces.POST("", params.WorkspacesController.CreateWorkspace)
+		workspaces.GET("", params.WorkspacesController.ListWorkspaces)
 		workspace := workspaces.Group("/:workspace")
 		{
-			workspace.GET("", workspaceCtrl.GetWorkspace)
-			workspace.POST("", workspaceCtrl.UpdateWorkspace)
-			workspace.DELETE("", workspaceCtrl.DeleteWorkspace)
+			workspace.GET("", params.WorkspacesController.GetWorkspace)
+			workspace.POST("", params.WorkspacesController.UpdateWorkspace)
+			workspace.DELETE("", params.WorkspacesController.DeleteWorkspace)
 
 			// HTTP Backend handlers
 
 			runs := workspace.Group("/runs")
 			{
-				runs.GET("", runsCtrl.List)
-				runs.POST("", runsCtrl.Create)
+				runs.GET("", params.RunsController.List)
+				runs.POST("", params.RunsController.Create)
 				runs.GET("/:run", notImplemented)
 				runs.POST("/:run", notImplemented)
 				runs.DELETE("/:run", notImplemented)
@@ -180,30 +155,30 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 			variables := workspace.Group("/variables")
 			{
-				variables.GET("", variablesCtrl.List)
-				variables.POST("", variablesCtrl.Create)
-				variables.GET(":variable", variablesCtrl.Get)
-				variables.PUT(":variable", variablesCtrl.Update)
-				variables.DELETE(":variable", variablesCtrl.Delete)
+				variables.GET("", params.VariablesController.List)
+				variables.POST("", params.VariablesController.Create)
+				variables.GET(":variable", params.VariablesController.Get)
+				variables.PUT(":variable", params.VariablesController.Update)
+				variables.DELETE(":variable", params.VariablesController.Delete)
 			}
 		}
 	}
 
 	agents := orgs.Group("agents")
 	{
-		agents.GET("", agentCtrl.List)
-		agents.POST("", agentCtrl.Create)
-		agents.GET("/:agent", agentCtrl.Get)
+		agents.GET("", params.AgentsController.List)
+		agents.POST("", params.AgentsController.Create)
+		agents.GET("/:agent", params.AgentsController.Get)
 		agents.POST("/:agent", notImplemented)
 		agents.DELETE("/:agent", notImplemented)
 
 		agentRuns := agents.Group("/:agent/runs")
 		{
-			agentRuns.Use(agentCtrl.AgentAccess)
-			agentRuns.GET("", agentCtrl.GetRuns)
+			agentRuns.Use(params.AgentsController.AgentAccess)
+			agentRuns.GET("", params.AgentsController.GetRuns)
 		}
 
-		agents.POST("/:agent/runner_token", agentCtrl.GenerateRunnerToken)
+		agents.POST("/:agent/runner_token", params.AgentsController.GenerateRunnerToken)
 	}
 
 	// Plans
@@ -236,26 +211,26 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	vcsConnections := orgs.Group("/vcs_connections")
 	{
-		vcsConnections.GET("", vcsCtrl.List)
-		vcsConnections.POST("", vcsCtrl.Create)
-		vcsConnections.GET(":vcs_connection", vcsCtrl.Get)
-		vcsConnections.GET(":vcs_connection/credentials", vcsCtrl.Credentials)
-		vcsConnections.DELETE(":vcs_connection", vcsCtrl.Delete)
+		vcsConnections.GET("", params.VcsController.List)
+		vcsConnections.POST("", params.VcsController.Create)
+		vcsConnections.GET(":vcs_connection", params.VcsController.Get)
+		vcsConnections.GET(":vcs_connection/credentials", params.VcsController.Credentials)
+		vcsConnections.DELETE(":vcs_connection", params.VcsController.Delete)
 	}
 	runs := orgs.Group("/runs")
 	{
 		runs.POST("", notImplemented)
-		runs.GET("/:run", runsCtrl.Get)
-		runs.POST("/:run", runsCtrl.Update)
-		runs.POST("/:run/presigned_url", runsCtrl.GeneratePresignedUrl)
-		runs.PUT("/:run/plan", runsCtrl.StorePlan).Use(middleware.VerifyStateAccess(
-			os.Getenv("JWT_SECRET_KEY"),
-			factory.NewWorkspacesRepository(),
+		runs.GET("/:run", params.RunsController.Get)
+		runs.POST("/:run", params.RunsController.Update)
+		runs.POST("/:run/presigned_url", params.RunsController.GeneratePresignedUrl)
+		runs.PUT("/:run/plan", params.RunsController.StorePlan).Use(middleware.VerifyStateAccess(
+			params.Config.JwtSecretKey,
+			params.WorkspacesRepository,
 		))
 		runs.POST("/:run/apply", notImplemented)
 		runs.POST("/:run/discard", notImplemented)
 		runs.POST("/:run/cancel", notImplemented)
-		runs.POST("/:run/logs", runsCtrl.SaveLogs)
+		runs.POST("/:run/logs", params.RunsController.SaveLogs)
 	}
 
 	webhooks := orgs.Group("/webhooks")
@@ -268,26 +243,25 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	meApi := r.Group("me")
 	{
-		meApi.GET("orgs", meCtrl.ListOrganizations)
+		meApi.GET("orgs", params.MeController.ListOrganizations)
 	}
 
 	authGroup := r.Group("/auth")
 	//Use(adapter.Wrap(confirm.Middleware(ab)))
 	{
-		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", ab.Config.Core.Router)))
-
+		authGroup.Any("*w", gin.WrapH(http.StripPrefix("/auth", params.AuthBoss.Config.Core.Router)))
 	}
 
 	v1auth := r.Group("/oauth/v1")
 	{
 		v1auth.GET("/authorize", func(c *gin.Context) {
-			err := authServer.HandleAuthorizeRequest(c.Writer, c.Request)
+			err := params.AuthServer.HandleAuthorizeRequest(c.Writer, c.Request)
 			if err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
 			}
 		})
 		v1auth.POST("/token", func(c *gin.Context) {
-			authServer.HandleTokenRequest(c.Writer, c.Request)
+			params.AuthServer.HandleTokenRequest(c.Writer, c.Request)
 		})
 	}
 
@@ -302,11 +276,32 @@ func New(conf *config.Config) (*gin.Engine, error) {
 
 	grpcApi := r.Group("/grpc")
 	{
-		grpcApi.Any(factory.NewGrpcRunsServer())
-		grpcApi.Any(factory.NewGrpcLogsServer())
-		grpcApi.Any(factory.NewGrpcPlansServer())
+		grpcApi.Any(params.GrpcRunsServer.Pattern(), params.GrpcRunsServer.Handler())
+		grpcApi.Any(params.GrpcLogsServer.Pattern(), params.GrpcLogsServer.Handler())
+		grpcApi.Any(params.GrpcPlanServer.Pattern(), params.GrpcPlanServer.Handler())
 	}
 
+	srv := &http.Server{Addr: ":8080", Handler: r}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			ln, err := net.Listen("tcp", srv.Addr)
+			if err != nil {
+				return err
+			}
+			params.Logger.Info("Starting HTTP server")
+			go func() {
+				err := srv.Serve(ln)
+				if err != nil {
+					params.Logger.Fatal(err.Error())
+				}
+			}()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return srv.Shutdown(ctx)
+		},
+	})
 	return r, nil
 }
 

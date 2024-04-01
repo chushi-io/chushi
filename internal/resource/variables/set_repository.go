@@ -27,6 +27,10 @@ type SetRepositoryImpl struct {
 	Db *gorm.DB
 }
 
+func NewVariableSetsRepository(db *gorm.DB) SetRepository {
+	return &SetRepositoryImpl{Db: db}
+}
+
 func (sri SetRepositoryImpl) List(params *ListVariableSetParams) ([]VariableSet, error) {
 	var variableSets []VariableSet
 	result := sri.Db.Where("organization_id = ?", params.OrganizationId).Find(&variableSets)
