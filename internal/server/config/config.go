@@ -3,8 +3,10 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	DatabaseUri  string `mapstructure:"database_uri"`
-	JwtSecretKey string `mapstructure:"jwt_secret_key"`
+	DatabaseUri   string `mapstructure:"database_uri"`
+	JwtSecretKey  string `mapstructure:"jwt_secret_key"`
+	SessionSecret string `mapstructure:"session_secret"`
+	CookieSecret  string `mapstructure:"cookie_secret"`
 }
 
 // Load will parse any environment variables in .env
@@ -17,6 +19,8 @@ func Load() (*Config, error) {
 
 	v.BindEnv("database_uri")
 	v.BindEnv("jwt_secret_key")
+	v.BindEnv("session_secret")
+	v.BindEnv("cookie_secret")
 
 	config := &Config{}
 	if err := v.Unmarshal(config); err != nil {

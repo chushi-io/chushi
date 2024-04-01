@@ -276,12 +276,12 @@ func Server() *fx.App {
 				})
 				return srv
 			},
-			func() abclientstate.CookieStorer {
-				cookieStoreKey, _ := base64.StdEncoding.DecodeString(`NpEPi8pEjKVjLGJ6kYCS+VTCzi6BUuDzU0wrwXyf5uDPArtlofn2AG6aTMiPmN3C909rsEWMNqJqhIVPGP3Exg==`)
+			func(conf *config.Config) abclientstate.CookieStorer {
+				cookieStoreKey, _ := base64.StdEncoding.DecodeString(conf.CookieSecret)
 				return abclientstate.NewCookieStorer(cookieStoreKey, nil)
 			},
-			func() abclientstate.SessionStorer {
-				sessionStoreKey, _ := base64.StdEncoding.DecodeString(`AbfYwmmt8UCwUuhd9qvfNA9UCuN1cVcKJN1ofbiky6xCyyBj20whe40rJa3Su0WOWLWcPpO1taqJdsEI/65+JA==`)
+			func(conf *config.Config) abclientstate.SessionStorer {
+				sessionStoreKey, _ := base64.StdEncoding.DecodeString(conf.SessionSecret)
 				return abclientstate.NewSessionStorer("test", sessionStoreKey, nil)
 			},
 			func(
