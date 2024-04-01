@@ -27,6 +27,10 @@ type RepositoryImpl struct {
 	Db *gorm.DB
 }
 
+func NewVariableRepository(db *gorm.DB) Repository {
+	return &RepositoryImpl{Db: db}
+}
+
 func (v RepositoryImpl) List(params *ListVariableParams) ([]Variable, error) {
 	var variables []Variable
 	query := v.Db.Where("organization_id = ?")

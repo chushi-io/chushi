@@ -6,6 +6,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
+	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/generates"
@@ -21,6 +22,38 @@ type AgentsController struct {
 	RunsRepository      run.RunRepository
 	WorkspaceRepository workspaces.WorkspacesRepository
 	JwtSecretKey        string
+}
+
+func NewAgentsController(
+	agentRepo agent.AgentRepository,
+	runsRepo run.RunRepository,
+	workspaceRepo workspaces.WorkspacesRepository,
+	conf *config.Config,
+) *AgentsController {
+	return &AgentsController{
+		Repository:          agentRepo,
+		RunsRepository:      runsRepo,
+		WorkspaceRepository: workspaceRepo,
+		JwtSecretKey:        conf.JwtSecretKey,
+	}
+}
+
+func (a *AgentsController) Middleware() []gin.HandlerFunc {
+	return []gin.HandlerFunc{}
+}
+
+func (a *AgentsController) Routes() []types.Route {
+	return []types.Route{
+		types.RouteRegistration("GET", "", []gin.HandlerFunc{a.List}),
+		types.RouteRegistration("POST", "", []gin.HandlerFunc{a.Create}),
+		types.RouteRegistration("GET", "/:agent", []gin.HandlerFunc{a.Get}),
+		types.RouteRegistration("POST", "/:agent", []gin.HandlerFunc{a.Update}),
+		types.RouteRegistration("DELETE", "/:agent", []gin.HandlerFunc{a.Delete}),
+		types.RouteRegistration("GET", "/:agent/runs", []gin.HandlerFunc{
+			a.AgentAccess,
+			a.GetRuns,
+		}),
+	}
 }
 
 func (ctrl *AgentsController) List(c *gin.Context) {

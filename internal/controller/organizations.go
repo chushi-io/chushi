@@ -10,6 +10,10 @@ type OrganizationsController struct {
 	Repository organization.OrganizationRepository
 }
 
+func NewOrganizationsController(repo organization.OrganizationRepository) *OrganizationsController {
+	return &OrganizationsController{Repository: repo}
+}
+
 func (ctrl *OrganizationsController) SetContext(c *gin.Context) {
 	org, err := ctrl.Repository.FindById(c.Param("organization"))
 	if err != nil {

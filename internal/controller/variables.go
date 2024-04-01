@@ -11,6 +11,10 @@ type VariablesController struct {
 	Repository variables.Repository
 }
 
+func NewVariablesController(repo variables.Repository) *VariablesController {
+	return &VariablesController{Repository: repo}
+}
+
 func (ctrl *VariablesController) List(c *gin.Context) {
 
 }

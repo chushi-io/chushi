@@ -14,6 +14,13 @@ type MeController struct {
 	Auth     *authboss.Authboss
 }
 
+func NewMeController(db *gorm.DB, auth *authboss.Authboss) *MeController {
+	return &MeController{
+		Database: db,
+		Auth:     auth,
+	}
+}
+
 func (ctrl *MeController) ListOrganizations(c *gin.Context) {
 	currentUser, err := ctrl.Auth.CurrentUser(c.Request)
 	if err != nil {
