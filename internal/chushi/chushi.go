@@ -334,7 +334,7 @@ func Server() *fx.App {
 						"recover_end": {"password", authboss.ConfirmPrefix + "password"},
 					},
 					Whitelist: map[string][]string{
-						"register": []string{"email", "name", "password"},
+						"register": {"email", "name", "password"},
 					},
 				}
 
