@@ -194,7 +194,7 @@ func Server() *fx.App {
 				conf *config.Config,
 			) types.GrpcRoute {
 				path, handler := apiv1connect.NewAuthHandler(
-					grpc.NewAuthServer(conf.JwtSecretKey),
+					grpc.NewAuthServer(conf),
 					interceptors,
 				)
 				return types.GrpcRouteRegistration(path+"*action", gin.WrapH(http.StripPrefix("/grpc", handler)))
