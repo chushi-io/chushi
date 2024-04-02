@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.8.1](https://github.com/chushi-io/chushi/compare/v1.8.0...v1.8.1) (2024-04-02)
+
+
+### Bug Fixes
+
+* **ci:** Fix lint steps, fix helm publish ([cf53277](https://github.com/chushi-io/chushi/commit/cf532771216a7f2b0fe6bb5f6b3d47b46b2d3d56))
+
 ## [1.8.0](https://github.com/chushi-io/chushi/compare/v1.7.1...v1.8.0) (2024-04-02)
 
 
