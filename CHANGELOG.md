@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0](https://github.com/chushi-io/chushi/compare/v1.7.1...v1.8.0) (2024-04-02)
+
+
+### Features
+
+* **helm:** Add helm chart ([bd0900f](https://github.com/chushi-io/chushi/commit/bd0900f76dc2615df3a8572fa48848e0ea454094))
+
+
+### Bug Fixes
+
+* **helm:** Adjust CI jobs ([aff91d8](https://github.com/chushi-io/chushi/commit/aff91d831e0c2c42e7dbf7e3b71b6457c1b475df))
+* **helm:** Fix chart name ([302632d](https://github.com/chushi-io/chushi/commit/302632d01d5f052d4b2bdcbc7ba778336d41c61a))
+
 ### [1.7.1](https://github.com/chushi-io/chushi/compare/v1.7.0...v1.7.1) (2024-02-29)
 
 
