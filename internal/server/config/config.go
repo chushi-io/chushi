@@ -7,6 +7,7 @@ type Config struct {
 	JwtSecretKey  string `mapstructure:"jwt_secret_key"`
 	SessionSecret string `mapstructure:"session_secret"`
 	CookieSecret  string `mapstructure:"cookie_secret"`
+	IssuerUrl     string `mapstructure:"issuer_url"`
 }
 
 // Load will parse any environment variables in .env
@@ -21,6 +22,7 @@ func Load() (*Config, error) {
 	v.BindEnv("jwt_secret_key")
 	v.BindEnv("session_secret")
 	v.BindEnv("cookie_secret")
+	v.BindEnv("issuer_url")
 
 	config := &Config{}
 	if err := v.Unmarshal(config); err != nil {
