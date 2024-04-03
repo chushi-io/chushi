@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0](https://github.com/chushi-io/chushi/compare/v1.8.3...v1.9.0) (2024-04-03)
+
+
+### Features
+
+* **migrations:** Move to migrations library ([0f10ee6](https://github.com/chushi-io/chushi/commit/0f10ee6b382caa2f71c88032c9e8ba1ca1c0890b))
+
 ### [1.8.3](https://github.com/chushi-io/chushi/compare/v1.8.2...v1.8.3) (2024-04-03)
 
 
