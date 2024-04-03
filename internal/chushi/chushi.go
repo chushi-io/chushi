@@ -63,6 +63,7 @@ func ProvideDatabase(conf *config.Config, log *zap.Logger, lc fx.Lifecycle) (*go
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	fmt.Println(conf.DatabaseUri)
 	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), gormConfig)
 	if err != nil {
 		return database, err
@@ -71,23 +72,25 @@ func ProvideDatabase(conf *config.Config, log *zap.Logger, lc fx.Lifecycle) (*go
 		OnStart: func(ctx context.Context) error {
 			log.Info("Running database migrations")
 			if err := database.AutoMigrate(
-				&workspaces.Workspace{},
-				&variables.Variable{},
-				&variables.VariableSet{},
 				&variables.OrganizationVariable{},
 				&variables.WorkspaceVariable{},
 				&variables.WorkspaceVariableSet{},
 				&variables.OrganizationVariableSet{},
 				&organization.Organization{},
-				&oauth.OauthClient{},
-				&oauth.OauthToken{},
-				&run.Run{},
 				&organization.User{},
 				&organization.OrganizationUser{},
+				&oauth.OauthClient{},
+				&oauth.OauthToken{},
 				&vcs_connection.VcsConnection{},
+				&agent.Agent{},
+				&workspaces.Workspace{},
+				&run.Run{},
+				&variables.VariableSet{},
+				&variables.Variable{},
 			); err != nil {
 				return err
 			}
+			log.Info("Database migrations finished")
 
 			return nil
 		},
