@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.8.2](https://github.com/chushi-io/chushi/compare/v1.8.1...v1.8.2) (2024-04-03)
+
+
+### Bug Fixes
+
+* **docker:** Fix entrypoint for Docker image ([1f91379](https://github.com/chushi-io/chushi/commit/1f91379f83653dfac98d2f8ddfa8337c42acb8ba))
+
 ### [1.8.1](https://github.com/chushi-io/chushi/compare/v1.8.0...v1.8.1) (2024-04-02)
 
 
