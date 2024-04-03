@@ -99,7 +99,7 @@ type UploadPlanResponse struct {
 
 func (r *Runs) UploadPlan(params *UploadPlanParams) (*UploadPlanResponse, error) {
 	runUrl := r.sdk.GetOrganizationUrl(
-		fmt.Sprintf("runs/%s/plan", r.sdk.OrganizationId, params.RunId),
+		fmt.Sprintf("runs/%s/plan", params.RunId),
 	)
 
 	var response UploadPlanResponse

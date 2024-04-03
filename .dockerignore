@@ -1,6 +1,9 @@
-data
-testdata
+.github
 bin
+data
+deploy
+testdata
+tmp
 .env
 .env.example
 .air.toml
