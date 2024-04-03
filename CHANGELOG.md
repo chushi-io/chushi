@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.8.3](https://github.com/chushi-io/chushi/compare/v1.8.2...v1.8.3) (2024-04-03)
+
+
+### Bug Fixes
+
+* **migrations:** Reorder ([cfb36d5](https://github.com/chushi-io/chushi/commit/cfb36d53bbdb0cf406049f46ed5b7073730e1b25))
+
 ### [1.8.2](https://github.com/chushi-io/chushi/compare/v1.8.1...v1.8.2) (2024-04-03)
 
 
