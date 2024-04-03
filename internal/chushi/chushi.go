@@ -70,28 +70,6 @@ func ProvideDatabase(conf *config.Config, log *zap.Logger, lc fx.Lifecycle) (*go
 	}
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("Running database migrations")
-			if err := database.AutoMigrate(
-				&variables.OrganizationVariable{},
-				&variables.WorkspaceVariable{},
-				&variables.WorkspaceVariableSet{},
-				&variables.OrganizationVariableSet{},
-				&organization.Organization{},
-				&organization.User{},
-				&organization.OrganizationUser{},
-				&oauth.OauthClient{},
-				&oauth.OauthToken{},
-				&vcs_connection.VcsConnection{},
-				&agent.Agent{},
-				&workspaces.Workspace{},
-				&run.Run{},
-				&variables.VariableSet{},
-				&variables.Variable{},
-			); err != nil {
-				return err
-			}
-			log.Info("Database migrations finished")
-
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {

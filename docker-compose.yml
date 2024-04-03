@@ -12,6 +12,16 @@ services:
       POSTGRES_PASSWORD: example
       POSTGRES_DB: chushi_development
 
+  db-test:
+    image: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgrestest_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: chushi_development
+
   nats:
     image: nats
     ports:
@@ -32,3 +42,4 @@ services:
 volumes:
   minio_data:
   postgres_data:
+  postgrestest_data:
