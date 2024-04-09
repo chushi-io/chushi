@@ -4,6 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"errors"
+	"fmt"
 	apiv1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/vcs_connection"
@@ -32,7 +33,9 @@ func (ws *WorkspaceServer) GetWorkspace(
 		return nil, err
 	}
 
-	if workspace.Agent.ID != ag.ID {
+	if *workspace.AgentID != ag.ID {
+		fmt.Println(workspace.Agent.ID)
+		fmt.Println(ag.ID)
 		return nil, errors.New("not found")
 	}
 	return connect.NewResponse(&apiv1.GetWorkspaceResponse{
@@ -68,7 +71,9 @@ func (ws *WorkspaceServer) GetVcsConnection(
 		return nil, err
 	}
 
-	if workspace.Agent.ID != ag.ID {
+	if *workspace.AgentID != ag.ID {
+		fmt.Println(workspace.Agent.ID)
+		fmt.Println(ag.ID)
 		return nil, errors.New("not found")
 	}
 
@@ -106,7 +111,9 @@ func (ws *WorkspaceServer) GetVariables(
 		return nil, err
 	}
 
-	if workspace.Agent.ID != ag.ID {
+	if *workspace.AgentID != ag.ID {
+		fmt.Println(workspace.Agent.ID)
+		fmt.Println(ag.ID)
 		return nil, errors.New("not found")
 	}
 

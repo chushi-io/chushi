@@ -2,20 +2,32 @@ package installer
 
 import (
 	"archive/zip"
+	"fmt"
 	"github.com/hashicorp/go-version"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 )
 
 type Installer struct {
 }
 
 // Install a given version of OpenTofu
-func Install(v *version.Version, binDir string) (string, error) {
+func Install(v *version.Version, binDir string, logger *zap.Logger) (string, error) {
 	// TODO: Build this dynamically given the environment we run on
-	downloadUrl := "https://github.com/opentofu/opentofu/releases/download/v1.6.1/tofu_1.6.1_darwin_arm64.zip"
+	downloadUrl := fmt.Sprintf(
+		"https://github.com/opentofu/opentofu/releases/download/v%s/tofu_%s_%s_%s.zip",
+		removePrefix(v.String()),
+		removePrefix(v.String()),
+		runtime.GOOS,
+		runtime.GOARCH,
+	)
+
+	logger.Info(downloadUrl)
 	pkgFile, err := os.CreateTemp(os.TempDir(), "tofu")
 	if err != nil {
 		return "", err
@@ -77,4 +89,9 @@ func Install(v *version.Version, binDir string) (string, error) {
 		return dstPath, nil
 	}
 	return "", nil
+}
+
+func removePrefix(input string) string {
+	res, _ := strings.CutPrefix(input, "v")
+	return res
 }

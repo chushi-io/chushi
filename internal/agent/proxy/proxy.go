@@ -4,7 +4,6 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"crypto/tls"
-	"fmt"
 	agentv1 "github.com/chushi-io/chushi/gen/agent/v1"
 	"github.com/chushi-io/chushi/gen/agent/v1/agentv1connect"
 	v1 "github.com/chushi-io/chushi/gen/api/v1"
@@ -129,7 +128,6 @@ func (s *Proxy) Run() error {
 	mux.Handle(agentv1connect.NewLogsHandler(s))
 	mux.Handle(agentv1connect.NewPlansHandler(s))
 
-	fmt.Println(s.address)
 	if err := http.ListenAndServe(
 		s.address,
 		// Use h2c so we can serve HTTP/2 without TLS.

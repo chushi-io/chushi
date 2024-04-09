@@ -9,6 +9,9 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the Chushi server",
 	Run: func(cmd *cobra.Command, args []string) {
+		go func() {
+			chushi.GrpcServer().Run()
+		}()
 		chushi.Server().Run()
 	},
 }

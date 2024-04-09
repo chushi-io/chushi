@@ -3,7 +3,6 @@ package middleware
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"github.com/chushi-io/chushi/internal/helpers"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/gin-gonic/gin"
@@ -50,7 +49,6 @@ func VerifyStateAccess(jwtSecretKey string, repository workspaces.WorkspacesRepo
 
 		claims, ok := token.Claims.(*StateAccessClaims)
 		if !ok || !token.Valid {
-			fmt.Println("Token either not valid, or not OK")
 			c.AbortWithError(http.StatusUnauthorized, errors.New("invalid token provided"))
 			return
 		}

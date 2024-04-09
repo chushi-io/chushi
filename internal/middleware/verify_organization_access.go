@@ -86,5 +86,6 @@ func (oam *OrganizationAccessMiddleware) tokenAuth(c *gin.Context, orgId uuid.UU
 	// For now, we'll assume we're an agent :shrug:
 	c.Set("client_id", client.GetID())
 	c.Set("organization_id", orgId.String())
+	c.Set("organization", orgId.String())
 	return
 }

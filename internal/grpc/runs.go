@@ -4,7 +4,6 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"errors"
-	"fmt"
 	v1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/run"
@@ -22,7 +21,6 @@ func (s *RunServer) Watch(
 	req *connect.Request[v1.WatchRunsRequest],
 	stream *connect.ServerStream[v1.Run],
 ) error {
-
 	check := ctx.Value("agent")
 	if check == nil {
 		return errors.New("agent not found")
@@ -40,12 +38,11 @@ func (s *RunServer) Watch(
 			return err
 		}
 		for _, r := range runs {
-			fmt.Println(r)
-			//if err := stream.Send(connect.NewResponse(&v1.Run{
-			//	Id: r.ID.String(),
-			//})); err != nil {
-			//	return err
-			//}
+			if err := stream.Send(&v1.Run{
+				Id: r.ID.String(),
+			}); err != nil {
+				return err
+			}
 		}
 		// For now, we want to disable streaming. Just output the runs that exist,
 		// and we'll exit
@@ -82,7 +79,7 @@ func (s *RunServer) Update(
 		return nil, err
 	}
 
-	if r.Agent.ID != ag.ID {
+	if *r.AgentID != ag.ID {
 		return nil, errors.New("unauthorized")
 	}
 
@@ -131,5 +128,6 @@ func (s *RunServer) Get(
 	return connect.NewResponse(&v1.Run{
 		Id:          r.ID.String(),
 		WorkspaceId: r.WorkspaceID.String(),
+		Operation:   r.Operation,
 	}), nil
 }

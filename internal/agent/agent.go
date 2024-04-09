@@ -5,20 +5,17 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	apiv1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
+	"github.com/chushi-io/chushi/internal/agent/driver"
 	"github.com/chushi-io/chushi/internal/agent/proxy"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
+	"golang.org/x/oauth2/clientcredentials"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"log"
 	"net"
 	"net/http"
-	"os"
-	"time"
 )
 
 type Agent struct {
@@ -27,13 +24,14 @@ type Agent struct {
 	grpcUrl               string
 	runnerImage           string
 	runnerImagePullPolicy string
-	client                *kubernetes.Clientset
 	runsClient            apiv1connect.RunsClient
 	authClient            apiv1connect.AuthClient
 	wsClient              apiv1connect.WorkspacesClient
-	logger                zap.Logger
+	logger                *zap.Logger
 	organizationId        string
 	httpClient            *http.Client
+	driver                driver.Driver
+	token                 string
 }
 
 func New(options ...func(*Agent)) *Agent {
@@ -56,9 +54,9 @@ func WithOrganizationId(organizationId string) func(agent *Agent) {
 	}
 }
 
-func WithKubeClient(client *kubernetes.Clientset) func(agent *Agent) {
+func WithDriver(drv driver.Driver) func(agent *Agent) {
 	return func(agent *Agent) {
-		agent.client = client
+		agent.driver = drv
 	}
 }
 
@@ -80,10 +78,14 @@ func WithProxy(serverUrl string, addr string) func(agent *Agent) {
 
 // TODO: This should be updated to accept clientcredentials.Config to support
 // rotation of expired tokens. For now, we will accept failure
-func WithGrpc(grpcUrl string, token string) func(agent *Agent) {
+func WithGrpc(grpcUrl string, creds clientcredentials.Config) func(agent *Agent) {
+	interceptors := connect.WithInterceptors(
+		NewAuthInterceptor(creds),
+	)
 	return func(agent *Agent) {
-		agent.runsClient = apiv1connect.NewRunsClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
-		agent.authClient = apiv1connect.NewAuthClient(newInsecureClient(), grpcUrl, connect.WithGRPC())
+		agent.runsClient = apiv1connect.NewRunsClient(newInsecureClient(), grpcUrl, connect.WithGRPC(), interceptors)
+		agent.authClient = apiv1connect.NewAuthClient(newInsecureClient(), grpcUrl, connect.WithGRPC(), interceptors)
+		agent.wsClient = apiv1connect.NewWorkspacesClient(newInsecureClient(), grpcUrl, connect.WithGRPC(), interceptors)
 		agent.grpcUrl = grpcUrl
 	}
 }
@@ -95,53 +97,55 @@ func WithRunnerImage(runnerImage string, pullPolicy string) func(agent *Agent) {
 	}
 }
 
-func WithLogger(logger zap.Logger) func(agent *Agent) {
+func WithLogger(logger *zap.Logger) func(agent *Agent) {
 	return func(agent *Agent) {
 		agent.logger = logger
 	}
 }
 
 // For now, this just queries the current list of runs,
-// and exists. However, it should query the API (or stream)
+// and exits. However, it should query the API (or stream)
 // and emit runners as needed
 func (a *Agent) Run() error {
+	a.logger.Debug("starting runs stream")
+	stream, err := a.runsClient.Watch(context.Background(), connect.NewRequest(&apiv1.WatchRunsRequest{
+		AgentId: a.id,
+	}))
+	if err != nil {
+		return err
+	}
 	for {
-		stream, err := a.runsClient.Watch(context.Background(), connect.NewRequest(&apiv1.WatchRunsRequest{
-			AgentId: a.id,
+		rcv := stream.Receive()
+		if !rcv {
+			break
+		}
+		scheduledRun := stream.Msg()
+		a.logger.Debug("getting run details")
+		run, err := a.runsClient.Get(context.Background(), connect.NewRequest(&apiv1.GetRunRequest{
+			RunId: scheduledRun.Id,
 		}))
 		if err != nil {
-			return err
+			// Handle the error?
+			a.logger.Fatal(err.Error())
 		}
-		for {
-			rcv := stream.Receive()
-			if !rcv {
-				time.Sleep(time.Second)
-				continue
-			}
-
-			scheduledRun := stream.Msg()
-
-			run, err := a.runsClient.Get(context.Background(), connect.NewRequest(&apiv1.GetRunRequest{
-				RunId: scheduledRun.Id,
-			}))
-			if err != nil {
-				// Handle the error?
-				a.logger.Fatal(err.Error())
-			}
-			if err := a.handle(run.Msg); err != nil {
-				a.logger.Fatal(err.Error())
-			}
-			a.logger.Info("Run completed", zap.String("run.id", scheduledRun.Id))
+		if err := a.handle(run.Msg); err != nil {
+			log.Fatal(err)
 		}
-		a.logger.Info("Sleeping before invocation")
-		time.Sleep(time.Second)
+		a.logger.Info("Run completed", zap.String("run.id", scheduledRun.Id))
 	}
 
+	if err := stream.Err(); err != nil {
+		return err
+	}
+	if err := stream.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (a *Agent) handle(run *apiv1.Run) error {
 
+	a.logger.Debug("getting workspace data")
 	ws, err := a.wsClient.GetWorkspace(context.TODO(), connect.NewRequest(&apiv1.GetWorkspaceRequest{
 		Id: run.WorkspaceId,
 	}))
@@ -155,11 +159,13 @@ func (a *Agent) handle(run *apiv1.Run) error {
 		return errors.New("workspace is already locked")
 	}
 
+	a.logger.Debug("generating token for runner")
 	token, err := a.generateToken(ws.Msg.Workspace.Id, run.Id, a.organizationId)
 	if err != nil {
 		return err
 	}
 
+	a.logger.Debug("updating run status")
 	if _, err := a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
 		Id:     run.Id,
 		Status: "running",
@@ -167,13 +173,16 @@ func (a *Agent) handle(run *apiv1.Run) error {
 		return err
 	}
 
+	a.logger.Debug("getting VCS connection")
 	creds, err := a.wsClient.GetVcsConnection(context.TODO(), connect.NewRequest(&apiv1.GetVcsConnectionRequest{
+		WorkspaceId:  ws.Msg.Workspace.Id,
 		ConnectionId: ws.Msg.Workspace.Vcs.ConnectionId,
 	}))
 	if err != nil {
 		return err
 	}
 
+	a.logger.Debug("getting variables")
 	variables, err := a.wsClient.GetVariables(context.TODO(), connect.NewRequest(&apiv1.GetVariablesRequest{
 		WorkspaceId: ws.Msg.Workspace.Id,
 	}))
@@ -181,166 +190,41 @@ func (a *Agent) handle(run *apiv1.Run) error {
 		return err
 	}
 
-	pod, err := a.launchPod(run, ws.Msg.Workspace, token, creds.Msg.Token, variables.Msg.Variables)
+	// Build a job spec
+	job := driver.NewJob(&driver.JobSpec{
+		OrganizationId: a.organizationId,
+		Image:          a.getRunnerImage(),
+		Run:            run,
+		Workspace:      ws.Msg.Workspace,
+		Token:          token,
+		Credentials:    creds.Msg.Token,
+		Variables:      variables.Msg.Variables,
+	})
+
+	a.logger.Debug("starting job")
+	_, err = a.driver.Start(job)
+	if err != nil {
+		return err
+	}
+	defer a.driver.Cleanup(job)
+
+	a.logger.Debug("waiting for job completion")
+	_, err = a.driver.Wait(job)
 	if err != nil {
 		return err
 	}
 
-	success, err := a.waitForPodCompletion(pod)
-	if err != nil {
-		return err
-	}
-
-	if !success {
+	if job.Status.State != "succeeded" {
 		return errors.New("workspace failed")
 	}
 
+	a.logger.Debug("updating run as completed")
 	// Lastly, post updates back to the run
 	_, err = a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
 		Id:     run.Id,
 		Status: "completed",
 	}))
 	return err
-}
-
-func (a *Agent) waitForPodCompletion(pod *v1.Pod) (bool, error) {
-loop:
-	for {
-		pod, err := a.client.CoreV1().
-			Pods(pod.Namespace).
-			Get(context.TODO(), pod.Name, metav1.GetOptions{})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		switch pod.Status.Phase {
-		case v1.PodSucceeded:
-			break loop
-		case v1.PodFailed:
-			return false, errors.New(pod.Status.Message)
-		case v1.PodPending:
-		case v1.PodRunning:
-			time.Sleep(time.Second)
-		}
-	}
-
-	return true, nil
-}
-
-func (a *Agent) launchPod(run *apiv1.Run, workspace *apiv1.Workspace, token string, credentials string, variables []*apiv1.Variable) (*v1.Pod, error) {
-	podManifest := a.podSpecForRun(run, workspace, token, credentials, variables)
-	return a.client.CoreV1().
-		Pods("default").
-		Create(context.TODO(), podManifest, metav1.CreateOptions{})
-}
-
-func (a *Agent) podSpecForRun(run *apiv1.Run, workspace *apiv1.Workspace, token string, response string, variables []*apiv1.Variable) *v1.Pod {
-	args := []string{
-		"runner",
-		fmt.Sprintf("-d=/workspace/%s", workspace.Vcs.WorkingDirectory),
-		"-v=1.6.6",
-		run.Operation,
-	}
-
-	envVars := []v1.EnvVar{
-		{
-			Name:  "CHUSHI_URL",
-			Value: os.Getenv("CHUSHI_URL"),
-		},
-		{
-			Name:  "CHUSHI_ORGANIZATION",
-			Value: a.organizationId,
-		},
-		{
-			Name:  "CHUSHI_RUN_ID",
-			Value: run.Id,
-		},
-		{
-			Name:  "CHUSHI_ACCESS_TOKEN",
-			Value: token,
-		},
-		{
-			Name:  "TF_HTTP_PASSWORD",
-			Value: token,
-		},
-		{
-			Name:  "TF_HTTP_USERNAME",
-			Value: "runner",
-		},
-	}
-	for _, variable := range variables {
-		if variable.Type == "environment" {
-			envVars = append(envVars, v1.EnvVar{
-				Name:  variable.Key,
-				Value: variable.Value,
-			})
-		}
-	}
-	autoMount := false
-	podSpec := v1.PodSpec{
-		AutomountServiceAccountToken: &autoMount,
-		Containers: []v1.Container{
-			// Actual run container
-			{
-				Name:  "chushi",
-				Image: a.getRunnerImage(),
-				// TODO: This needs to be managed
-				ImagePullPolicy: v1.PullNever,
-				Command:         []string{"/chushi"},
-				Args:            args,
-				Env:             envVars,
-				VolumeMounts: []v1.VolumeMount{
-					{
-						MountPath: "/workspace",
-						Name:      "workspace",
-					},
-				},
-			},
-		},
-		// Container to download VCS repo
-		InitContainers: []v1.Container{
-			{
-				Name:  "git",
-				Image: "alpine/git",
-				Command: []string{
-					"/bin/sh",
-					"-c",
-					fmt.Sprintf(`
-git clone -c credential.helper='!f() { echo username=chushi; echo "password=$GITHUB_PAT"; };f' %s /workspace
-`, workspace.Vcs.Source)},
-				Env: []v1.EnvVar{
-					{
-						Name:  "GITHUB_PAT",
-						Value: token,
-					},
-				},
-				VolumeMounts: []v1.VolumeMount{
-					{
-						MountPath: "/workspace",
-						Name:      "workspace",
-					},
-				},
-			},
-		},
-		Volumes: []v1.Volume{
-			{
-				Name: "workspace",
-				VolumeSource: v1.VolumeSource{
-					EmptyDir: &v1.EmptyDirVolumeSource{},
-				},
-			},
-		},
-		RestartPolicy: v1.RestartPolicyNever,
-	}
-
-	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    a.organizationId,
-			GenerateName: "chushi-runner-",
-			Labels:       map[string]string{},
-		},
-		Spec: podSpec,
-	}
 }
 
 func (a *Agent) getRunnerImage() string {

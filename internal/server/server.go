@@ -11,7 +11,6 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
 	"github.com/chushi-io/chushi/internal/server/config"
-	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/server"
@@ -40,10 +39,6 @@ type Params struct {
 	UserStore                    *organization.UserStore
 	WorkspacesRepository         workspaces.WorkspacesRepository
 	OrganizationAccessMiddleware *middleware.OrganizationAccessMiddleware
-	GrpcAuthServer               types.GrpcRoute `name:"grpc_auth"`
-	GrpcPlanServer               types.GrpcRoute `name:"grpc_plans"`
-	GrpcLogsServer               types.GrpcRoute `name:"grpc_logs"`
-	GrpcRunsServer               types.GrpcRoute `name:"grpc_runs"`
 }
 
 func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
@@ -54,10 +49,13 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	)
 
 	r := gin.Default()
-	r.UseH2C = true
+	//r.UseH2C = true
 	r.Use(requestid.New())
 	r.Use(adapter.Wrap(params.AuthBoss.LoadClientStateMiddleware))
 
+	r.Handle("PRI", ":any", func(c *gin.Context) {
+		c.Status(200)
+	})
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
@@ -99,7 +97,9 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	v1api.POST("/orgs", params.OrganizationsController.Create)
 	orgs := v1api.Group("/orgs/:organization")
 	// Authorize any requests to access the specified organization
-	orgs.Use(params.OrganizationAccessMiddleware.VerifyOrganizationAccess)
+	orgs.
+		Use(params.OrganizationsController.SetContext).
+		Use(params.OrganizationAccessMiddleware.VerifyOrganizationAccess)
 	{
 		orgs.GET("", params.OrganizationsController.Get)
 		variables := orgs.Group("/variables")
@@ -269,17 +269,12 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	r.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/ui") {
 			c.File("./ui/build/index.html")
+		} else if c.Request.Method == "PRI" {
+			c.AbortWithStatus(http.StatusOK)
 		} else {
 			c.AbortWithStatus(http.StatusNotFound)
 		}
 	})
-
-	grpcApi := r.Group("/grpc")
-	{
-		grpcApi.Any(params.GrpcRunsServer.Pattern(), params.GrpcRunsServer.Handler())
-		grpcApi.Any(params.GrpcLogsServer.Pattern(), params.GrpcLogsServer.Handler())
-		grpcApi.Any(params.GrpcPlanServer.Pattern(), params.GrpcPlanServer.Handler())
-	}
 
 	srv := &http.Server{Addr: ":8080", Handler: r}
 
