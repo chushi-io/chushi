@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.0](https://github.com/chushi-io/chushi/compare/v1.9.0...v1.10.0) (2024-04-09)
+
+
+### Features
+
+* **driver:** Add swappable drivers ([677e28c](https://github.com/chushi-io/chushi/commit/677e28cd14a9eb79e0a925660dd2d961cd572685))
+
 ## [1.9.0](https://github.com/chushi-io/chushi/compare/v1.8.3...v1.9.0) (2024-04-03)
 
 
