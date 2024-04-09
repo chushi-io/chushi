@@ -83,7 +83,7 @@ func (r *Runner) Run(ctx context.Context, out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	install, err := installer.Install(ver, r.workingDirectory)
+	install, err := installer.Install(ver, r.workingDirectory, r.logger)
 	if err != nil {
 		return err
 	}

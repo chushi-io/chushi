@@ -1,7 +1,7 @@
 package chushi
 
 import (
-	"connectrpc.com/connect"
+	"connectrpc.com/otelconnect"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/grpc"
 	"github.com/chushi-io/chushi/internal/middleware"
@@ -25,7 +24,6 @@ import (
 	"github.com/chushi-io/chushi/internal/server/config"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
 	"github.com/chushi-io/chushi/internal/service/run_manager"
-	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
@@ -35,10 +33,13 @@ import (
 	abclientstate "github.com/volatiletech/authboss-clientstate"
 	abrenderer "github.com/volatiletech/authboss-renderer"
 	"github.com/volatiletech/authboss/v3"
+	_ "github.com/volatiletech/authboss/v3/auth"
 	"github.com/volatiletech/authboss/v3/defaults"
+	_ "github.com/volatiletech/authboss/v3/logout"
 	"github.com/volatiletech/authboss/v3/otp/twofactor"
 	"github.com/volatiletech/authboss/v3/otp/twofactor/sms2fa"
 	"github.com/volatiletech/authboss/v3/otp/twofactor/totp2fa"
+	_ "github.com/volatiletech/authboss/v3/register"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -63,7 +64,6 @@ func ProvideDatabase(conf *config.Config, log *zap.Logger, lc fx.Lifecycle) (*go
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	fmt.Println(conf.DatabaseUri)
 	database, err := gorm.Open(postgres.Open(conf.DatabaseUri), gormConfig)
 	if err != nil {
 		return database, err
@@ -80,6 +80,35 @@ func ProvideDatabase(conf *config.Config, log *zap.Logger, lc fx.Lifecycle) (*go
 	return database, nil
 }
 
+func ProvideS3Client() (*s3.Client, error) {
+	if os.Getenv("USE_MINIO") != "" {
+		key := os.Getenv("AWS_ACCESS_KEY_ID")
+		secret := os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+		creds := credentials.NewStaticCredentialsProvider(key, secret, "")
+
+		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				URL: "http://localhost:9000",
+			}, nil
+		})
+		cfg, _ := awsconfig.LoadDefaultConfig(context.TODO(),
+			awsconfig.WithRegion("us-east-1"),
+			awsconfig.WithCredentialsProvider(creds),
+			awsconfig.WithEndpointResolverWithOptions(customResolver))
+		// Create an Amazon S3 service client
+		return s3.NewFromConfig(cfg, func(o *s3.Options) {
+			o.UsePathStyle = true
+		}), nil
+	} else {
+		sdkConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+		return s3.NewFromConfig(sdkConfig), nil
+	}
+}
+
 func Server() *fx.App {
 	return fx.New(
 		fx.NopLogger,
@@ -87,35 +116,8 @@ func Server() *fx.App {
 			// Base components
 			ProvideConfig,
 			ProvideDatabase,
+			ProvideS3Client,
 			zap.NewProduction,
-			func() (*s3.Client, error) {
-				if os.Getenv("USE_MINIO") != "" {
-					key := os.Getenv("AWS_ACCESS_KEY_ID")
-					secret := os.Getenv("AWS_SECRET_ACCESS_KEY")
-
-					creds := credentials.NewStaticCredentialsProvider(key, secret, "")
-
-					customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-						return aws.Endpoint{
-							URL: "http://localhost:9000",
-						}, nil
-					})
-					cfg, _ := awsconfig.LoadDefaultConfig(context.TODO(),
-						awsconfig.WithRegion("us-east-1"),
-						awsconfig.WithCredentialsProvider(creds),
-						awsconfig.WithEndpointResolverWithOptions(customResolver))
-					// Create an Amazon S3 service client
-					return s3.NewFromConfig(cfg, func(o *s3.Options) {
-						o.UsePathStyle = true
-					}), nil
-				} else {
-					sdkConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
-					if err != nil {
-						return nil, err
-					}
-					return s3.NewFromConfig(sdkConfig), nil
-				}
-			},
 
 			// OAuth
 			oauth.NewClientStore,
@@ -144,77 +146,6 @@ func Server() *fx.App {
 			// Utils
 			file_manager.New,
 			run_manager.New,
-
-			// GRPC endpoints
-			func(
-				clientStore *oauth.ClientStore,
-				agentRepo agent.AgentRepository,
-			) connect.Option {
-				interceptors := connect.WithInterceptors(auth2.NewAuthInterceptor(
-					clientStore,
-					agentRepo,
-				))
-				return interceptors
-			},
-
-			// Workspaces GRPC
-			fx.Annotate(func(
-				interceptors connect.Option,
-				repo workspaces.WorkspacesRepository,
-			) types.GrpcRoute {
-				path, handler := apiv1connect.NewWorkspacesHandler(
-					&grpc.WorkspaceServer{Repository: repo},
-					interceptors,
-				)
-				return types.GrpcRouteRegistration(path+"*action", gin.WrapH(http.StripPrefix("/grpc", handler)))
-			}, fx.As(new(types.GrpcRoute)), fx.ResultTags(`name:"grpc_workspaces"`)),
-
-			// Auth GRPC
-			fx.Annotate(func(
-				interceptors connect.Option,
-				conf *config.Config,
-			) types.GrpcRoute {
-				path, handler := apiv1connect.NewAuthHandler(
-					grpc.NewAuthServer(conf),
-					interceptors,
-				)
-				return types.GrpcRouteRegistration(path+"*action", gin.WrapH(http.StripPrefix("/grpc", handler)))
-			}, fx.As(new(types.GrpcRoute)), fx.ResultTags(`name:"grpc_auth"`)),
-
-			// Plans GRPC
-			fx.Annotate(func(
-				interceptors connect.Option,
-			) types.GrpcRoute {
-				path, handler := apiv1connect.NewPlansHandler(
-					&grpc.PlanServer{}, interceptors,
-				)
-				return types.GrpcRouteRegistration(path+"*action", gin.WrapH(http.StripPrefix("/grpc", handler)))
-			}, fx.As(new(types.GrpcRoute)), fx.ResultTags(`name:"grpc_plans"`)),
-
-			// Logs GRPC
-			fx.Annotate(func(
-				interceptors connect.Option,
-			) types.GrpcRoute {
-				path, handler := apiv1connect.NewLogsHandler(
-					&grpc.LogsServer{}, interceptors,
-				)
-				return types.GrpcRouteRegistration(path+"*action", gin.WrapH(http.StripPrefix("/grpc", handler)))
-			}, fx.As(new(types.GrpcRoute)), fx.ResultTags(`name:"grpc_logs"`)),
-
-			// Runs GRPC
-			fx.Annotate(func(
-				interceptors connect.Option,
-				runRepo run.RunRepository,
-				agentRepo agent.AgentRepository,
-			) types.GrpcRoute {
-				path, handler := apiv1connect.NewRunsHandler(
-					&grpc.RunServer{
-						RunRepository:   runRepo,
-						AgentRepository: agentRepo,
-					}, interceptors,
-				)
-				return types.GrpcRouteRegistration(path+"*action", gin.WrapH(http.StripPrefix("/grpc", handler)))
-			}, fx.As(new(types.GrpcRoute)), fx.ResultTags(`name:"grpc_runs"`)),
 
 			func(
 				orgRepo organization.OrganizationRepository,
@@ -245,8 +176,7 @@ func Server() *fx.App {
 				srv := oauthserver.NewDefaultServer(manager)
 				srv.SetClientInfoHandler(oauthserver.ClientFormHandler)
 				srv.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-					userID = "testing"
-					return
+					return "", nil
 				})
 				srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 					log.Println("Internal Error:", err.Error())
@@ -271,7 +201,7 @@ func Server() *fx.App {
 				sessionStore abclientstate.SessionStorer,
 			) *authboss.Authboss {
 				ab := authboss.New()
-				ab.Config.Paths.RootURL = "http://localhost:5000"
+				ab.Config.Paths.RootURL = "http://localhost:8080"
 				ab.Config.Storage.Server = store
 				ab.Config.Storage.SessionState = sessionStore
 				ab.Config.Storage.CookieState = cookieStore
@@ -344,6 +274,61 @@ func Server() *fx.App {
 			server.New,
 		),
 		fx.Invoke(server.New),
+	)
+}
+
+func GrpcServer() *fx.App {
+	return fx.New(
+		//fx.NopLogger,
+		// Base components
+		fx.Provide(
+			ProvideConfig,
+			ProvideDatabase,
+			zap.NewProduction,
+			ProvideS3Client,
+
+			oauth.NewClientStore,
+			oauth.NewTokenStore,
+			agent.NewAgentRepository,
+			run.NewRunRepository,
+			workspaces.NewWorkspacesRepository,
+			vcs_connection.New,
+			auth2.NewInterceptor,
+
+			func() *otelconnect.Interceptor {
+				otelInterceptor, _ := otelconnect.NewInterceptor()
+				return otelInterceptor
+			},
+			func(conf *config.Config) *grpc.AuthServer {
+				return grpc.NewAuthServer(conf)
+			},
+			func(
+				repo workspaces.WorkspacesRepository,
+				vcsRepo vcs_connection.Repository,
+			) *grpc.WorkspaceServer {
+				return &grpc.WorkspaceServer{
+					Repository:    repo,
+					VcsRepository: vcsRepo,
+				}
+			},
+			func() *grpc.PlanServer {
+				return &grpc.PlanServer{}
+			},
+			func() *grpc.LogsServer {
+				return &grpc.LogsServer{}
+			},
+			func(
+				runRepo run.RunRepository,
+				agentRepo agent.AgentRepository,
+			) *grpc.RunServer {
+				return &grpc.RunServer{
+					RunRepository:   runRepo,
+					AgentRepository: agentRepo,
+				}
+			},
+		),
+
+		fx.Invoke(grpc.New),
 	)
 }
 

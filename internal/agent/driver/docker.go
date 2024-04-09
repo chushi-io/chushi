@@ -1,0 +1,116 @@
+package driver
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/client"
+	"io"
+	"os"
+	"time"
+)
+
+type Docker struct {
+	Client *client.Client
+}
+
+func (d Docker) Start(job *Job) (*Job, error) {
+	// Clone the git repo
+	dir, err := cloneGitRepo(
+		job.Spec.Run.Id,
+		job.Spec.Workspace.Vcs.Source,
+		job.Spec.Workspace.Vcs.Branch,
+		job.Spec.Credentials,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Pull the image
+	_, err = d.Client.ImagePull(context.Background(), job.Spec.Image, image.PullOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	cont, err := d.Client.ContainerCreate(
+		context.Background(),
+		&container.Config{
+			Image: job.Spec.Image,
+			Cmd: []string{
+				"runner",
+				fmt.Sprintf("-d=/workspace/%s", job.Spec.Workspace.Vcs.WorkingDirectory),
+				"-v=1.6.2",
+				job.Spec.Run.Operation,
+			},
+		},
+		&container.HostConfig{
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeBind,
+					Source: dir,
+					Target: "/workspace/",
+				},
+			},
+		},
+		nil,
+		nil,
+		job.Spec.Run.Id,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := d.Client.ContainerStart(context.Background(), cont.ID, container.StartOptions{}); err != nil {
+		return nil, err
+	}
+	job.Status.Metadata["container_id"] = cont.ID
+	return job, nil
+}
+
+func (d Docker) Wait(job *Job) (*Job, error) {
+	containerId, ok := job.Status.Metadata["container_id"]
+	if !ok {
+		return nil, errors.New("no container ID found")
+	}
+	// TODO: We shouldn't sleep, instead opting
+	// to check for creating / initializing states
+	time.Sleep(time.Second * 10)
+	for {
+		data, err := d.Client.ContainerInspect(context.TODO(), containerId)
+		if err != nil {
+			return nil, err
+		}
+		if !data.State.Running {
+			if data.State.ExitCode == 0 {
+				return job, nil
+			}
+			return job, errors.New(fmt.Sprintf("Exited with code %d", data.State.ExitCode))
+		}
+		job.Status.State = data.State.Status
+		time.Sleep(time.Second * 1)
+	}
+}
+
+func (d Docker) Cleanup(job *Job) error {
+	containerId, ok := job.Status.Metadata["container_id"]
+	if !ok {
+		return errors.New("no container ID found")
+	}
+	logs, err := d.Client.ContainerLogs(context.TODO(), containerId, container.LogsOptions{
+		ShowStderr: true,
+		ShowStdout: true,
+	})
+	if err != nil {
+		fmt.Println("Failed getting container logs")
+	} else {
+		io.Copy(os.Stdout, logs)
+	}
+	return d.Client.ContainerRemove(context.TODO(), containerId, container.RemoveOptions{
+		RemoveVolumes: true,
+		RemoveLinks:   true,
+	})
+}
