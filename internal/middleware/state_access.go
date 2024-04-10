@@ -3,25 +3,24 @@ package middleware
 import (
 	"encoding/base64"
 	"errors"
-	"github.com/chushi-io/chushi/internal/helpers"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"net/http"
-	"os"
 	"strings"
 )
 
 type StateAccessClaims struct {
-	Workspace string `json:"workspace"`
-	Run       string `json:"run"`
+	Workspace    string `json:"workspace"`
+	Run          string `json:"run"`
+	Organization string `json:"organization"`
+
 	jwt.RegisteredClaims
 }
 
 func VerifyStateAccess(jwtSecretKey string, repository workspaces.WorkspacesRepository) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		org := helpers.GetOrganization(c)
-
 		header := c.Request.Header.Get("Authorization")
 		if header == "" {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("header not found"))
@@ -40,7 +39,7 @@ func VerifyStateAccess(jwtSecretKey string, repository workspaces.WorkspacesRepo
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
-			return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+			return []byte(jwtSecretKey), nil
 		})
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, err)
@@ -53,7 +52,13 @@ func VerifyStateAccess(jwtSecretKey string, repository workspaces.WorkspacesRepo
 			return
 		}
 
-		ws, err := repository.FindById(org.ID, c.Param("workspace"))
+		orgId, err := uuid.Parse(claims.Organization)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, errors.New("invalid token provided"))
+			return
+		}
+
+		ws, err := repository.FindById(orgId, c.Param("workspace"))
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
@@ -62,5 +67,7 @@ func VerifyStateAccess(jwtSecretKey string, repository workspaces.WorkspacesRepo
 		if claims.Workspace != ws.ID.String() {
 			c.AbortWithError(http.StatusForbidden, errors.New("access denied to workspace"))
 		}
+
+		c.Set("organization", orgId)
 	}
 }

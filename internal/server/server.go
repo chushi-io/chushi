@@ -77,11 +77,12 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	}
 
 	// Hoist state to top level routing
-	state := r.Group("/:orgId/:workspace/state")
-	state.Use(middleware.VerifyStateAccess(
-		params.Config.JwtSecretKey,
-		params.WorkspacesRepository,
-	))
+	state := r.Group("/:organization/:workspace/state")
+	state.Use(
+		middleware.VerifyStateAccess(
+			params.Config.JwtSecretKey,
+			params.WorkspacesRepository,
+		))
 	{
 		state.GET("", params.WorkspacesController.GetState)
 		state.POST("", params.WorkspacesController.UploadState)

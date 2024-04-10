@@ -22,7 +22,7 @@ executions occuring for Chushi workspaces.'
 	// The JSON output should be streamed to the Chushi server (as well
 	// as cached somewhere locally in the event of issues), and then exit.
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := zap.L()
+		logger, _ := zap.NewDevelopment()
 		if len(args) == 0 {
 			logger.Fatal("Please provider a command to run")
 		}
@@ -52,7 +52,7 @@ func init() {
 	runnerCmd.Flags().StringP("directory", "d", "/workspace", "The working directory")
 	runnerCmd.Flags().IntP("parallellism", "p", 10, "Parallel terraform threads to run")
 	runnerCmd.Flags().StringP("version", "v", "", "Terraform version to use")
-	runnerCmd.Flags().String("grpc-url", "localhost:5002", "GRPC Url for streaming logs / plans")
+	runnerCmd.Flags().String("grpc-url", "localhost:8081", "GRPC Url for streaming logs / plans")
 
 	rootCmd.AddCommand(runnerCmd)
 }

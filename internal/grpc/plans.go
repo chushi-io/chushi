@@ -3,6 +3,7 @@ package grpc
 import (
 	"connectrpc.com/connect"
 	"context"
+	"encoding/base64"
 	"errors"
 	v1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/internal/resource/agent"
@@ -37,10 +38,15 @@ func (ps *PlanServer) UploadPlan(
 		return nil, err
 	}
 
+	sDec, err := base64.StdEncoding.DecodeString(req.Msg.Content)
+	if err != nil {
+		return nil, err
+	}
+
 	if err = ps.FileManager.UploadPlan(
 		ag.OrganizationID,
 		r.ID,
-		strings.NewReader(req.Msg.Content),
+		strings.NewReader(string(sDec)),
 	); err != nil {
 		return nil, err
 	}

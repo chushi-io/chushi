@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/chushi-io/chushi/internal/agent/proxy"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -33,16 +32,10 @@ func runProxy(cmd *cobra.Command, args []string) {
 		TokenURL:     tokenUrl,
 	}
 
-	token, err := cc.Token(context.TODO())
-	if err != nil {
-		zap.L().Fatal(err.Error())
-	}
-
 	p := proxy.New(
 		proxy.WithHttpClient(proxy.NewInsecureClient()),
-		proxy.WithServerUrl(grpcUrl),
+		proxy.WithServerUrl(grpcUrl, cc),
 		proxy.WithAddr(address),
-		proxy.WithToken(token.AccessToken),
 	)
 
 	if err := p.Run(); err != nil {

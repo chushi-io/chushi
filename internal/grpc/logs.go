@@ -25,8 +25,11 @@ func (ls *LogsServer) StreamLogs(ctx context.Context, req *connect.Request[v1.St
 
 func (ls *LogsServer) UploadLogs(ctx context.Context, req *connect.Request[v1.UploadLogsRequest]) (*connect.Response[v1.UploadLogsResponse], error) {
 	ag := ctx.Value("agent").(*agent.Agent)
-	runId := req.Msg.RunId
-	r, err := ls.Runs.Get(&types.UuidOrString{Type: types.Uuid, StringValue: runId})
+	runId, err := types.FromString(req.Msg.RunId)
+	if err != nil {
+		return nil, err
+	}
+	r, err := ls.Runs.Get(runId)
 	if err != nil {
 		return nil, err
 	}

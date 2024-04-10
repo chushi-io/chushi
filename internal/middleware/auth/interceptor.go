@@ -72,13 +72,13 @@ func (i *Interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 			return connect.NewError(connect.CodeUnauthenticated, err)
 		}
 
-		agent, err := i.validateToken(authToken)
+		ag, err := i.validateToken(authToken)
 		if err != nil {
 			return connect.NewError(connect.CodeUnauthenticated, err)
 		}
 
-		ctx = context.WithValue(ctx, "agent", agent)
-		ctx = context.WithValue(ctx, "organization_id", agent.OrganizationID)
+		ctx = context.WithValue(ctx, "agent", ag)
+		ctx = context.WithValue(ctx, "organization_id", ag.OrganizationID)
 		return next(ctx, conn)
 	}
 }

@@ -106,10 +106,6 @@ func runAgent(cmd *cobra.Command, args []string) {
 	}
 
 	opts = append(opts, agent.WithDriver(drv))
-	proxyAddr, _ := cmd.Flags().GetString("proxy-addr")
-	if proxyAddr != "" {
-		opts = append(opts, agent.WithProxy(grpcUrl, proxyAddr))
-	}
 
 	runnerImage, _ := cmd.Flags().GetString("runner-image")
 	pullPolicy, _ := cmd.Flags().GetString("runner-image-pull-policy")

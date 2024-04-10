@@ -35,6 +35,20 @@ func (d Docker) Start(job *Job) (*Job, error) {
 		return nil, err
 	}
 
+	variables := []string{
+		fmt.Sprintf("CHUSHI_URL=%s", os.Getenv("CHUSHI_URL")),
+		fmt.Sprintf("CHUSHI_ORGANIZATION=%s", job.Spec.OrganizationId),
+		fmt.Sprintf("CHUSHI_RUN_ID=%s", job.Spec.Run.Id),
+		fmt.Sprintf("CHUSHI_ACCESS_TOKEN=%s", job.Spec.Token),
+		fmt.Sprintf("TF_HTTP_PASSWORD=%s", job.Spec.Token),
+		fmt.Sprintf("TF_HTTP_USERNAME=%s", "runner"),
+	}
+	for _, variable := range job.Spec.Variables {
+		if variable.Type == "environment" {
+			variables = append(variables, fmt.Sprintf("%s=%s", variable.Key, variable.Value))
+		}
+	}
+
 	cont, err := d.Client.ContainerCreate(
 		context.Background(),
 		&container.Config{
@@ -43,8 +57,10 @@ func (d Docker) Start(job *Job) (*Job, error) {
 				"runner",
 				fmt.Sprintf("-d=/workspace/%s", job.Spec.Workspace.Vcs.WorkingDirectory),
 				"-v=1.6.2",
+				"--grpc-url=http://host.docker.internal:5002",
 				job.Spec.Run.Operation,
 			},
+			Env: variables,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
