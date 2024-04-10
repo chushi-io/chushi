@@ -8,6 +8,7 @@ import (
 	"github.com/chushi-io/chushi/gen/agent/v1/agentv1connect"
 	v1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
+	"github.com/chushi-io/chushi/internal/agent"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"golang.org/x/oauth2/clientcredentials"
@@ -43,16 +44,13 @@ func WithHttpClient(httpClient *http.Client) func(proxy *Proxy) {
 	}
 }
 
-func WithToken(token string) func(proxy *Proxy) {
+func WithServerUrl(serverUrl string, creds clientcredentials.Config) func(proxy *Proxy) {
+	interceptors := connect.WithInterceptors(
+		agent.NewAuthInterceptor(creds),
+	)
 	return func(proxy *Proxy) {
-		proxy.token = token
-	}
-}
-
-func WithServerUrl(serverUrl string) func(proxy *Proxy) {
-	return func(proxy *Proxy) {
-		proxy.logsClient = apiv1connect.NewLogsClient(proxy.httpClient, serverUrl, connect.WithGRPC())
-		proxy.plansClient = apiv1connect.NewPlansClient(proxy.httpClient, serverUrl, connect.WithGRPC())
+		proxy.logsClient = apiv1connect.NewLogsClient(proxy.httpClient, serverUrl, connect.WithGRPC(), interceptors)
+		proxy.plansClient = apiv1connect.NewPlansClient(proxy.httpClient, serverUrl, connect.WithGRPC(), interceptors)
 		proxy.serverUrl = serverUrl
 	}
 }
@@ -89,8 +87,8 @@ func (s *Proxy) UploadLogs(
 	// either leverage that, or ultimately remove it
 	request := connect.NewRequest(&v1.UploadLogsRequest{
 		Content: req.Msg.Content,
+		RunId:   req.Msg.RunId,
 	})
-	request.Header().Set("Authorization", s.token)
 	_, err := s.logsClient.UploadLogs(context.TODO(), request)
 	if err != nil {
 		return connect.NewResponse(&agentv1.UploadLogsResponse{
@@ -110,8 +108,8 @@ func (s *Proxy) UploadPlan(
 ) (*connect.Response[agentv1.UploadPlanResponse], error) {
 	request := connect.NewRequest(&v1.UploadPlanRequest{
 		Content: req.Msg.Content,
+		RunId:   req.Msg.RunId,
 	})
-	request.Header().Set("Authorization", s.token)
 	_, err := s.plansClient.UploadPlan(context.TODO(), request)
 	if err != nil {
 		return connect.NewResponse(&agentv1.UploadPlanResponse{

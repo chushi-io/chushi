@@ -294,6 +294,7 @@ func GrpcServer() *fx.App {
 			workspaces.NewWorkspacesRepository,
 			vcs_connection.New,
 			auth2.NewInterceptor,
+			file_manager.New,
 
 			func() *otelconnect.Interceptor {
 				otelInterceptor, _ := otelconnect.NewInterceptor()
@@ -311,11 +312,23 @@ func GrpcServer() *fx.App {
 					VcsRepository: vcsRepo,
 				}
 			},
-			func() *grpc.PlanServer {
-				return &grpc.PlanServer{}
+			func(
+				repo run.RunRepository,
+				fileManager file_manager.FileManager,
+			) *grpc.PlanServer {
+				return &grpc.PlanServer{
+					Runs:        repo,
+					FileManager: fileManager,
+				}
 			},
-			func() *grpc.LogsServer {
-				return &grpc.LogsServer{}
+			func(
+				repo run.RunRepository,
+				fileManager file_manager.FileManager,
+			) *grpc.LogsServer {
+				return &grpc.LogsServer{
+					Runs:        repo,
+					FileManager: fileManager,
+				}
 			},
 			func(
 				runRepo run.RunRepository,

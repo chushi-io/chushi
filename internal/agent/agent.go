@@ -8,7 +8,6 @@ import (
 	apiv1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
 	"github.com/chushi-io/chushi/internal/agent/driver"
-	"github.com/chushi-io/chushi/internal/agent/proxy"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -20,7 +19,6 @@ import (
 
 type Agent struct {
 	id                    string
-	proxy                 *proxy.Proxy
 	grpcUrl               string
 	runnerImage           string
 	runnerImagePullPolicy string
@@ -63,16 +61,6 @@ func WithDriver(drv driver.Driver) func(agent *Agent) {
 func WithAgentId(agentId string) func(agent *Agent) {
 	return func(agent *Agent) {
 		agent.id = agentId
-	}
-}
-
-func WithProxy(serverUrl string, addr string) func(agent *Agent) {
-	return func(agent *Agent) {
-		agent.proxy = proxy.New(
-			proxy.WithServerUrl(serverUrl),
-			proxy.WithAddr(addr),
-			proxy.WithHttpClient(agent.httpClient),
-		)
 	}
 }
 

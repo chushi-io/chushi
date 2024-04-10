@@ -6,6 +6,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -113,13 +114,14 @@ func (ctrl *WorkspacesController) DeleteWorkspace(c *gin.Context) {
 }
 
 func (ctrl *WorkspacesController) LockWorkspace(c *gin.Context) {
-	orgId, err := helpers.GetOrganizationId(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+	orgId, found := c.Get("organization")
+	if !found || orgId == "" {
+		c.AbortWithError(http.StatusForbidden, errors.New("organization not found"))
 		return
 	}
+	orgUuid := orgId.(uuid.UUID)
 
-	workspace, err := ctrl.Repository.FindById(orgId, c.Param("workspace"))
+	workspace, err := ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -134,13 +136,14 @@ func (ctrl *WorkspacesController) LockWorkspace(c *gin.Context) {
 }
 
 func (ctrl *WorkspacesController) UnlockWorkspace(c *gin.Context) {
-	orgId, err := helpers.GetOrganizationId(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+	orgId, found := c.Get("organization")
+	if !found || orgId == "" {
+		c.AbortWithError(http.StatusForbidden, errors.New("organization not found"))
 		return
 	}
+	orgUuid := orgId.(uuid.UUID)
 
-	workspace, err := ctrl.Repository.FindById(orgId, c.Param("workspace"))
+	workspace, err := ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -155,15 +158,20 @@ func (ctrl *WorkspacesController) UnlockWorkspace(c *gin.Context) {
 }
 
 func (ctrl *WorkspacesController) GetState(c *gin.Context) {
-	org := helpers.GetOrganization(c)
+	orgId, found := c.Get("organization")
+	if !found || orgId == "" {
+		c.AbortWithError(http.StatusForbidden, errors.New("organization not found"))
+		return
+	}
+	orgUuid := orgId.(uuid.UUID)
 
-	workspace, err := ctrl.Repository.FindById(org.ID, c.Param("workspace"))
+	workspace, err := ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	state, err := ctrl.FileManager.FetchState(org.ID, workspace.ID)
+	state, err := ctrl.FileManager.FetchState(orgUuid, workspace.ID)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -174,15 +182,20 @@ func (ctrl *WorkspacesController) GetState(c *gin.Context) {
 }
 
 func (ctrl *WorkspacesController) UploadState(c *gin.Context) {
-	org := helpers.GetOrganization(c)
+	orgId, found := c.Get("organization")
+	if !found || orgId == "" {
+		c.AbortWithError(http.StatusForbidden, errors.New("organization not found"))
+		return
+	}
+	orgUuid := orgId.(uuid.UUID)
 
-	workspace, err := ctrl.Repository.FindById(org.ID, c.Param("workspace"))
+	workspace, err := ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	err = ctrl.FileManager.UploadState(org.ID, workspace.ID, c.Request.Body)
+	err = ctrl.FileManager.UploadState(orgUuid, workspace.ID, c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
