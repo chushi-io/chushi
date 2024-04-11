@@ -1,13 +1,6 @@
 import * as React from "react";
-import TableContainer from "@mui/material/TableContainer";
-import Paper from '@mui/material/Paper';
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TableCell from "@mui/material/TableCell";
-import TableBody from "@mui/material/TableBody";
 import {Link} from "react-router-dom";
-import Table from "@mui/material/Table";
-import Button from "@mui/material/Button";
+import {Button, Table} from '@mantine/core';
 import {useEffect, useState} from "react";
 import {useOrganizations} from "../providers/OrganizationProvider";
 import axios from "axios";
@@ -24,36 +17,31 @@ const ListVariableSets = () => {
     }, orgs.currentOrganization)
     return (
         <React.Fragment>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell align="right">Auto Attach</TableCell>
-                            <TableCell align="right">Priority</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {variableSets.map((variableSet) => (
-                            <TableRow
-                                key={variableSet.id}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell component="th" scope="row">
-                                    <Link to={`/variable_sets/${variableSet.id}`}>
-                                        {variableSet.name}
-                                    </Link>
-                                </TableCell>
-                                <TableCell align="right">{variableSet.auto_attach}</TableCell>
-                                <TableCell align="right">{variableSet.priority}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Table withTableBorder={true}>
+                <Table.Thead>
+                    <Table.Tr>
+                        <Table.Th>Name</Table.Th>
+                        <Table.Th align="right">Auto Attach</Table.Th>
+                        <Table.Th align="right">Priority</Table.Th>
+                    </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                    {variableSets.map((variableSet) => (
+                      <Table.Tr key={variableSet.id}>
+                          <Table.Td>
+                              <Link to={`/variable_sets/${variableSet.id}`}>
+                                  {variableSet.name}
+                              </Link>
+                          </Table.Td>
+                          <Table.Td align="right">{variableSet.auto_attach}</Table.Td>
+                          <Table.Td align="right">{variableSet.priority}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                </Table.Tbody>
+            </Table>
 
-            <Button variant="outlined">
-                <Link to={"/variable_sets/new"}>Create Variable Set</Link>
+            <Button component={Link} variant="outline" to={"/variable_sets/new"}>
+                Create Variable Set
             </Button>
         </React.Fragment>
     )

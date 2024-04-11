@@ -117,7 +117,6 @@ func (d Docker) Wait(job *Job) (*Job, error) {
 			}
 			return job, errors.New(fmt.Sprintf("Exited with code %d", data.State.ExitCode))
 		}
-		job.Status.State = data.State.Status
 		time.Sleep(time.Second * 1)
 	}
 }

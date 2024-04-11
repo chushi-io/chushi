@@ -1,15 +1,20 @@
 import * as React from "react";
-import {useState} from "react";
-import FormGroup from "@mui/material/FormGroup";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import Button from "@mui/material/Button";
 import axios from "axios";
 import {useOrganizations} from "../providers/OrganizationProvider";
 import {useNavigate} from "react-router-dom";
+import {TextInput, Button, Group, Box, Checkbox} from '@mantine/core';
+import { useForm } from '@mantine/form';
 
 const NewVariableSet = () => {
+    const form = useForm({
+        initialValues: {
+            name: '',
+            description: '',
+            autoAttach: false,
+            priority: 0
+        },
+        validate: {}
+    })
     const orgs = useOrganizations()
     const navigate = useNavigate()
     // 	Name           string    `json:"name"`
@@ -17,19 +22,12 @@ const NewVariableSet = () => {
     // 	AutoAttach     bool      `json:"auto_attach"`
     // 	Priority       int32     `json:"priority"`
 
-    const [name, setName] = useState("")
-    const [description, setDescription] = useState("")
-    const [autoAttach, setAutoAttach] = useState(false)
-    const [priority, setPriority] = useState(0)
-
-    const onSubmit = async (event) => {
-        event.preventDefault()
-        console.log({name, description, autoAttach, priority})
+    const submit = async (values) => {
         let payload = {
-            name,
-            description,
-            auto_attach: autoAttach,
-            priority
+            name: values.name,
+            description: values.description,
+            auto_attach: values.autoAttach,
+            priority: values.priority
         }
 
         const res = await axios.post(`/api/v1/orgs/${orgs.currentOrganization}/variable_sets`, payload)
@@ -39,35 +37,40 @@ const NewVariableSet = () => {
 
     return (
         <React.Fragment>
-            <form onSubmit={onSubmit}>
-                <FormGroup>
-                    <TextField
-                        label={"Name"}
-                        value={name}
-                        onChange={e => setName(e.target.value)} />
-                </FormGroup>
-                <FormGroup>
-                    <TextField
-                        label={"Description"}
-                        value={description}
-                        onChange={e => setDescription(e.target.value)} />
-                </FormGroup>
-                <FormGroup>
-                    <FormControlLabel control={
-                        <Switch inputProps={{ 'aria-label': 'controlled' }} checked={autoAttach} onChange={e => setAutoAttach(e.target.checked)}/>
-                    } label={"Attach to workspaces automatically"} />
-                </FormGroup>
-                <FormGroup>
-                    <TextField
-                        type={"number"}
-                        label={"Priority"}
-                        value={priority}
-                        onChange={e => setPriority(e.target.value)} />
-                </FormGroup>
-                <Button type={"submit"}>
-                    Create
-                </Button>
-            </form>
+            <Box maw={340} mx="auto">
+                <form onSubmit={form.onSubmit(submit)}>
+                    <TextInput
+                      withAsterisk
+                      label="Name"
+                      placeholder=""
+                      {...form.getInputProps('name')}
+                    />
+
+                    <TextInput
+                      withAsterisk
+                      label="Description"
+                      placeholder=""
+                      {...form.getInputProps('description')}
+                    />
+
+                    <TextInput
+                      withAsterisk
+                      label="Priority"
+                      placeholder=""
+                      {...form.getInputProps('priority')}
+                    />
+
+                    <Checkbox
+                      mt="md"
+                      label="Auto Attach"
+                      {...form.getInputProps('autoAttach', { type: 'checkbox' })}
+                    />
+
+                    <Group justify="flex-end" mt="md">
+                        <Button type="submit" variant={"outline"}>Submit</Button>
+                    </Group>
+                </form>
+            </Box>
         </React.Fragment>
     )
 }

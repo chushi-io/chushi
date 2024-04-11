@@ -2,16 +2,9 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {Link, useParams} from "react-router-dom";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import {useOrganizations} from "../providers/OrganizationProvider";
-import Button from "@mui/material/Button";
-import {Chip} from "@mui/material";
+import {Anchor, Breadcrumbs, Table} from "@mantine/core";
+
 
 const ShowWorkspace = () => {
     const [workspace, setWorkspace] = useState({})
@@ -40,59 +33,60 @@ const ShowWorkspace = () => {
 
     return (
         <React.Fragment>
-            <h4>{workspace.name}</h4>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell align="right">Status</TableCell>
-                            <TableCell align="right">Add</TableCell>
-                            <TableCell align="right">Change</TableCell>
-                            <TableCell align="right">Destroy</TableCell>
-                            <TableCell align="right">Resources</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {runs.map((run) => {
-                            let color = "default"
-                            let variant = "filled"
-                            switch (run.status) {
-                                case "completed":
-                                    color = "success"
-                                    break;
-                                case "pending":
-                                    color = "primary"
-                                    variant = "outlined"
-                                    break;
-                                case "failed":
-                                    color = "warning"
-                                    break;
-                            }
-                            return (
-                                <TableRow
-                                    key={run.id}
-                                    sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                                >
-                                    <TableCell component="th" scope="row">
-                                        <Link to={`/runs/${run.id}`}>
-                                            {run.id}
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        <Chip size={"small"} label={run.status} color={color}/>
-                                    </TableCell>
-                                    <TableCell align="right">{run.add}</TableCell>
-                                    <TableCell align="right">{run.change}</TableCell>
-                                    <TableCell align="right">{run.destroy}</TableCell>
-                                    <TableCell align="right">{run.managed_resources}</TableCell>
-                                </TableRow>
-                            )
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button variant="outlined" onClick={triggerRun}>Trigger Run</Button>
+            {/*<h4>{workspace.name}</h4>*/}
+            <Breadcrumbs>
+                <Anchor component={Link} to={"/workspaces"}>Workspaces</Anchor>
+                <Anchor component={Link} to={`/workspaces/${workspaceId}`}>{workspace.name}</Anchor>
+                <Anchor component={Link} to={`/workspaces/${workspaceId}`}>Runs</Anchor>
+            </Breadcrumbs>
+            <Table withTableBorder={true}>
+                <Table.Thead>
+                    <Table.Tr>
+                        <Table.Th>ID</Table.Th>
+                        <Table.Th align="right">Status</Table.Th>
+                        <Table.Th align="right">Add</Table.Th>
+                        <Table.Th align="right">Change</Table.Th>
+                        <Table.Th align="right">Destroy</Table.Th>
+                        <Table.Th align="right">Resources</Table.Th>
+                    </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                    {runs.map((run) => {
+                        let color = "default"
+                        let variant = "filled"
+                        switch (run.status) {
+                            case "completed":
+                                color = "success"
+                                break;
+                            case "pending":
+                                color = "primary"
+                                variant = "outlined"
+                                break;
+                            case "failed":
+                                color = "warning"
+                                break;
+                        }
+                        return (
+                          <Table.Tr key={run.id}>
+                              <Table.Td>
+                                  <Link to={`/runs/${run.id}`}>
+                                      {run.id}
+                                  </Link>
+                              </Table.Td>
+                              <Table.Td align="right">
+                                  {/*<Chip size={"small"} label={run.status} color={color}/>*/}
+                                  {run.status}
+                              </Table.Td>
+                              <Table.Td align="right">{run.add}</Table.Td>
+                              <Table.Td align="right">{run.change}</Table.Td>
+                              <Table.Td align="right">{run.destroy}</Table.Td>
+                              <Table.Td align="right">{run.managed_resources}</Table.Td>
+                          </Table.Tr>
+                        )
+                    })}
+                </Table.Tbody>
+            </Table>
+            {/*<Button variant="outlined" onClick={triggerRun}>Trigger Run</Button>*/}
         </React.Fragment>
     )
 }

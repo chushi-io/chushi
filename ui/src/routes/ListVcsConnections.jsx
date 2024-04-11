@@ -2,9 +2,8 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {useOrganizations} from "../providers/OrganizationProvider";
 import axios from "axios";
-import {Alert} from "@mui/material";
 import {Link} from "react-router-dom";
-import Button from "@mui/material/Button";
+import {Alert, Anchor, Breadcrumbs, Button} from "@mantine/core";
 
 const ListVcsConnections = () => {
     const [vcsConnections, setVcsConnections] = useState([]);
@@ -20,14 +19,17 @@ const ListVcsConnections = () => {
     }, [orgs.currentOrganization])
     return (
         <React.Fragment>
-            {vcsConnections.length === 0 && <Alert severity="info">No VCS connections have been configured yet!</Alert>}
+          <Breadcrumbs>
+            <Anchor component={Link} to={"/vcs_connections"}>VCS Connections</Anchor>
+          </Breadcrumbs>
+            {vcsConnections.length === 0 && <Alert variant="light" color={"yellow"}>No VCS connections have been configured yet!</Alert>}
             <ul>
                 {vcsConnections.map(conn => {
                     return <li>{conn.name}</li>
                 })}
             </ul>
-            <Button variant="outlined">
-                <Link to={"/vcs_connections/new"}>New VCS Connection</Link>
+            <Button component={Link} to={"/vcs_connections/new"} variant="outline">
+                New VCS Connection
             </Button>
         </React.Fragment>
     )

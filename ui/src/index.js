@@ -1,8 +1,8 @@
 import React from 'react';
-import { StyledEngineProvider } from '@mui/material/styles';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
+import { createTheme, MantineProvider } from '@mantine/core';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -10,15 +10,18 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} from "react-router-dom";
 
-import Root from "./routes/Root";
+// core styles are required for all packages
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '@mantine/code-highlight/styles.css';
+
+import Layout from "./layouts/Default";
 import ListWorkspaces from "./routes/ListWorkspaces";
 import ErrorPage from "./error-page";
 import ShowWorkspace from "./routes/ShowWorkspace";
 import ListAgents from "./routes/ListAgents";
 import ShowAgent from "./routes/ShowAgent";
 
-import { Link as RouterLink } from 'react-router-dom';
-import {ThemeProvider, createTheme} from "@mui/material/styles";
 import NewAgent from "./routes/NewAgent";
 import OrganizationProvider from "./providers/OrganizationProvider";
 import CreateWorkspace from "./routes/CreateWorkspace";
@@ -30,29 +33,14 @@ import NewVariableSet from "./routes/NewVariableSet";
 import ShowVariableSet from "./routes/ShowVariableSet";
 import NewVariable from "./routes/NewVariable";
 
-const LinkBehavior = React.forwardRef((props, ref) => {
-    const { href, ...other } = props;
-    return <RouterLink ref={ref} to={href} {...other} />;
+const theme = createTheme({
+  /** Put your mantine theme override here */
 });
 
-const theme = createTheme({
-    components: {
-        MuiLink: {
-            defaultProps: {
-                component: LinkBehavior,
-            },
-        },
-        MuiButtonBase: {
-            defaultProps: {
-                LinkComponent: LinkBehavior,
-            },
-        },
-    },
-});
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+        <Route path="/" element={<Layout />} errorElement={<ErrorPage />}>
             <Route path={"variables/new"} element={<NewVariable attachment={"organization"} />} />
             <Route path={"organizations"}>
                 <Route index={true} element={<ListOrganizations />} />
@@ -87,13 +75,11 @@ const router = createBrowserRouter(
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-      <StyledEngineProvider>
+      <MantineProvider theme={theme}>
           <OrganizationProvider>
-              <ThemeProvider theme={theme}>
-                  <RouterProvider router={router} />
-              </ThemeProvider>
+              <RouterProvider router={router} />
           </OrganizationProvider>
-      </StyledEngineProvider>
+      </MantineProvider>
   </React.StrictMode>
 );
 
