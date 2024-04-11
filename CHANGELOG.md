@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.10.1](https://github.com/chushi-io/chushi/compare/v1.10.0...v1.10.1) (2024-04-11)
+
+
+### Bug Fixes
+
+* **driver:** Stub out driver tests, refactor interfaces ([29fa993](https://github.com/chushi-io/chushi/commit/29fa993766d724dae5d894626cb0064499f3132e))
+
 ## [1.10.0](https://github.com/chushi-io/chushi/compare/v1.9.0...v1.10.0) (2024-04-09)
 
 
