@@ -3,9 +3,7 @@ package main
 import (
 	"github.com/chushi-io/chushi/internal/agent"
 	"github.com/chushi-io/chushi/internal/agent/driver"
-	"github.com/chushi-io/chushi/pkg/sdk"
 	"github.com/docker/docker/client"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2/clientcredentials"
@@ -36,7 +34,6 @@ func init() {
 	agentCmd.Flags().Int("poll-interval", 2, "How often to poll the queue endpoint (seconds)")
 	agentCmd.Flags().String("agent-id", "", "ID of the agent")
 	agentCmd.Flags().String("token-url", "https://chushi.io/auth/v1/token", "Chushi Token URL")
-	agentCmd.Flags().String("server-url", "", "Chushi API URL")
 	agentCmd.Flags().String("grpc-url", "http://localhost:8080/grpc", "Chushi GRPC URL")
 	agentCmd.Flags().String("org-id", "", "ID of the organization")
 	agentCmd.Flags().String("kubeconfig", "", "Location of kubeconfig file")
@@ -48,7 +45,6 @@ func init() {
 
 func runAgent(cmd *cobra.Command, args []string) {
 	agentId, _ := cmd.Flags().GetString("agent-id")
-	serverUrl, _ := cmd.Flags().GetString("server-url")
 	grpcUrl, _ := cmd.Flags().GetString("grpc-url")
 	rawOrgId, _ := cmd.Flags().GetString("org-id")
 	driverType, _ := cmd.Flags().GetString("driver")
@@ -59,19 +55,6 @@ func runAgent(cmd *cobra.Command, args []string) {
 		ClientID:     os.Getenv("CHUSHI_CLIENT_ID"),
 		ClientSecret: os.Getenv("CHUSHI_CLIENT_SECRET"),
 		TokenURL:     tokenUrl,
-	}
-
-	chushiSdk := sdk.New()
-
-	if rawOrgId != "" {
-		orgId, err := uuid.Parse(rawOrgId)
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-		chushiSdk = chushiSdk.WithOrganizationId(orgId)
-	}
-	if serverUrl != "" {
-		chushiSdk = chushiSdk.WithBaseUrl(serverUrl)
 	}
 
 	opts := []func(a *agent.Agent){
@@ -102,7 +85,7 @@ func runAgent(cmd *cobra.Command, args []string) {
 		}
 		drv = driver.Docker{Client: cli}
 	default:
-		drv = driver.Inline{}
+		drv = driver.NewInlineRunner(logger, grpcUrl)
 	}
 
 	opts = append(opts, agent.WithDriver(drv))

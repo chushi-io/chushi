@@ -3,7 +3,6 @@ package proxy
 import (
 	"connectrpc.com/connect"
 	"context"
-	"crypto/tls"
 	agentv1 "github.com/chushi-io/chushi/gen/agent/v1"
 	"github.com/chushi-io/chushi/gen/agent/v1/agentv1connect"
 	v1 "github.com/chushi-io/chushi/gen/api/v1"
@@ -12,7 +11,6 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"golang.org/x/oauth2/clientcredentials"
-	"net"
 	"net/http"
 )
 
@@ -134,19 +132,4 @@ func (s *Proxy) Run() error {
 		panic(err)
 	}
 	return nil
-}
-
-func NewInsecureClient() *http.Client {
-	return &http.Client{
-		Transport: &http2.Transport{
-			AllowHTTP: true,
-			DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
-				// If you're also using this client for non-h2c traffic, you may want
-				// to delegate to tls.Dial if the network isn't TCP or the addr isn't
-				// in an allowlist.
-				return net.Dial(network, addr)
-			},
-			// Don't forget timeouts!
-		},
-	}
 }

@@ -35,8 +35,17 @@ func NewJob(spec *JobSpec) *Job {
 
 type JobStatus struct {
 	Metadata map[string]string
-	State    string
+	State    JobState
 }
+
+type JobState string
+
+const (
+	JobStateRunning  JobState = "running"
+	JobStatePending           = "pending"
+	JobStateComplete          = "complete"
+	JobStateFailed            = "failed"
+)
 
 func (job *Job) GetMetadata(key string) (string, error) {
 	if val, ok := job.Status.Metadata[key]; ok {
