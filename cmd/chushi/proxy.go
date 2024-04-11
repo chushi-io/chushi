@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/chushi-io/chushi/internal/agent/proxy"
+	"github.com/chushi-io/chushi/internal/helpers"
+	"github.com/chushi-io/chushi/internal/proxy"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2/clientcredentials"
@@ -33,7 +34,7 @@ func runProxy(cmd *cobra.Command, args []string) {
 	}
 
 	p := proxy.New(
-		proxy.WithHttpClient(proxy.NewInsecureClient()),
+		proxy.WithHttpClient(helpers.NewInsecureClient()),
 		proxy.WithServerUrl(grpcUrl, cc),
 		proxy.WithAddr(address),
 	)
