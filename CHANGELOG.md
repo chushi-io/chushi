@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.11.0](https://github.com/chushi-io/chushi/compare/v1.10.1...v1.11.0) (2024-04-11)
+
+
+### Features
+
+* **ui:** Update UI to use Mantine instead of Material UI ([2b6aed8](https://github.com/chushi-io/chushi/commit/2b6aed87c7e01349720069c7e9818b4c1b7f7b46))
+
 ### [1.10.1](https://github.com/chushi-io/chushi/compare/v1.10.0...v1.10.1) (2024-04-11)
 
 
