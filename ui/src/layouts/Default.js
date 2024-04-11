@@ -1,42 +1,48 @@
+import {AppShell, NavLink, Select} from '@mantine/core';
+import {Link, Outlet} from "react-router-dom";
 import * as React from "react";
-import {Drawer, Grid} from "@mui/material";
-import ListSubheader from '@mui/material/ListSubheader';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Collapse from '@mui/material/Collapse';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import DraftsIcon from '@mui/icons-material/Drafts';
-import SendIcon from '@mui/icons-material/Send';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import StarBorder from '@mui/icons-material/StarBorder';
+import {useOrganizations} from "../providers/OrganizationProvider";
 
-const DefaultLayout = (props) => {
-    const [open, setOpen] = React.useState(true);
-
-    const handleClick = () => {
-        setOpen(!open);
-    };
+export default () => {
+    const context = useOrganizations()
     return (
-        <Grid container spacing={2}>
-            <Sidebar className="app">
-                <Menu>
-                    <MenuItem className="menu1">
-                        <h2>QUICKPAY</h2>
-                    </MenuItem>
-                    <MenuItem> Dashboard </MenuItem>
-                    <MenuItem> Invoices </MenuItem>
-                    <MenuItem> Charts </MenuItem>
-                    <MenuItem> Wallets </MenuItem>
-                    <MenuItem> Transactions </MenuItem>
-                    <MenuItem> Settings </MenuItem>
-                    <MenuItem> Logout </MenuItem>
-                </Menu>
-            </Sidebar>
-        </Grid>
-    )
-}
+      <AppShell
+        header={{ height: 60 }}
+        navbar={{
+            width: 300,
+            breakpoint: 'sm',
+        }}
+        padding="md"
+      >
+          <AppShell.Header>
+              <div>Chushi</div>
+          </AppShell.Header>
 
-export default DefaultLayout;
+          <AppShell.Navbar p="md">
+              <Select
+                data={context.organizations.map(org => {
+                    return { value: org.id, label: org.name }
+                })}
+                value={context.currentOrganization}
+                onChange={(_value, option) => {
+                    console.log(_value)
+                    console.log(option)
+                    context.changeOrganization(_value)
+                }}
+              />
+              <NavLink component={Link} to={"/workspaces"} label={"Workspaces"} />
+              <NavLink component={Link} to={"/agents"} label={"Agents"} />
+              <NavLink component={Link} to={"/registry"} label={"Registry"} />
+              <NavLink component={Link} to={"/settings"} label={"Settings"} />
+              <NavLink component={Link} to={"/organizations"} label={"Organizations"} />
+              <NavLink component={Link} to={"/vcs_connections"} label={"Connections"} />
+              <NavLink component={Link} to={"/variables"} label={"Variables"} />
+              <NavLink component={Link} to={"/variable_sets"} label={"Variable Sets"} />
+          </AppShell.Navbar>
+
+          <AppShell.Main>
+              <Outlet />
+          </AppShell.Main>
+      </AppShell>
+    );
+}

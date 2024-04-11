@@ -1,16 +1,9 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import {Link} from "react-router-dom";
-import {Button} from "@mui/material";
 import {useOrganizations} from "../providers/OrganizationProvider";
+import {Anchor, Breadcrumbs, Table, Button } from "@mantine/core";
 
 const ListAgents = () => {
     const [agents, setAgents] = useState([])
@@ -24,33 +17,33 @@ const ListAgents = () => {
 
     return (
         <React.Fragment>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Client ID</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {agents.map((agent) => (
-                            <TableRow
-                                key={agent.name}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell>
-                                    <Link to={`/agents/${agent.id}`}>
-                                        {agent.name}
-                                    </Link>
-                                </TableCell>
-                                <TableCell align={"right"}>{agent.oauth_client_id}</TableCell>
+            <Breadcrumbs>
+                <Anchor component={Link} to={"/agents"}>Agents</Anchor>
+            </Breadcrumbs>
+            <Table withTableBorder={true}>
+                <Table.Thead>
+                    <Table.Tr>
+                        <Table.Th>Name</Table.Th>
+                        <Table.Th align="right">Client ID</Table.Th>
+                    </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                    {agents.map((agent) => (
+                      <Table.Tr key={agent.id}>
+                          <Table.Td>
+                              <Link to={`/agents/${agent.id}`}>
+                                  {agent.id}
+                              </Link>
+                          </Table.Td>
+                          <Table.Td>{agent.oauth_client_id}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                </Table.Tbody>
+            </Table>
 
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button href={"/agents/new"}>New Agent</Button>
+            <Button component={Link} to={"/agents/new"} variant={"outline"}>
+                New Agent
+            </Button>
         </React.Fragment>
 
     )
