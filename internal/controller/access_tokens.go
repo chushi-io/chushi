@@ -5,6 +5,7 @@ import (
 	"github.com/chushi-io/chushi/internal/resource/access_token"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 	"time"
 )
@@ -69,4 +70,17 @@ func (ctrl *AccessTokensController) Create(c *gin.Context) {
 		"id":    accessToken.Id,
 		"token": accessToken.Token,
 	}})
+}
+
+func (ctrl *AccessTokensController) Delete(c *gin.Context) {
+	tokenId, err := uuid.Parse(c.Param("accessToken"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	if err := ctrl.Repository.Delete(tokenId); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }

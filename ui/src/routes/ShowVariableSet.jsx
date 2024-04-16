@@ -45,7 +45,7 @@ const ShowVariableSet = () => {
                 </Table.Tbody>
             </Table>
 
-            <Button variant="outline" to={`/variable_sets/${variableSetId}/variables/new`}>
+            <Button variant="outline" component={Link} to={`/variable_sets/${variableSetId}/variables/new`}>
                 Add Variable
             </Button>
         </React.Fragment>

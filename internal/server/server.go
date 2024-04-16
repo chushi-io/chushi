@@ -74,6 +74,7 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	{
 		settings.GET("access_tokens", params.AccessTokensController.List)
 		settings.POST("access_tokens", params.AccessTokensController.Create)
+		settings.DELETE("access_tokens/:accessToken", params.AccessTokensController.Delete)
 	}
 
 	api := r.Group("/api")

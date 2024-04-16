@@ -71,5 +71,6 @@ func (r repositoryImpl) Update(token *AccessToken) (*AccessToken, error) {
 }
 
 func (r repositoryImpl) Delete(tokenId uuid.UUID) error {
-	return nil
+	result := r.Db.Delete(&AccessToken{}, "id = ?", tokenId)
+	return result.Error
 }

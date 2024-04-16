@@ -7,9 +7,10 @@ import { Table } from '@mantine/core';
 import {useForm} from "@mantine/form";
 import { DatePickerInput } from '@mantine/dates';
 import dayjs from "dayjs";
+import {IconTrash} from "@tabler/icons-react";
 
 const AccessTokens = () => {
-  const [opened, setOpened] = useState(false)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
   const [tokens, setTokens] = useState([])
   const [tokenValue, setTokenValue] = useState("")
 
@@ -30,7 +31,7 @@ const AccessTokens = () => {
   const resetForm = () => { }
 
   const close = () => {
-    setOpened(false)
+    setCreateModalOpen(false)
   }
 
   const submit = (values) => {
@@ -41,6 +42,12 @@ const AccessTokens = () => {
       ])
       setTokenValue(res.data.access_token.token)
       close()
+    })
+  }
+
+  const deleteToken = (tokenId) => {
+    axios.delete(`/settings/access_tokens/${tokenId}`).then((res) => {
+      setTokens(tokens.filter(token => token.id !== tokenId))
     })
   }
 
@@ -59,6 +66,7 @@ const AccessTokens = () => {
             <Table.Th>Created At</Table.Th>
             <Table.Th>Last Seen</Table.Th>
             <Table.Th>Expires At</Table.Th>
+            <Table.Th></Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -69,12 +77,15 @@ const AccessTokens = () => {
               <Table.Td>{token.created_at}</Table.Td>
               <Table.Td>{token.last_seen}</Table.Td>
               <Table.Td>{token.expires_at}</Table.Td>
+              <Table.Td>
+                <Button onClick={() => deleteToken(token.id)} variant="outline" color="red" size={"compact-sm"}><IconTrash /></Button>
+              </Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
       </Table>
 
-      <Modal opened={opened} onClose={close} title="New Access Token">
+      <Modal opened={createModalOpen} onClose={close} title="New Access Token">
         <form onSubmit={form.onSubmit(submit)}>
           <TextInput
             withAsterisk
@@ -94,7 +105,7 @@ const AccessTokens = () => {
         </form>
       </Modal>
 
-      <Button onClick={() => setOpened(true)} variant="outline">
+      <Button onClick={() => setCreateModalOpen(true)} variant="outline">
         Create Access Token
       </Button>
     </React.Fragment>
