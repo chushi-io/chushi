@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.13.0](https://github.com/chushi-io/chushi/compare/v1.12.0...v1.13.0) (2024-04-16)
+
+
+### Features
+
+* **tokens:** Add delete token routes ([e007f94](https://github.com/chushi-io/chushi/commit/e007f94af9bba5c0704c293732b83719ee4275b2))
+
 ## [1.12.0](https://github.com/chushi-io/chushi/compare/v1.11.0...v1.12.0) (2024-04-16)
 
 
