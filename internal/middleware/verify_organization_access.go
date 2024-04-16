@@ -36,6 +36,7 @@ func (oam *OrganizationAccessMiddleware) VerifyOrganizationAccess(c *gin.Context
 
 	switch authType {
 	case "user":
+	case "personal_access_token":
 		oam.userAuth(c, org.ID)
 		return
 	case "token":

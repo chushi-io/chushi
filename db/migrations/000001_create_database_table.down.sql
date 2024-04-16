@@ -1,1 +1,1 @@
-DROP TABLE public.*
+-- DROP TABLE public.*

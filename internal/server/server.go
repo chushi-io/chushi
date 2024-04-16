@@ -5,8 +5,10 @@ import (
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/middleware/auth"
+	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/personal_access_token"
 	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/session"
 	"github.com/chushi-io/chushi/internal/middleware/auth/strategy/token"
+	"github.com/chushi-io/chushi/internal/resource/access_token"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/server/adapter"
@@ -34,11 +36,15 @@ type Params struct {
 	VariablesController          *controller.VariablesController
 	VariablesSetsController      *controller.VariableSetsController
 	MeController                 *controller.MeController
+	AccessTokensController       *controller.AccessTokensController
 	AuthServer                   *server.Server
 	AuthBoss                     *authboss.Authboss
 	UserStore                    *organization.UserStore
 	WorkspacesRepository         workspaces.WorkspacesRepository
 	OrganizationAccessMiddleware *middleware.OrganizationAccessMiddleware
+	UserinfoMiddleware           *middleware.UserinfoMiddleware
+	AccessTokensRepository       access_token.Repository
+	UserRepository               organization.UserRepository
 }
 
 func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
@@ -46,6 +52,7 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	middlewareFactory := auth.WithStrategies(
 		session.New(params.AuthBoss, params.UserStore),
 		token.New(params.Config.JwtSecretKey),
+		personal_access_token.New(params.AccessTokensRepository, params.UserRepository),
 	)
 
 	r := gin.Default()
@@ -61,6 +68,13 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 			"message": "pong",
 		})
 	})
+
+	settings := r.Group("/settings")
+	settings.Use(params.UserinfoMiddleware.Handle)
+	{
+		settings.GET("access_tokens", params.AccessTokensController.List)
+		settings.POST("access_tokens", params.AccessTokensController.Create)
+	}
 
 	api := r.Group("/api")
 	{
@@ -149,7 +163,7 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 			{
 				runs.GET("", params.RunsController.List)
 				runs.POST("", params.RunsController.Create)
-				runs.GET("/:run", notImplemented)
+				runs.GET("/:run", params.RunsController.Get)
 				runs.POST("/:run", notImplemented)
 				runs.DELETE("/:run", notImplemented)
 			}
@@ -281,6 +295,7 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+
 			ln, err := net.Listen("tcp", srv.Addr)
 			if err != nil {
 				return err

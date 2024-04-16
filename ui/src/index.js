@@ -8,7 +8,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} from "react-router-dom";
+import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider, Routes} from "react-router-dom";
 
 // core styles are required for all packages
 import '@mantine/core/styles.css';
@@ -32,6 +32,16 @@ import ListVariableSets from "./routes/ListVariableSets";
 import NewVariableSet from "./routes/NewVariableSet";
 import ShowVariableSet from "./routes/ShowVariableSet";
 import NewVariable from "./routes/NewVariable";
+import Account from "./layouts/Account";
+import Profile from "./routes/settings/Profile";
+import AccessTokens from "./routes/settings/AccessTokens";
+
+// Set dayjs parsing format
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import Organizations from "./routes/settings/Organizations";
+import ViewRun from "./routes/ViewRun";
+dayjs.extend(customParseFormat);
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -39,35 +49,48 @@ const theme = createTheme({
 
 
 const router = createBrowserRouter(
-    createRoutesFromElements(
+    createRoutesFromElements([
+      <Route path="settings" element={<Account />}>
+        <Route path={"profile"} element={<Profile />} />
+        <Route path={"organizations"} element={<Organizations />} />
+        <Route path={"billing"} element={<h3>Billing</h3>} />
+        <Route path={"mfa"} element={<h3>Multi Factor Authentication</h3>} />
+        <Route path={"access_tokens"} element={<AccessTokens />} />
+      </Route>,
         <Route path="/" element={<Layout />} errorElement={<ErrorPage />}>
-            <Route path={"variables/new"} element={<NewVariable attachment={"organization"} />} />
-            <Route path={"organizations"}>
-                <Route index={true} element={<ListOrganizations />} />
+          <Route path={"variables/new"} element={<NewVariable attachment={"organization"} />} />
+          <Route path={"organizations"}>
+            <Route index={true} element={<ListOrganizations />} />
+          </Route>
+          <Route path="workspaces">
+            <Route index={true} element={<ListWorkspaces />} />
+            <Route path={"new"} element={<CreateWorkspace />} />
+            <Route path={":workspaceId"} >
+              <Route index={true} element={<ShowWorkspace />} />
+              <Route path={"runs"}>
+                <Route path={":runId"} element={<ViewRun />}/>
+              </Route>
             </Route>
-            <Route path="workspaces">
-                <Route index={true} element={<ListWorkspaces />} />
-                <Route path={"new"} element={<CreateWorkspace />} />
-                <Route path={":workspaceId"} element={<ShowWorkspace />} />
-                <Route path={":workspaceId/variables/new"} element={<NewVariable attachment={"workspace"} />} />
-            </Route>
-            <Route path={"agents"}>
-                <Route index={true} element={<ListAgents />} />
-                <Route path={"new"} element={<NewAgent />} />
-                <Route path={":agentId"} element={<ShowAgent />} />
-            </Route>
-            <Route path={"vcs_connections"}>
-                <Route index={true} element={<ListVcsConnections />} />
-                <Route path={"new"} element={<CreateVcsConnection />} />
-            </Route>
-            <Route path={"variable_sets"}>
-                <Route index={true} element={<ListVariableSets />} />
-                <Route path={"new"} element={<NewVariableSet />} />
-                <Route path={":variableSetId"} element={<ShowVariableSet />} />
-                <Route path={":variableSetId/variables/new"} element={<NewVariable attachment={"variable_set"} />} />
-            </Route>
+            <Route path={":workspaceId/variables/new"} element={<NewVariable attachment={"workspace"} />} />
+          </Route>
+          <Route path={"agents"}>
+            <Route index={true} element={<ListAgents />} />
+            <Route path={"new"} element={<NewAgent />} />
+            <Route path={":agentId"} element={<ShowAgent />} />
+          </Route>
+          <Route path={"vcs_connections"}>
+            <Route index={true} element={<ListVcsConnections />} />
+            <Route path={"new"} element={<CreateVcsConnection />} />
+          </Route>
+          <Route path={"variable_sets"}>
+            <Route index={true} element={<ListVariableSets />} />
+            <Route path={"new"} element={<NewVariableSet />} />
+            <Route path={":variableSetId"} element={<ShowVariableSet />} />
+            <Route path={":variableSetId/variables/new"} element={<NewVariable attachment={"variable_set"} />} />
+          </Route>
+
         </Route>
-    ), {
+    ]), {
         basename: "/ui"
     }
 );

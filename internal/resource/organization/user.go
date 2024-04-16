@@ -3,6 +3,7 @@ package organization
 import (
 	"errors"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -49,6 +50,26 @@ type User struct {
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
+
+type UserRepository interface {
+	Find(userId uuid.UUID) (*User, error)
+}
+
+type userRepositoryImpl struct {
+	Db *gorm.DB
+}
+
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return userRepositoryImpl{Db: db}
+}
+
+func (u userRepositoryImpl) Find(userId uuid.UUID) (*User, error) {
+	var user User
+	if result := u.Db.Find(&user, "id = ?", userId); result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
 
 func (u *User) PutPID(pid string)                         { u.Email = pid }
 func (u *User) PutPassword(password string)               { u.Password = password }

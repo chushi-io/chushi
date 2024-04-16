@@ -69,7 +69,7 @@ const ShowWorkspace = () => {
                         return (
                           <Table.Tr key={run.id}>
                               <Table.Td>
-                                  <Link to={`/runs/${run.id}`}>
+                                  <Link to={`/workspaces/${workspaceId}/runs/${run.id}`}>
                                       {run.id}
                                   </Link>
                               </Table.Td>

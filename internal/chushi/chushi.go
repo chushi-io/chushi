@@ -13,6 +13,7 @@ import (
 	"github.com/chushi-io/chushi/internal/grpc"
 	"github.com/chushi-io/chushi/internal/middleware"
 	auth2 "github.com/chushi-io/chushi/internal/middleware/auth"
+	"github.com/chushi-io/chushi/internal/resource/access_token"
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/oauth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
@@ -132,6 +133,8 @@ func Server() *fx.App {
 			variables.NewVariableSetsRepository,
 			vcs_connection.New,
 			workspaces.NewWorkspacesRepository,
+			organization.NewUserRepository,
+			access_token.New,
 
 			// Controllers
 			controller.NewAgentsController,
@@ -142,6 +145,10 @@ func Server() *fx.App {
 			controller.NewVariableSetsController,
 			controller.NewWorkspacesController,
 			controller.NewVcsConnectionsController,
+			controller.NewAccessTokensController,
+
+			// Middleware
+			middleware.NewUserinfoMiddleware,
 
 			// Utils
 			file_manager.New,

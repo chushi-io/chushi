@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"net/http"
 	"strings"
 )
@@ -22,7 +23,10 @@ func (ta Token) Evaluate(c *gin.Context) bool {
 	if bearerToken == "" {
 		return false
 	}
-	return strings.HasPrefix(bearerToken, "Bearer ")
+
+	authToken, _ := strings.CutPrefix(bearerToken, "Bearer ")
+	_, err := uuid.Parse(authToken)
+	return err != nil
 }
 
 func (ta Token) Handle(c *gin.Context) bool {
@@ -32,6 +36,7 @@ func (ta Token) Handle(c *gin.Context) bool {
 	}
 	authToken, _ := strings.CutPrefix(bearerToken, "Bearer ")
 
+	// Not a UUID, handle JWT
 	token, err := jwt.ParseWithClaims(authToken, &generates.JWTAccessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")

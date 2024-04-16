@@ -54,6 +54,7 @@ func (d Docker) Start(job *Job) (*Job, error) {
 		fmt.Sprintf("TF_HTTP_PASSWORD=%s", job.Spec.Token),
 		fmt.Sprintf("TF_HTTP_USERNAME=%s", "runner"),
 	}
+
 	for _, variable := range job.Spec.Variables {
 		if variable.Type == "environment" {
 			variables = append(variables, fmt.Sprintf("%s=%s", variable.Key, variable.Value))

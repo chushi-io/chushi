@@ -33,8 +33,7 @@ export default () => {
               <NavLink component={Link} to={"/workspaces"} label={"Workspaces"} />
               <NavLink component={Link} to={"/agents"} label={"Agents"} />
               <NavLink component={Link} to={"/registry"} label={"Registry"} />
-              <NavLink component={Link} to={"/settings"} label={"Settings"} />
-              <NavLink component={Link} to={"/organizations"} label={"Organizations"} />
+              <NavLink component={Link} to={"/settings/profile"} label={"Settings"} />
               <NavLink component={Link} to={"/vcs_connections"} label={"Connections"} />
               <NavLink component={Link} to={"/variables"} label={"Variables"} />
               <NavLink component={Link} to={"/variable_sets"} label={"Variable Sets"} />

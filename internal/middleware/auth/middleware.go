@@ -1,6 +1,10 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"errors"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
 type Middleware struct {
 	strategies []Strategy
@@ -16,8 +20,17 @@ func WithStrategies(strategies ...Strategy) *Middleware {
 }
 
 func (m *Middleware) Handle(c *gin.Context) {
+	var strategies []Strategy
 	for _, strategy := range m.strategies {
-		_ = strategy.Handle(c)
+		if strategy.Evaluate(c) {
+			strategies = append(strategies, strategy)
+		}
 	}
-	return
+
+	for _, strategy := range strategies {
+		if strategy.Handle(c) {
+			return
+		}
+	}
+	c.AbortWithError(http.StatusUnauthorized, errors.New("no valid authentication method provided"))
 }
