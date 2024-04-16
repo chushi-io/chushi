@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.0](https://github.com/chushi-io/chushi/compare/v1.11.0...v1.12.0) (2024-04-16)
+
+
+### Features
+
+* **tokens:** Support access token creation ([7586b92](https://github.com/chushi-io/chushi/commit/7586b921bbe7a6a48b02c2ebc8af70698dfd506d))
+
 ## [1.11.0](https://github.com/chushi-io/chushi/compare/v1.10.1...v1.11.0) (2024-04-11)
 
 
