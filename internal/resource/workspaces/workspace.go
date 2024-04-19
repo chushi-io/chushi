@@ -3,6 +3,7 @@ package workspaces
 import (
 	"github.com/chushi-io/chushi/internal/resource/agent"
 	"github.com/chushi-io/chushi/internal/resource/organization"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"time"
 )
@@ -46,6 +47,77 @@ type Workspace struct {
 
 	// DriftDetection
 	DriftDetection DriftDetection `gorm:"embedded;embeddedPrefix:drift_detection_" json:"drift_detection"`
+}
+
+func (w *Workspace) ToCloud() any {
+	return gin.H{
+		"data": gin.H{
+			"attributes": gin.H{
+				"actions": gin.H{
+					"is-destroyable": w.AllowDestroy,
+				},
+				"allow-destroy-plan": w.AllowDestroy,
+				//"apply-duration-average": 158000,
+				"auto-apply": w.AutoApply,
+				//"auto-apply-run-trigger": false,
+				//"auto-destroy-at": null,
+				//"auto-destroy-activity-duration": null,
+				//"created-at":  w.CreatedAt.String(),
+				"description": "",
+				//"environment": "default",
+				"execution-mode":        "remote",
+				"file-triggers-enabled": true,
+				"global-remote-state":   false,
+				"latest-change-at":      "2021-06-23T17:50:48.815Z",
+				"locked":                w.Locked,
+				"name":                  w.Name,
+				//"operations": true,
+				"permissions": gin.H{
+					"can-create-state-versions": true,
+					"can-destroy":               true,
+					"can-force-unlock":          true,
+					"can-lock":                  true,
+					"can-manage-run-tasks":      true,
+					"can-manage-tags":           true,
+					"can-queue-apply":           true,
+					"can-queue-destroy":         true,
+					"can-queue-run":             true,
+					"can-read-settings":         true,
+					"can-read-state-versions":   true,
+					"can-read-variable":         true,
+					"can-unlock":                true,
+					"can-update":                true,
+					"can-update-variable":       true,
+					"can-force-delete":          true,
+				},
+				//"plan-duration-average": 20000,
+				//"policy-check-failures": null,
+				//"queue-all-runs": false,
+				//"resource-count": 0,
+				//"run-failures": 6,
+				//"source": "terraform",
+				//"source-name": null,
+				//"source-url": null,
+				//"speculative-enabled": true,
+				//"structured-run-output-enabled": false,
+				"terraform-version": w.Version,
+				//"trigger-prefixes": [],
+				//"updated-at": "2021-08-16T18:54:06.874Z",
+				//"vcs-repo": null,
+				//"vcs-repo-identifier": null,
+				//"working-directory": null,
+				//"workspace-kpis-runs-count": 7,
+				//"setting-overwrites": {
+				//"execution-mode": true,
+				//"agent-pool": true
+				//}
+			},
+			"id":            w.ID,
+			"links":         gin.H{},
+			"relationships": gin.H{},
+			"type":          "workspaces",
+		},
+	}
 }
 
 type DriftDetection struct {

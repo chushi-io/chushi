@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/middleware/auth"
@@ -109,6 +110,37 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	// Apply our auth to all API endpoints
 	v1api.Use(middlewareFactory.Handle)
 
+	// Mappings to support opentofu cloud workspace
+	r.GET("/.well-known/terraform.json", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"modules.v1": "/api/v1/registry/modules/", "providers.v1": "/api/v1/registry/providers/", "motd.v1": "/api/terraform/motd", "state.v2": "/api/v1/", "tfe.v2": "/api/v1/", "tfe.v2.1": "/api/v1/", "tfe.v2.2": "/api/v1/", "versions.v1": "https://checkpoint-api.hashicorp.com/v1/versions/"})
+	})
+	v1api.GET("/organizations/:organization", params.OrganizationsController.Get)
+	v1api.GET("/organizations/:organization/entitlement-set", params.OrganizationsController.Entitlements)
+	v1api.
+		//Use(middleware.VerifyStateAccess(
+		//	params.Config.JwtSecretKey,
+		//	params.WorkspacesRepository,
+		//)).
+		Use(params.OrganizationsController.SetContext).
+		Use(params.OrganizationAccessMiddleware.VerifyOrganizationAccess).
+		GET("/organizations/:organization/workspaces/:workspace", params.WorkspacesController.GetCloudWorkspace)
+	r.Use(func(c *gin.Context) {
+		fmt.Println(c.Request.Header)
+	})
+	r.POST("/api/v1/workspaces/:workspace/actions/lock", params.WorkspacesController.LockWorkspace)
+	r.POST("/api/v1/workspaces/:workspace/actions/unlock", params.WorkspacesController.UnlockWorkspace)
+	r.GET("/api/v1/workspaces/:workspace/state-versions", params.WorkspacesController.ListStateVersions)
+	r.GET("/api/v1/workspaces/:workspace/current-state-version", params.WorkspacesController.CurrentStateVersion)
+	r.POST("/api/v1/workspaces/:workspace/state-versions", params.WorkspacesController.CreateStateVersion)
+
+	r.POST("/api/v1/workspaces/:workspace/configuration-versions", params.WorkspacesController.CreateConfigurationVersion)
+
+	r.GET("/api/v1/ping", func(c *gin.Context) {
+		c.Header("tfp-api-version", "2.6")
+		c.Header("tfp-appname", "Chushi")
+		c.Status(http.StatusOK)
+	})
 	v1api.GET("/orgs", params.OrganizationsController.List)
 	v1api.POST("/orgs", params.OrganizationsController.Create)
 	orgs := v1api.Group("/orgs/:organization")

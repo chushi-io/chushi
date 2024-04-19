@@ -18,6 +18,7 @@ type WorkspacesRepository interface {
 	Unlock(workspace *Workspace) error
 	Delete(workspaceId string) error
 	FindById(organizationId uuid.UUID, workspaceId string) (*Workspace, error)
+	FindByWorkspaceId(workspaceId string) (*Workspace, error)
 	FindAll() ([]Workspace, error)
 	FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error)
 }
@@ -32,6 +33,23 @@ type WorkspacesRepositoryImpl struct {
 
 func NewWorkspacesRepository(db *gorm.DB) WorkspacesRepository {
 	return &WorkspacesRepositoryImpl{Db: db}
+}
+
+func (w WorkspacesRepositoryImpl) FindByWorkspaceId(workspaceId string) (*Workspace, error) {
+	var workspace Workspace
+	// If someone decides they want to name their workspace using a UUID,
+	// this will start to fail. The UUID check will pass, but the
+	// resource is requested by name...
+	search := []string{"id = ?", workspaceId}
+	if _, err := uuid.Parse(workspaceId); err != nil {
+		search = []string{"name = ?", workspaceId}
+	}
+	if result := w.Db.
+		Where(search[0], search[1]).
+		First(&workspace); result.Error != nil {
+		return nil, result.Error
+	}
+	return &workspace, nil
 }
 
 func (w WorkspacesRepositoryImpl) Save(workspace *Workspace) error {
