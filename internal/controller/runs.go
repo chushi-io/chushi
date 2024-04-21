@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"encoding/json"
+	"errors"
 	"github.com/chushi-io/chushi/internal/helpers"
+	"github.com/chushi-io/chushi/internal/http/response"
 	"github.com/chushi-io/chushi/internal/resource/run"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
@@ -9,6 +12,7 @@ import (
 	"github.com/chushi-io/chushi/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"io"
 	"net/http"
 	"time"
 )
@@ -189,6 +193,70 @@ func (ctrl *RunsController) StorePlan(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+type CloudInput struct {
+	Data struct {
+		Type          string                 `json:"type"`
+		Attributes    map[string]interface{} `json:"attributes"`
+		Relationships map[string]struct {
+			Data struct {
+				Type string `json:"type"`
+				Id   string `json:"id"`
+			} `json:"data"`
+		} `json:"relationships"`
+	} `json:"data"`
+}
+
+func (ctrl *RunsController) CloudCreate(c *gin.Context) {
+	var input CloudInput
+	body, _ := io.ReadAll(c.Request.Body)
+	if err := json.Unmarshal(body, &input); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	workspaceRel, ok := input.Data.Relationships["workspace"]
+	if !ok {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid input"))
+		return
+	}
+
+	ws, err := ctrl.Workspaces.FindByWorkspaceId(workspaceRel.Data.Id)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	r, err := ctrl.RunManager.CreateRun(&run_manager.CreateRunParams{
+		OrganizationId: ws.OrganizationID,
+		WorkspaceId:    ws.ID,
+		Operation:      "plan",
+	})
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	result := response.WorkspaceRun(ws, r.Run)
+	c.JSON(http.StatusOK, result)
+}
+
+func (ctrl *RunsController) CloudGet(c *gin.Context) {
+	var runId *types.UuidOrString
+	var err error
+	if runId, err = types.FromString(c.Param("run")); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	r, err := ctrl.Runs.Get(runId)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.WorkspaceRun(&r.Workspace, r))
+}
+
 func (ctrl *RunsController) GeneratePresignedUrl(c *gin.Context) {
 	org := helpers.GetOrganization(c)
 	var err error
@@ -213,4 +281,39 @@ func (ctrl *RunsController) GeneratePresignedUrl(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"url": url,
 	})
+}
+
+func (ctrl *RunsController) CloudList(c *gin.Context) {
+	ws, err := ctrl.Workspaces.FindByWorkspaceId(c.Param("workspace"))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	runs, err := ctrl.Runs.List(&run.RunListParams{
+		OrganizationId: ws.OrganizationID,
+		WorkspaceId:    ws.ID.String(),
+	})
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.WorkspaceRuns(runs))
+}
+
+func (ctrl *RunsController) CloudQueue(c *gin.Context) {
+	orgId, err := uuid.Parse(c.Param("organization"))
+	runs, err := ctrl.Runs.List(&run.RunListParams{
+		OrganizationId: orgId,
+		Status:         "pending",
+	})
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.WorkspaceRuns(runs))
 }

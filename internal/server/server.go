@@ -133,8 +133,16 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	r.GET("/api/v1/workspaces/:workspace/state-versions", params.WorkspacesController.ListStateVersions)
 	r.GET("/api/v1/workspaces/:workspace/current-state-version", params.WorkspacesController.CurrentStateVersion)
 	r.POST("/api/v1/workspaces/:workspace/state-versions", params.WorkspacesController.CreateStateVersion)
-
+	r.POST("/api/v1/runs", params.RunsController.CloudCreate)
+	r.GET("/api/v1/configuration-versions/:version", params.WorkspacesController.GetConfigurationVersion)
 	r.POST("/api/v1/workspaces/:workspace/configuration-versions", params.WorkspacesController.CreateConfigurationVersion)
+	r.PUT("/api/v1/workspaces/:workspace/configuration-versions/:version", params.WorkspacesController.UploadConfiguration)
+	r.GET("/api/v1/runs/:run/run-events", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{})
+	})
+	r.GET("/api/v1/runs/:run", params.RunsController.CloudGet)
+	r.GET("/api/v1/workspaces/:workspace/runs", params.RunsController.CloudList)
+	r.GET("/api/v1/organizations/:organization/runs/queue", params.RunsController.CloudQueue)
 
 	r.GET("/api/v1/ping", func(c *gin.Context) {
 		c.Header("tfp-api-version", "2.6")

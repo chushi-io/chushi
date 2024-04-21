@@ -21,6 +21,9 @@ type WorkspacesRepository interface {
 	FindByWorkspaceId(workspaceId string) (*Workspace, error)
 	FindAll() ([]Workspace, error)
 	FindAllForOrg(organizationId uuid.UUID) ([]Workspace, error)
+	CreateConfigurationVersion(version *ConfigurationVersion) error
+	GetConfigurationVersion(versionId string) (*ConfigurationVersion, error)
+	UpdateConfigurationVersion(version *ConfigurationVersion) error
 }
 
 type UpdateWorkspaceParams struct {
@@ -133,4 +136,24 @@ func (w WorkspacesRepositoryImpl) FindAllForOrg(organizationId uuid.UUID) ([]Wor
 		return []Workspace{}, result.Error
 	}
 	return workspaces, nil
+}
+
+func (w WorkspacesRepositoryImpl) CreateConfigurationVersion(version *ConfigurationVersion) error {
+	if result := w.Db.Create(version); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (w WorkspacesRepositoryImpl) GetConfigurationVersion(versionId string) (*ConfigurationVersion, error) {
+	var configurationVersion ConfigurationVersion
+	if result := w.Db.Find(&configurationVersion, "id = ?", versionId); result.Error != nil {
+		return nil, result.Error
+	}
+	return &configurationVersion, nil
+}
+
+func (w WorkspacesRepositoryImpl) UpdateConfigurationVersion(version *ConfigurationVersion) error {
+	result := w.Db.Save(version)
+	return result.Error
 }

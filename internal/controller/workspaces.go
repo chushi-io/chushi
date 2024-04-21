@@ -2,8 +2,8 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"github.com/chushi-io/chushi/internal/helpers"
+	"github.com/chushi-io/chushi/internal/http/response"
 	"github.com/chushi-io/chushi/internal/resource/workspaces"
 	"github.com/chushi-io/chushi/internal/service/file_manager"
 	"github.com/gin-gonic/gin"
@@ -308,120 +308,102 @@ func (ctrl *WorkspacesController) ListStateVersions(c *gin.Context) {
 }
 
 func (ctrl *WorkspacesController) CurrentStateVersion(c *gin.Context) {
-	var ws *workspaces.Workspace
-	var err error
-	if c.Param("organization") != "" {
-		orgId, found := c.Get("organization")
-		if !found || orgId == "" {
-			c.AbortWithError(http.StatusForbidden, errors.New("organization not found"))
-			return
-		}
-		orgUuid := orgId.(uuid.UUID)
-		ws, err = ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-	} else {
-		ws, err = ctrl.Repository.FindByWorkspaceId(c.Param("workspace"))
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
+	ws, err := ctrl.getWorkspaceFromContext(c)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": gin.H{
-			"id":   ws.ID,
-			"type": "state-versions",
-			"attributes": gin.H{
-				"created-at":                     "2021-06-08T01:22:03.794Z",
-				"size":                           940,
-				"hosted-state-download-url":      fmt.Sprintf("https://caring-foxhound-whole.ngrok-free.app/%s/%s/state", ws.OrganizationID, ws.ID),
-				"hosted-state-upload-url":        "",
-				"hosted-json-state-download-url": "",
-				"hosted-json-state-upload-url":   "",
-				"status":                         "finalized",
-				"intermediate":                   false,
-				"modules": gin.H{
-					"root": gin.H{
-						"null-resource":               1,
-						"data.terraform-remote-state": 1,
-					},
-				},
-				"providers":           gin.H{},
-				"resources":           []gin.H{},
-				"resources-processed": true,
-				"serial":              9,
-				"state-version":       4,
-				"terraform-version":   "0.15.4",
-				"vcs-commit-url":      "https://gitlab.com/my-organization/terraform-test/-/commit/abcdef12345",
-				"vcs-commit-sha":      "abcdef12345",
-			},
-			"relationships": gin.H{
-				"created-by": gin.H{
-					"data":  gin.H{},
-					"links": gin.H{},
-				},
-				"workspace": gin.H{
-					"data": gin.H{
-						"id":   ws.ID,
-						"type": "workspaces",
-					},
-				},
-				"outputs": gin.H{
-					"data": []gin.H{},
-				},
-			},
-			"links": gin.H{},
-		},
-	})
+	c.JSON(http.StatusOK, response.WorkspaceCurrentStateVersion(ws))
 }
 
 func (ctrl *WorkspacesController) CreateStateVersion(c *gin.Context) {
-	var ws *workspaces.Workspace
-	var err error
-	if c.Param("organization") != "" {
-		orgId, found := c.Get("organization")
-		if !found || orgId == "" {
-			c.AbortWithError(http.StatusForbidden, errors.New("organization not found"))
-			return
-		}
-		orgUuid := orgId.(uuid.UUID)
-		ws, err = ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-	} else {
-		ws, err = ctrl.Repository.FindByWorkspaceId(c.Param("workspace"))
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
+	ws, err := ctrl.getWorkspaceFromContext(c)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": gin.H{
-			"id":   ws.ID,
-			"type": "state-versions",
-			"attributes": gin.H{
-				"vcs-commit-sha":                 "",
-				"vcs-commit-url":                 "",
-				"created-at":                     "2018-07-12T20:32:01.490Z",
-				"hosted-state-download-url":      "https://archivist.terraform.io/v1/object/f55b739b-ff03-4716-b436-726466b96dc4",
-				"hosted-json-state-download-url": "https://archivist.terraform.io/v1/object/4fde7951-93c0-4414-9a40-f3abc4bac490",
-				"hosted-state-upload-url":        "",
-				"hosted-json-state-upload-url":   "",
-				"status":                         "finalized",
-				"intermediate":                   true,
-				"serial":                         1,
-			},
-			"links": gin.H{},
-		},
-	})
+	c.JSON(http.StatusOK, response.WorkspaceStateVersion(ws))
 }
 
 func (ctrl *WorkspacesController) CreateConfigurationVersion(c *gin.Context) {
+	ws, err := ctrl.getWorkspaceFromContext(c)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
+	configurationVersion := &workspaces.ConfigurationVersion{
+		Source:      "tofu-api",
+		Speculative: false,
+		Status:      "pending",
+		Provisional: false,
+		WorkspaceId: ws.ID,
+	}
+
+	if err := ctrl.Repository.CreateConfigurationVersion(configurationVersion); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.WorkspaceConfigurationVersion(ws, configurationVersion))
+}
+
+func (ctrl *WorkspacesController) UploadConfiguration(c *gin.Context) {
+	ws, err := ctrl.getWorkspaceFromContext(c)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	version, err := ctrl.Repository.GetConfigurationVersion(c.Param("version"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if err := ctrl.FileManager.UploadConfiguration(ws.OrganizationID, version.ID, c.Request.Body); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	version.Status = "uploaded"
+	if err := ctrl.Repository.UpdateConfigurationVersion(version); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.WorkspaceConfigurationVersion(ws, version))
+
+}
+
+func (ctrl *WorkspacesController) GetConfigurationVersion(c *gin.Context) {
+	cv, err := ctrl.Repository.GetConfigurationVersion(c.Param("version"))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ws, err := ctrl.Repository.FindByWorkspaceId(cv.WorkspaceId.String())
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.WorkspaceConfigurationVersion(ws, cv))
+}
+
+func (ctrl *WorkspacesController) getWorkspaceFromContext(c *gin.Context) (*workspaces.Workspace, error) {
+	if c.Param("organization") != "" {
+		orgId, found := c.Get("organization")
+		if !found {
+			return nil, errors.New("organization not found")
+		}
+
+		orgUuid := orgId.(uuid.UUID)
+		return ctrl.Repository.FindById(orgUuid, c.Param("workspace"))
+	} else {
+		// TODO: We should validate the organization ID at some point
+		return ctrl.Repository.FindByWorkspaceId(c.Param("workspace"))
+	}
 }
