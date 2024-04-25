@@ -21,6 +21,7 @@ type FileManager interface {
 	FetchState(organizationId uuid.UUID, workspaceId uuid.UUID) ([]byte, error)
 	UploadState(organizationId uuid.UUID, workspaceId uuid.UUID, reader io.Reader) error
 	PresignedPlanUrl(organizationId uuid.UUID, runId uuid.UUID) (string, error)
+	UploadConfiguration(organizationId uuid.UUID, versionId uuid.UUID, reader io.Reader) error
 }
 
 func New(client *s3.Client) FileManager {
@@ -113,6 +114,11 @@ func (impl *FileManagerImpl) UploadLogs(organizationId uuid.UUID, runId uuid.UUI
 	return err
 }
 
+func (impl *FileManagerImpl) UploadConfiguration(organizationId uuid.UUID, versionId uuid.UUID, reader io.Reader) error {
+	_, err := uploadObject(impl.S3Client, context.TODO(), organizationId.String(), versionsUrl(versionId), reader)
+	return err
+}
+
 func (impl *FileManagerImpl) PresignedPlanUrl(organizationId uuid.UUID, runId uuid.UUID) (string, error) {
 	presignClient := s3.NewPresignClient(impl.S3Client)
 	request, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
@@ -156,4 +162,8 @@ func logsUrl(runId uuid.UUID) string {
 
 func planUrl(runId uuid.UUID) string {
 	return fmt.Sprintf("runs/%s/plan", runId.String())
+}
+
+func versionsUrl(versionId uuid.UUID) string {
+	return fmt.Sprintf("configuration-versions/%s", versionId.String())
 }

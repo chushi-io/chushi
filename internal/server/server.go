@@ -109,6 +109,47 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	// Apply our auth to all API endpoints
 	v1api.Use(middlewareFactory.Handle)
 
+	// Mappings to support opentofu cloud workspace
+	r.GET("/.well-known/terraform.json", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"modules.v1": "/api/v1/registry/modules/", "providers.v1": "/api/v1/registry/providers/", "motd.v1": "/api/terraform/motd", "state.v2": "/api/v1/", "tfe.v2": "/api/v1/", "tfe.v2.1": "/api/v1/", "tfe.v2.2": "/api/v1/", "versions.v1": "https://checkpoint-api.hashicorp.com/v1/versions/"})
+	})
+	v1api.GET("/organizations/:organization", params.OrganizationsController.Get)
+	v1api.GET("/organizations/:organization/entitlement-set", params.OrganizationsController.Entitlements)
+	v1api.
+		//Use(middleware.VerifyStateAccess(
+		//	params.Config.JwtSecretKey,
+		//	params.WorkspacesRepository,
+		//)).
+		Use(params.OrganizationsController.SetContext).
+		Use(params.OrganizationAccessMiddleware.VerifyOrganizationAccess).
+		GET("/organizations/:organization/workspaces/:workspace", params.WorkspacesController.GetCloudWorkspace)
+	r.Use(func(c *gin.Context) {
+		//fmt.Println(c.Request.Header)
+	})
+	r.POST("/api/v1/workspaces/:workspace/actions/lock", params.WorkspacesController.LockWorkspace)
+	r.POST("/api/v1/workspaces/:workspace/actions/unlock", params.WorkspacesController.UnlockWorkspace)
+	r.GET("/api/v1/workspaces/:workspace/state-versions", params.WorkspacesController.ListStateVersions)
+	r.GET("/api/v1/workspaces/:workspace/current-state-version", params.WorkspacesController.CurrentStateVersion)
+	r.POST("/api/v1/workspaces/:workspace/state-versions", params.WorkspacesController.CreateStateVersion)
+	r.POST("/api/v1/runs", params.RunsController.CloudCreate)
+	r.GET("/api/v1/configuration-versions/:version", params.WorkspacesController.GetConfigurationVersion)
+	r.POST("/api/v1/workspaces/:workspace/configuration-versions", params.WorkspacesController.CreateConfigurationVersion)
+	r.PUT("/api/v1/workspaces/:workspace/configuration-versions/:version", params.WorkspacesController.UploadConfiguration)
+	r.GET("/api/v1/runs/:run/run-events", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{})
+	})
+	r.GET("/api/v1/runs/:run", params.RunsController.CloudGet)
+	r.GET("/api/v1/workspaces/:workspace/runs", params.RunsController.CloudList)
+	r.GET("/api/v1/organizations/:organization/runs/queue", params.RunsController.CloudQueue)
+	r.GET("/api/v1/plans/:plan", params.RunsController.GetAsPlan)
+
+	r.GET("/api/v1/ping", func(c *gin.Context) {
+		c.Header("tfp-api-version", "2.6")
+		c.Header("tfp-appname", "Chushi")
+		c.Status(http.StatusOK)
+	})
+	r.GET("/api/v1/runs/:run/logs", params.RunsController.Logs)
 	v1api.GET("/orgs", params.OrganizationsController.List)
 	v1api.POST("/orgs", params.OrganizationsController.Create)
 	orgs := v1api.Group("/orgs/:organization")
@@ -146,13 +187,13 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	}
 
 	// Workspaces
-	workspaces := orgs.Group("/workspaces")
+	ws := orgs.Group("/workspaces")
 	wam := &middleware.WorkspaceAccessMiddleware{}
-	workspaces.Use(wam.VerifyWorkspaceAccess)
+	ws.Use(wam.VerifyWorkspaceAccess)
 	{
-		workspaces.POST("", params.WorkspacesController.CreateWorkspace)
-		workspaces.GET("", params.WorkspacesController.ListWorkspaces)
-		workspace := workspaces.Group("/:workspace")
+		ws.POST("", params.WorkspacesController.CreateWorkspace)
+		ws.GET("", params.WorkspacesController.ListWorkspaces)
+		workspace := ws.Group("/:workspace")
 		{
 			workspace.GET("", params.WorkspacesController.GetWorkspace)
 			workspace.POST("", params.WorkspacesController.UpdateWorkspace)

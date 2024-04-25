@@ -63,6 +63,7 @@ func (oam *OrganizationAccessMiddleware) userAuth(c *gin.Context, orgId uuid.UUI
 		return
 	}
 	c.Set("organization_id", orgId.String())
+	//c.Set("organization", o)
 }
 
 func (oam *OrganizationAccessMiddleware) tokenAuth(c *gin.Context, orgId uuid.UUID) {
@@ -84,9 +85,15 @@ func (oam *OrganizationAccessMiddleware) tokenAuth(c *gin.Context, orgId uuid.UU
 		return
 	}
 
+	org, err := oam.OrganizationRepository.FindById(orgId.String())
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, errors.New("invalid request"))
+		return
+	}
+
 	// For now, we'll assume we're an agent :shrug:
 	c.Set("client_id", client.GetID())
 	c.Set("organization_id", orgId.String())
-	c.Set("organization", orgId.String())
+	c.Set("organization", org)
 	return
 }

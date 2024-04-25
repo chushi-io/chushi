@@ -23,6 +23,16 @@ func (ctrl *OrganizationsController) SetContext(c *gin.Context) {
 	}
 }
 
+func (ctrl *OrganizationsController) Entitlements(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"id":         c.Param("organization"),
+			"type":       "entitlement-sets",
+			"attributes": gin.H{"operations": true},
+		},
+	})
+}
+
 func (ctrl *OrganizationsController) Get(c *gin.Context) {
 	org, err := ctrl.Repository.FindById(c.Param("organization"))
 	if err != nil {
