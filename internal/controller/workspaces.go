@@ -286,9 +286,9 @@ func (ctrl *WorkspacesController) ListStateVersions(c *gin.Context) {
 			"attributes": gin.H{
 				"created-at":                     "2021-06-08T01:22:03.794Z",
 				"size":                           940,
-				"hosted-state-download-url":      "https://archivist.terraform.io/v1/object/...",
+				"hosted-state-download-url":      "https://archivist.chushi.io.io/v1/object/...",
 				"hosted-state-upload-url":        "null",
-				"hosted-json-state-download-url": "https://archivist.terraform.io/v1/object/...",
+				"hosted-json-state-download-url": "https://archivist.chushi.io.io/v1/object/...",
 				"hosted-json-state-upload-url":   "null",
 				"status":                         "finalized",
 				"intermediate":                   false,
