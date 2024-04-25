@@ -317,3 +317,23 @@ func (ctrl *RunsController) CloudQueue(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.WorkspaceRuns(runs))
 }
+
+func (ctrl *RunsController) GetAsPlan(c *gin.Context) {
+	var runId *types.UuidOrString
+	var err error
+	if runId, err = types.FromString(c.Param("plan")); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	r, err := ctrl.Runs.Get(runId)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.RunAsPlan(r))
+}
+
+func (ctrl *RunsController) Logs(c *gin.Context) {
+	c.Status(200)
+}

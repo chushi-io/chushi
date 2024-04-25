@@ -6,12 +6,13 @@ type RunStatus string
 
 const (
 	RunStatusPending    RunStatus = "pending"
+	RunStatusQueued               = "queued"
 	RunStatusRunning              = "running"
 	RunStatusPlanned              = "planned"
-	RunStatusCompleted            = "completed"
-	RunStatusFailed               = "failed"
+	RunStatusCompleted            = "finished"
+	RunStatusFailed               = "errored"
 	RunStatusSuperseded           = "superseded"
-	RunStatusCancelled            = "cancelled"
+	RunStatusCancelled            = "canceled"
 )
 
 func ToRunStatus(input string) (RunStatus, error) {

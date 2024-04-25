@@ -8,13 +8,14 @@ import (
 	apiv1 "github.com/chushi-io/chushi/gen/api/v1"
 	"github.com/chushi-io/chushi/gen/api/v1/apiv1connect"
 	"github.com/chushi-io/chushi/internal/agent/driver"
+	"github.com/chushi-io/chushi/pkg/types"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/oauth2/clientcredentials"
 	v1 "k8s.io/api/core/v1"
-	"log"
 	"net"
 	"net/http"
+	"time"
 )
 
 type Agent struct {
@@ -95,40 +96,45 @@ func WithLogger(logger *zap.Logger) func(agent *Agent) {
 // and exits. However, it should query the API (or stream)
 // and emit runners as needed
 func (a *Agent) Run() error {
+
 	a.logger.Debug("starting runs stream")
-	stream, err := a.runsClient.Watch(context.Background(), connect.NewRequest(&apiv1.WatchRunsRequest{
-		AgentId: a.id,
-	}))
-	if err != nil {
-		return err
-	}
 	for {
-		rcv := stream.Receive()
-		if !rcv {
-			break
-		}
-		scheduledRun := stream.Msg()
-		a.logger.Debug("getting run details")
-		run, err := a.runsClient.Get(context.Background(), connect.NewRequest(&apiv1.GetRunRequest{
-			RunId: scheduledRun.Id,
+		a.logger.Debug("checking for runs")
+		stream, err := a.runsClient.Watch(context.Background(), connect.NewRequest(&apiv1.WatchRunsRequest{
+			AgentId: a.id,
 		}))
 		if err != nil {
-			// Handle the error?
-			a.logger.Fatal(err.Error())
+			return err
 		}
-		if err := a.handle(run.Msg); err != nil {
-			log.Fatal(err)
+		for {
+			rcv := stream.Receive()
+			if !rcv {
+				break
+			}
+			scheduledRun := stream.Msg()
+			a.logger.Debug("getting run details")
+			run, err := a.runsClient.Get(context.Background(), connect.NewRequest(&apiv1.GetRunRequest{
+				RunId: scheduledRun.Id,
+			}))
+			if err != nil {
+				// Handle the error?
+				a.logger.Error(err.Error())
+				continue
+			}
+			if err := a.handle(run.Msg); err != nil {
+				a.logger.Error(err.Error())
+				continue
+			}
+			a.logger.Info("Run completed", zap.String("run.id", scheduledRun.Id))
 		}
-		a.logger.Info("Run completed", zap.String("run.id", scheduledRun.Id))
+		if err := stream.Err(); err != nil {
+			a.logger.Error(err.Error())
+		}
+		if err := stream.Close(); err != nil {
+			a.logger.Error(err.Error())
+		}
+		time.Sleep(time.Second * 5)
 	}
-
-	if err := stream.Err(); err != nil {
-		return err
-	}
-	if err := stream.Close(); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (a *Agent) handle(run *apiv1.Run) error {
@@ -156,7 +162,7 @@ func (a *Agent) handle(run *apiv1.Run) error {
 	a.logger.Debug("updating run status")
 	if _, err := a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
 		Id:     run.Id,
-		Status: "running",
+		Status: types.RunStatusRunning,
 	})); err != nil {
 		return err
 	}
@@ -203,6 +209,12 @@ func (a *Agent) handle(run *apiv1.Run) error {
 	}
 
 	if job.Status.State != "succeeded" {
+		if _, err := a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
+			Id:     run.Id,
+			Status: types.RunStatusFailed,
+		})); err != nil {
+			return err
+		}
 		return errors.New("workspace failed")
 	}
 
@@ -210,7 +222,7 @@ func (a *Agent) handle(run *apiv1.Run) error {
 	// Lastly, post updates back to the run
 	_, err = a.runsClient.Update(context.TODO(), connect.NewRequest(&apiv1.UpdateRunRequest{
 		Id:     run.Id,
-		Status: "completed",
+		Status: types.RunStatusCompleted,
 	}))
 	return err
 }

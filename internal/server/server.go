@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/chushi-io/chushi/internal/controller"
 	"github.com/chushi-io/chushi/internal/middleware"
 	"github.com/chushi-io/chushi/internal/middleware/auth"
@@ -126,7 +125,7 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 		Use(params.OrganizationAccessMiddleware.VerifyOrganizationAccess).
 		GET("/organizations/:organization/workspaces/:workspace", params.WorkspacesController.GetCloudWorkspace)
 	r.Use(func(c *gin.Context) {
-		fmt.Println(c.Request.Header)
+		//fmt.Println(c.Request.Header)
 	})
 	r.POST("/api/v1/workspaces/:workspace/actions/lock", params.WorkspacesController.LockWorkspace)
 	r.POST("/api/v1/workspaces/:workspace/actions/unlock", params.WorkspacesController.UnlockWorkspace)
@@ -143,12 +142,14 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	r.GET("/api/v1/runs/:run", params.RunsController.CloudGet)
 	r.GET("/api/v1/workspaces/:workspace/runs", params.RunsController.CloudList)
 	r.GET("/api/v1/organizations/:organization/runs/queue", params.RunsController.CloudQueue)
+	r.GET("/api/v1/plans/:plan", params.RunsController.GetAsPlan)
 
 	r.GET("/api/v1/ping", func(c *gin.Context) {
 		c.Header("tfp-api-version", "2.6")
 		c.Header("tfp-appname", "Chushi")
 		c.Status(http.StatusOK)
 	})
+	r.GET("/api/v1/runs/:run/logs", params.RunsController.Logs)
 	v1api.GET("/orgs", params.OrganizationsController.List)
 	v1api.POST("/orgs", params.OrganizationsController.Create)
 	orgs := v1api.Group("/orgs/:organization")
@@ -186,13 +187,13 @@ func New(params Params, lc fx.Lifecycle) (*gin.Engine, error) {
 	}
 
 	// Workspaces
-	workspaces := orgs.Group("/workspaces")
+	ws := orgs.Group("/workspaces")
 	wam := &middleware.WorkspaceAccessMiddleware{}
-	workspaces.Use(wam.VerifyWorkspaceAccess)
+	ws.Use(wam.VerifyWorkspaceAccess)
 	{
-		workspaces.POST("", params.WorkspacesController.CreateWorkspace)
-		workspaces.GET("", params.WorkspacesController.ListWorkspaces)
-		workspace := workspaces.Group("/:workspace")
+		ws.POST("", params.WorkspacesController.CreateWorkspace)
+		ws.GET("", params.WorkspacesController.ListWorkspaces)
+		workspace := ws.Group("/:workspace")
 		{
 			workspace.GET("", params.WorkspacesController.GetWorkspace)
 			workspace.POST("", params.WorkspacesController.UpdateWorkspace)

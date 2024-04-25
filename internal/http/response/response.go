@@ -140,7 +140,22 @@ func WorkspaceRun(ws *workspaces.Workspace, run *run.Run) gin.H {
 				"target-addrs":  []string{},
 				"variables":     []gin.H{},
 			},
-			"relationships": gin.H{},
+			"relationships": gin.H{
+				// For now, we'll simply map the plan and
+				// apply relationships to the run itself
+				"plan": gin.H{
+					"data": gin.H{
+						"type": "plans",
+						"id":   run.ID,
+					},
+				},
+				"apply": gin.H{
+					"data": gin.H{
+						"type": "applies",
+						"id":   run.ID,
+					},
+				},
+			},
 			"links": gin.H{
 				"self": fmt.Sprintf("/api/v1/runs/%s", run.ID),
 			},
@@ -198,5 +213,35 @@ func WorkspaceRuns(runs []run.Run) gin.H {
 	}
 	return gin.H{
 		"data": data,
+	}
+}
+
+func RunAsPlan(r *run.Run) gin.H {
+	return gin.H{
+		"data": gin.H{
+			"id":   r.ID,
+			"type": "plans",
+			"attributes": gin.H{
+				"execution-details": gin.H{
+					"mode": "remote",
+				},
+				"generated-configuration": false,
+				"has-changes":             true,
+				"resource-additions":      r.Add,
+				"resource-changes":        r.Change,
+				"resource-destructions":   r.Destroy,
+				"resource-imports":        0,
+				"status":                  r.Status,
+				"status-timestamps": gin.H{
+					"queued-at":   "2018-07-02T22:29:53+00:00",
+					"pending-at":  "2018-07-02T22:29:53+00:00",
+					"started-at":  "2018-07-02T22:29:54+00:00",
+					"finished-at": "2018-07-02T22:29:58+00:00",
+				},
+				"log-read-url": fmt.Sprintf("https://caring-foxhound-whole.ngrok-free.app/api/v1/runs/%s/logs", r.ID),
+			},
+			"relationships": gin.H{},
+			"links":         gin.H{},
+		},
 	}
 }
