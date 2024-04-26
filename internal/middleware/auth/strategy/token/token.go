@@ -2,8 +2,8 @@ package token
 
 import (
 	"errors"
+	"github.com/chushi-io/chushi/internal/middleware/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"net/http"
@@ -37,7 +37,7 @@ func (ta Token) Handle(c *gin.Context) bool {
 	authToken, _ := strings.CutPrefix(bearerToken, "Bearer ")
 
 	// Not a UUID, handle JWT
-	token, err := jwt.ParseWithClaims(authToken, &generates.JWTAccessClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(authToken, &auth.ChushiClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
@@ -48,7 +48,7 @@ func (ta Token) Handle(c *gin.Context) bool {
 		return false
 	}
 
-	claims, ok := token.Claims.(*generates.JWTAccessClaims)
+	claims, ok := token.Claims.(*auth.ChushiClaims)
 	if !ok || !token.Valid {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return false
@@ -58,6 +58,6 @@ func (ta Token) Handle(c *gin.Context) bool {
 	// Downstream handlers can load the audience / subject
 	// information if needed
 	c.Set("claims", claims)
-	c.Set("auth_type", "token")
+	c.Set("auth_type", auth.AuthenticationTypeAgentToken)
 	return true
 }

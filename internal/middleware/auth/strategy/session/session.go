@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/chushi-io/chushi/internal/middleware/auth"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/authboss/v3"
@@ -36,7 +37,6 @@ func (a *Session) Handle(c *gin.Context) bool {
 		return false
 	}
 
-	c.Set("user", user)
-	c.Set("auth_type", "user")
+	c.Set("auth", auth.NewContextForUser(auth.AuthenticationTypeSession, nil, user))
 	return true
 }

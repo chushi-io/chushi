@@ -1,6 +1,7 @@
 package personal_access_token
 
 import (
+	"github.com/chushi-io/chushi/internal/middleware/auth"
 	"github.com/chushi-io/chushi/internal/resource/access_token"
 	"github.com/chushi-io/chushi/internal/resource/organization"
 	"github.com/gin-gonic/gin"
@@ -50,7 +51,13 @@ func (t PersonalAccessToken) Handle(c *gin.Context) bool {
 	if err != nil {
 		return false
 	}
-	c.Set("user", user)
-	c.Set("auth_type", "personal_access_token")
+	c.Set("claims", &auth.ChushiClaims{
+		User: &auth.ChushiUserClaim{
+			Id:    user.ID,
+			Email: user.Email,
+		},
+	})
+	c.Set("auth", auth.NewContextForUser(auth.AuthenticationTypeAccessToken, nil, user))
+
 	return true
 }
