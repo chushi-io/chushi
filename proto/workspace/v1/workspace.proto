@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package workspace.v1;
+
+service Workspaces {
+  rpc List(ListWorkspacesRequest) returns (ListWorkspacesResponse) {}
+  rpc Create(CreateWorkspaceRequest) returns (Workspace) {}
+  rpc Get(GetWorkspaceRequest) returns (Workspace) {}
+}
+
+message Workspace {
+  string id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string deleted_at = 4;
+  string name = 5;
+  bool allow_destroy = 6;
+  bool auto_apply = 7;
+  bool auto_destroy_at = 8;
+  string execution_mode = 9;
+  string vcs_source = 10;
+  string vcs_branch = 11;
+  string vcs_patterns = 12;
+  string vcs_working_directory = 13;
+  string version = 14;
+  bool locked = 15;
+  string lock_by = 16;
+  string lock_at = 17;
+  string lock_id = 18;
+  string organization_id = 19;
+  string agent_id = 20;
+  bool drift_detection_enabled = 21;
+  string drift_detection_schedule = 22;
+  string vcs_connection_id = 23;
+}
+
+message ListWorkspacesRequest {
+  string organization_id = 1;
+}
+
+message CreateWorkspaceRequest {
+  string name = 2;
+  bool allow_destroy = 3;
+  bool auto_apply = 4;
+  bool auto_destroy_at = 5;
+  string execution_mode = 6;
+  string vcs_source = 7;
+  string vcs_branch = 8;
+  string vcs_patterns = 9;
+  string vcs_working_directory = 10;
+  string version = 11;
+  string organization_id = 12;
+  string agent_id = 13;
+  bool drift_detection_enabled = 14;
+  string drift_detection_schedule = 15;
+  string vcs_connection_id = 16;
+}
+
+message ListWorkspacesResponse {
+  repeated Workspace workspaces = 1;
+}
+
+message GetWorkspaceRequest {
+  string workspace_id = 1;
+}

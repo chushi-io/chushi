@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package organization.v1;
+
+service Organizations {
+  rpc Create(CreateOrganizationRequest) returns (Organization) {}
+  rpc Get(GetOrganizationRequest) returns (Organization) {}
+  rpc SetAgent(SetOrganizationAgentRequest) returns (Organization) {}
+}
+
+message GetOrganizationRequest {
+  string id = 1;
+}
+
+message CreateOrganizationRequest {
+  string name = 1;
+  string type = 2;
+  bool allow_auto_create_workspace = 3;
+}
+
+message SetOrganizationAgentRequest {
+  string id = 1;
+  string default_agent_id = 2;
+}
+
+message Organization {
+  string id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string deleted_at = 4;
+  string name = 5;
+  string type = 6;
+  bool allow_auto_create_workspace = 7;
+  string default_agent_id = 8;
+}
