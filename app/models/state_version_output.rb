@@ -1,0 +1,2 @@
+class StateVersionOutput < ApplicationRecord
+end

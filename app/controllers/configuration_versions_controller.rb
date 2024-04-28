@@ -1,0 +1,2 @@
+class ConfigurationVersionsController < AuthenticatedController
+end

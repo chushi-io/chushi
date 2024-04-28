@@ -1,0 +1,7 @@
+<%= form_with model: @vcs_connection do |form| %>
+  <%= form.text_field :name %>
+  <%= form.select :provider, ["github", "gitlab", "bitbucket", "git"] %>
+
+  <%= form.password_field :github_personal_access_token %>
+  <%= form.submit %>
+<% end %>

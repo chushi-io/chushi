@@ -1,0 +1,16 @@
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Status</th>
+  </tr>
+  <% @agents.each do |agent| %>
+  <tr>
+    <td><%= agent.id %></td>
+    <td><%= agent.name %></td>
+    <td><%= agent.status %></td>
+  </tr>
+  <% end %>
+</table>
+
+<a href="<%= new_agent_path %>">Create Agent</a>

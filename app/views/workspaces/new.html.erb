@@ -1,0 +1,19 @@
+<%= form_with model: @workspace do |form| %>
+  <%= form.text_field :name %>
+  <%= form.text_field :description %>
+  <%= form.text_field :environment %>
+  <%= form.select :execution_mode, ["remote", "local", "agent"] %>
+
+  <%= form.select :tofu_version, ["v1.6.2", "v1.7.0-rc1", "latest"] %>
+
+  <%= check_box_tag(:auto_apply) %>
+  <%= label_tag(:auto_apply, "Auto Apply") %>
+
+  <%= check_box_tag(:allow_destroy_plan) %>
+  <%= label_tag(:allow_destroy_plan, "Allow Destroy Plan") %>
+
+  <%= form.text_field :source %>
+  <%= form.text_field :working_directory %>
+  <%= form.select :vcs_connection_id, @vcs_connections.map{ |conn| [conn.name, conn.id]} %>
+  <%= form.submit %>
+<% end %>

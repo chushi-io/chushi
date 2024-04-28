@@ -1,0 +1,15 @@
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Provider</th>
+    <th>Type</th>
+  </tr>
+  <% @vcs_connections.each do |conn| %>
+  <tr>
+    <td><%= conn.name %></td>
+    <td><%= conn.provider %></td>
+    <td><%= conn.github_type %></td>
+  </tr>
+  <% end %>
+</table>
+<a href="<%= new_vcs_connection_path %>">Create VCS Connection</a>

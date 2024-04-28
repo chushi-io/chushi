@@ -1,0 +1,2 @@
+class StateVersionsController < AuthenticatedController
+end

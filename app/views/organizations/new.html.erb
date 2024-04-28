@@ -1,0 +1,5 @@
+<%= form_with model: @organization do |form| %>
+  <%= form.text_field :name %>
+  <%= form.select :organization_type, ["personal", "business"] %>
+  <%= form.submit %>
+<% end %>

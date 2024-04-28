@@ -1,0 +1,2 @@
+class VariablesController < AuthenticatedController
+end

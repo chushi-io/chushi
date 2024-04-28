@@ -1,0 +1,2 @@
+class VariableSet < ApplicationRecord
+end

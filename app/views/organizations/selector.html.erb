@@ -1,0 +1,6 @@
+<%= form_with do |form| %>
+  <%= form.select :organization_id, @organizations.map{ |org| [org.name, org.id]} %>
+  <%= form.submit "Change Organization" %>
+<% end %>
+
+<a href="<%= new_organization_path %>">Create Organization</a>

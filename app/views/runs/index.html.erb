@@ -1,0 +1,26 @@
+<table>
+  <tr>
+    <th>Message</th>
+    <th>Has Changes</th>
+    <th>Plan Only</th>
+    <th>Status</th>
+    <th>Trigger Reason</th>
+    <th>Plan</th>
+    <th>Apply</th>
+    <th>Configuration Version</th>
+  </tr>
+  <% @runs.each do |run | %>
+  <tr>
+    <td><%= run.message %></td>
+    <td><%= run.has_changes %></td>
+    <td><%= run.plan_only %></td>
+    <td><%= run.status %></td>
+    <td><%= run.trigger_reason %></td>
+    <td><%= run.plan.id unless run.plan.nil? %></td>
+    <td><%= run.apply.id unless run.apply.nil? %></td>
+    <td><%= run.configuration_version.id unless run.configuration_version.nil? %></td>
+  </tr>
+  <% end %>
+</table>
+
+<a href="<%= new_workspace_run_path %>">Create Run</a>

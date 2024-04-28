@@ -1,0 +1,7 @@
+<%= form_with model: [@workspace, @run] do |form| %>
+  <%= form.text_field :message %>
+  <%= check_box_tag(:plan_only) %>
+  <%= label_tag(:plan_only, "Plan Only") %>
+
+  <%= form.submit %>
+<% end %>

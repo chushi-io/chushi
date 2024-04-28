@@ -1,0 +1,2 @@
+class PlansController < AuthenticatedController
+end

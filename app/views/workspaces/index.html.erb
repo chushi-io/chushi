@@ -1,0 +1,27 @@
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Environment</th>
+    <th>Execution Mode</th>
+    <th>Tofu Version</th>
+    <th>Auto Apply</th>
+    <th>Allow Destroy</th>
+    <th>VCS Connection</th>
+  </tr>
+  <% @workspaces.each do |workspace| %>
+    <tr>
+      <td><a href="<%= workspace_path workspace %>"><%= workspace.name %></a></td>
+      <td><%= workspace.description %></td>
+      <td><%= workspace.environment %></td>
+      <td><%= workspace.execution_mode %></td>
+      <td><%= workspace.tofu_version %></td>
+      <td><%= workspace.auto_apply %></td>
+      <td><%= workspace.allow_destroy_plan %></td>
+      <td><%= workspace.vcs_connection.name %></td>
+    </tr>
+  <% end %>
+</table>
+
+
+<a href="<%= new_workspace_path %>">Create Workspace</a>

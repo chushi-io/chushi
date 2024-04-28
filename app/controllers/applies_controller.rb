@@ -1,0 +1,2 @@
+class AppliesController < AuthenticatedController
+end

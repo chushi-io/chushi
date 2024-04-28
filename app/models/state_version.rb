@@ -1,0 +1,2 @@
+class StateVersion < ApplicationRecord
+end
