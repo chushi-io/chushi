@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_28_190948) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_29_004638) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "access_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "token"
+    t.string "token_authable_type", null: false
+    t.uuid "token_authable_id", null: false
+    t.string "scopes"
+    t.datetime "expires_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_access_tokens_on_token", unique: true
+    t.index ["token_authable_type", "token_authable_id"], name: "index_access_tokens_on_token_authable"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -79,13 +92,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_28_190948) do
     t.boolean "provisional"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "auto_queue_runs", default: false
     t.index ["organization_id"], name: "index_configuration_versions_on_organization_id"
     t.index ["workspace_id"], name: "index_configuration_versions_on_workspace_id"
   end
 
   create_table "organization_users", force: :cascade do |t|
     t.uuid "organization_id"
-    t.bigint "user_id"
+    t.uuid "user_id"
     t.string "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -94,9 +108,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_28_190948) do
   end
 
   create_table "organizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "name"
-    t.boolean "allow_auto_create_workspace"
-    t.string "organization_type"
+    t.string "name", null: false
+    t.boolean "allow_auto_create_workspace", default: false
+    t.string "organization_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "agent_id"
@@ -187,7 +201,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_28_190948) do
     t.index ["workspace_id"], name: "index_state_versions_on_workspace_id"
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
@@ -316,6 +330,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_28_190948) do
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
   add_foreign_key "organization_users", "organizations"
+  add_foreign_key "organization_users", "users"
   add_foreign_key "organizations", "agents"
   add_foreign_key "plans", "organizations"
   add_foreign_key "runs", "agents"

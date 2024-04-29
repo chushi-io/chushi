@@ -1,0 +1,16 @@
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Auto Create Workspaces</th>
+    <th>Type</th>
+  </tr>
+  <% @organizations.each do |organization| %>
+  <tr>
+    <td><%= organization.id %></td>
+    <td><%= organization.name %></td>
+    <td><%= organization.allow_auto_create_workspace %></td>
+    <td><%= organization.organization_type %></td>
+  </tr>
+  <% end %>
+</table>

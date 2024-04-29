@@ -1,6 +1,10 @@
 class OrganizationsController < AuthenticatedController
   skip_before_action :set_organization!
 
+  def index
+    @organizations = current_user.organizations
+  end
+
   def new
     @organization = Organization.new
   end

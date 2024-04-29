@@ -1,2 +1,2 @@
-class Api::V1::PlansController < ApplicationController
+class Api::V1::PlansController < Api::ApiController
 end

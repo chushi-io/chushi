@@ -6,4 +6,5 @@ class User < ApplicationRecord
 
   has_many :organization_users
   has_many :organizations, through: :organization_users
+  has_many :access_tokens, as: :token_authable
 end
