@@ -19,6 +19,7 @@ class Api::V1::ConfigurationVersionsController < Api::ApiController
     version = ConfigurationVersion.find(params[:id])
     render json: {}, status: :forbidden and return unless can_access_version(version)
 
+    request.body.rewind
     version.archive.attach(io: request.body, filename: "archive")
 
     render json: version.errors.full_messages unless version.save

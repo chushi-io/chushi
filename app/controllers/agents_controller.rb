@@ -14,6 +14,9 @@ class AgentsController < AuthenticatedController
   def create
     @agent = @organization.agents.new(agent_params)
     if @agent.save
+      @token = AccessToken.new
+      @token.token_authable = @agent
+      @token.save!
       flash[:info] = "Agent successfully created"
       redirect_to @agent
     else

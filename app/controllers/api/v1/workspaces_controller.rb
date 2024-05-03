@@ -1,5 +1,4 @@
 class Api::V1::WorkspacesController < Api::ApiController
-  before_action :verify_organization_access, :only => [:index]
 
   def index
     org = Organization.find(params[:organization_id])
@@ -13,6 +12,14 @@ class Api::V1::WorkspacesController < Api::ApiController
 
   def unlock
 
+  end
+
+  def show
+    # TODO: Hack to only support agents for now
+    puts "Are we even getting here?"
+    puts @agent
+    @workspace = @organization.workspaces.find(params[:id])
+    render json: @workspace
   end
 
   def state_versions

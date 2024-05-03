@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_29_004638) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -27,17 +27,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_004638) do
     t.index ["token_authable_type", "token_authable_id"], name: "index_access_tokens_on_token_authable"
   end
 
-  create_table "active_storage_attachments", force: :cascade do |t|
+  create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
-    t.bigint "record_id", null: false
-    t.bigint "blob_id", null: false
+    t.uuid "record_id", null: false
+    t.uuid "blob_id", null: false
     t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
-  create_table "active_storage_blobs", force: :cascade do |t|
+  create_table "active_storage_blobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "key", null: false
     t.string "filename", null: false
     t.string "content_type"
@@ -49,8 +49,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_004638) do
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
-  create_table "active_storage_variant_records", force: :cascade do |t|
-    t.bigint "blob_id", null: false
+  create_table "active_storage_variant_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
@@ -63,6 +63,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_004638) do
     t.datetime "updated_at", null: false
     t.string "api_key"
     t.string "api_secret"
+    t.datetime "last_ping_at", precision: nil
+    t.string "ip_address"
     t.index ["api_key"], name: "index_agents_on_api_key", unique: true
     t.index ["organization_id", "name"], name: "index_agents_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_agents_on_organization_id"
@@ -131,6 +133,39 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_004638) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_plans_on_organization_id"
+  end
+
+  create_table "providers", force: :cascade do |t|
+    t.string "namespace"
+    t.string "provider_type"
+    t.string "version"
+    t.json "protocols"
+    t.json "platforms"
+    t.json "gpg_public_keys"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "registry_modules", force: :cascade do |t|
+    t.string "registry_id"
+    t.string "owner"
+    t.string "namespace"
+    t.string "name"
+    t.string "provider"
+    t.string "description"
+    t.string "location"
+    t.string "definition"
+    t.json "root"
+    t.json "submodules"
+    t.string "source"
+    t.integer "downloads"
+    t.boolean "verified"
+    t.datetime "published_at", precision: nil
+    t.string "version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["namespace", "name", "provider", "version"], name: "idx_on_namespace_name_provider_version_e3589d1e1f", unique: true
+    t.index ["registry_id"], name: "index_registry_modules_on_registry_id", unique: true
   end
 
   create_table "runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

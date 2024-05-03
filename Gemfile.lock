@@ -1668,6 +1668,8 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     jmespath (1.6.2)
+    jsonapi-serializer (2.2.0)
+      activesupport (>= 4.2)
     loofah (2.22.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -1818,6 +1820,7 @@ DEPENDENCIES
   git (~> 1.19)
   importmap-rails
   jbuilder
+  jsonapi-serializer (~> 2.2)
   pg (~> 1.1)
   puma (>= 5.0)
   rails (~> 7.1.3)

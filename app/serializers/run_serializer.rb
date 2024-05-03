@@ -1,0 +1,27 @@
+class RunSerializer
+  include JSONAPI::Serializer
+
+  set_type :runs
+  attribute :actions do |object| {} end
+  attribute :canceled_at do |o| nil end
+  attribute :created_at
+  attribute :has_changes do |o| false end
+  attribute :auto_apply do |o| false end
+  attribute :allow_empty_apply do |o| true end
+  attribute :allow_config_generation do |o| false end
+  attribute :is_destroy do |o| false end
+  attribute :message
+  attribute :plan_only
+  attribute :source do |o| "tfe-api" end
+  attribute :status
+  attribute :trigger_reason do |o| "manual" end
+  attribute :target_addrs do |o| [] end
+  attribute :permissions do |o| {} end
+  attribute :refresh do |o| false end
+  attribute :refresh_only do |o| false end
+  attribute :refresh_addrs do |o| false end
+  attribute :save_plan do |o| true end
+  attribute :variables do |o| [] end
+
+  belongs_to :workspace
+end

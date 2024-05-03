@@ -37,3 +37,5 @@ gem "sidekiq", "~> 7.2"
 gem "git", "~> 1.19"
 
 gem "aws-sdk", "~> 3.2"
+
+gem "jsonapi-serializer", "~> 2.2"
