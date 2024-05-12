@@ -16,8 +16,6 @@ class Api::V1::WorkspacesController < Api::ApiController
 
   def show
     # TODO: Hack to only support agents for now
-    puts "Are we even getting here?"
-    puts @agent
     @workspace = @organization.workspaces.find(params[:id])
     render json: @workspace
   end

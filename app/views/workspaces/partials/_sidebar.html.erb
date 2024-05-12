@@ -1,0 +1,17 @@
+<div class="drawer lg:drawer-open">
+  <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-content flex flex-col m-5">
+    <%= yield %>
+  </div>
+  <div class="drawer-side">
+    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+    <ul class="menu p-4 w-60 min-h-full bg-base-200 text-base-content">
+      <!-- Sidebar content here -->
+      <li><a href="<%= workspaces_path %>">Back to Workspaces</a></li>
+      <li><a href="<%= workspace_path @workspace %>">Workspace</a></li>
+      <li><a href="<%= workspace_runs_path @workspace %>">Runs</a></li>
+      <li><a>Managed Resources</a></li>
+      <li><a>Settings</a></li>
+    </ul>
+  </div>
+</div>

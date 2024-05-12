@@ -1,3 +1,14 @@
-<%= @workspace.name %>
+<%= render layout: 'workspaces/partials/sidebar' do %>
+  <div class="text-sm breadcrumbs">
+    <ul>
+      <li><a href="<%= workspaces_path %>">Workspaces</a></li>
+      <li><%= @workspace.name %></li>
+    </ul>
+  </div>
 
-<a href="<%= workspace_runs_path @workspace %>">View Runs</a>
+  <h2><%= @workspace.name %></h2>
+  <h3>ID: <%= @workspace.id %></h3>
+
+  <h2>Current State</h2>
+  <a href="<%= workspace_runs_path @workspace %>">View Runs</a>
+<% end %>

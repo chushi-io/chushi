@@ -1,4 +1,5 @@
 class Api::ApiController < ActionController::API
+  include JSONAPI::Deserialization
   before_action :set_default_response_format
   before_action :verify_access_token
 

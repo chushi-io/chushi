@@ -10,6 +10,7 @@ class CreatePlans < ActiveRecord::Migration[7.1]
       t.string :status
       t.string :logs_url
 
+
       t.references :organization, foreign_key: true, type: :uuid
 
       t.timestamps

@@ -15,6 +15,19 @@ class RunsController < AuthenticatedController
   def create
     @run = @workspace.runs.new(run_params)
     @run.organization = @organization
+    @plan = @organization.plans.new(
+      execution_mode: @workspace.execution_mode,
+      status: "pending"
+    )
+    @plan.save!
+    unless @run.plan_only
+      @apply = @organization.applies.new(
+        execution_mode: @workspace.execution_mode
+      )
+      @apply.save!
+    end
+    @run.plan = @plan
+    @run.apply = @apply
     if @run.save
       GenerateConfigurationVersionJob.perform_async(@run.id)
       flash[:info] = "Run created"

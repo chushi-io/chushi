@@ -62,13 +62,17 @@ class GenerateConfigurationVersionJob
 
       @run.configuration_version.archive.attach(io: File.open(archive_name), filename: "archive")
       @run.configuration_version.update(status: "uploaded")
+      @run.update(status: "fetching_completed")
 
     ensure
       FileUtils.remove_file(archive_name) if File.exist?(archive_name)
       FileUtils.remove_dir(path) if File.exist?(path)
     end
 
-    # Cleanup the cloned repo and the archive
 
+    # Check for appropriate next state. For now, we'll just set
+    # it to "plan_queued"
+
+    @run.update(status: "plan_queued")
   end
 end

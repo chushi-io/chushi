@@ -1,7 +1,14 @@
-<%= form_with model: @vcs_connection do |form| %>
-  <%= form.text_field :name %>
-  <%= form.select :provider, ["github", "gitlab", "bitbucket", "git"] %>
+<%= render layout: 'partials/default_sidebar' do %>
+  <div class="w-full max-w-xs">
+  <%= form_with model: @vcs_connection do |form| %>
+    <%= form.label :name %>
+    <%= form.text_field :name, class: "input input-bordered w-full max-w-xs" %>
+    <%= form.label :provider %>
+    <%= form.select :provider, ["github", "gitlab", "bitbucket", "git"], {}, class: "select select-bordered w-full max-w-xs" %>
 
-  <%= form.password_field :github_personal_access_token %>
-  <%= form.submit %>
+    <%= form.label "Token" %>
+    <%= form.password_field :github_personal_access_token, class: "input input-bordered w-full max-w-xs" %>
+    <%= form.submit "Create VCS Connection", class: "btn btn-primary btn-sm"  %>
+  <% end %>
+</div>
 <% end %>

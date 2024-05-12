@@ -1,18 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  get '.well-known/terraform.json', to: ->(env) {
-    [200, {}, [{
-      "modules.v1": "/api/v1/registry/modules/",
-      "providers.v1": "/api/v1/registry/providers/",
-      "motd.v1": "/api/tofu/motd",
-      "state.v2": "/api/v1/",
-      "tfe.v2": "/api/v1/",
-      "tfe.v2.1": "/api/v1/",
-      "tfe.v2.2": "/api/v1/",
-      "versions.v1": "/api/v1/versions/"
-    }.to_json]]
-  }
+  get '.well-known/terraform.json', :controller => :well_known, :action => :terraform
+
   resources :workspaces do
     resources :runs
   end

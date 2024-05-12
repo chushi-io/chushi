@@ -1,4 +1,5 @@
-<table>
+<%= render layout: 'partials/default_sidebar' do %>
+  <table class="table">
   <tr>
     <th>Name</th>
     <th>Provider</th>
@@ -12,4 +13,5 @@
   </tr>
   <% end %>
 </table>
-<a href="<%= new_vcs_connection_path %>">Create VCS Connection</a>
+<a class="btn btn-primary btn-sm" href="<%= new_vcs_connection_path %>">Create VCS Connection</a>
+<% end %>

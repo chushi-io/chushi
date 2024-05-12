@@ -39,3 +39,7 @@ gem "git", "~> 1.19"
 gem "aws-sdk", "~> 3.2"
 
 gem "jsonapi-serializer", "~> 2.2"
+
+gem "jsonapi.rb", "~> 2.0"
+
+gem "tailwindcss-rails", "~> 2.6"
