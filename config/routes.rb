@@ -28,15 +28,16 @@ Rails.application.routes.draw do
         get "/:namespace", action: :index
         get "/search", action: :search
         get "/:namespace/:name/:provider/versions", action: :versions
-        get "/:namespace/:name/:provider/:version/download", action: :download
+        get "/:namespace/:name/:provider/:version/download", action: :download, constraints: { version: /[^\/]+/ }
+        get "/archive/:namespace/:name/:provider/:version/*.tar.gz", action: :archive, as: :archive, constraints: { version: /[^\/]+/ }
         get "/:namespace/:name/:provider/download", action: :download
         get "/:namespace/:name", action: :latest
         get "/:namespace/:name/:provider", action: :latest
-        get "/:namespace/:name/:provider/:version", action: :show
-        post "/:namespace/:name/:provider/:version", action: :create
+        get "/:namespace/:name/:provider/:version", action: :show, constraints: { version: /[^\/]+/ }
+        post "/:namespace/:name/:provider/:version", action: :create, constraints: { version: /[^\/]+/ }
       end
       scope "providers", :controller => "providers" do
-        post "/:namespace/:type/:version", action: :create
+        post "/:namespace/:type/:version", action: :create, constraints: { version: /[^\/]+/ }
         get "/:namespace/:type/versions", action: :index
       end
     end
@@ -87,5 +88,5 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "workspaces#index"
 end

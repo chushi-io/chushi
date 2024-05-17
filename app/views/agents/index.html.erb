@@ -1,4 +1,5 @@
-<table>
+<%= render layout: 'partials/default_sidebar' do %>
+<table class="table">
   <tr>
     <th>ID</th>
     <th>Name</th>
@@ -6,11 +7,12 @@
   </tr>
   <% @agents.each do |agent| %>
   <tr>
-    <td><%= agent.id %></td>
+    <td><a href="<%= agent_path agent %>"><%= agent.id %></a></td>
     <td><%= agent.name %></td>
     <td><%= agent.status %></td>
   </tr>
   <% end %>
 </table>
 
-<a href="<%= new_agent_path %>">Create Agent</a>
+<a class="btn btn-primary btn-sm" href="<%= new_agent_path %>">Create Agent</a>
+<% end %>

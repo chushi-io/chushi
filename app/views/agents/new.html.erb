@@ -1,4 +1,15 @@
-<%= form_with model: @agent do |form| %>
-  <%= form.text_field :name %>
-  <%= form.submit %>
+<%= render layout: 'partials/default_sidebar' do %>
+  <div class="w-full max-w-xs">
+    <div class="text-sm breadcrumbs">
+      <ul>
+        <li><a href="<%= agents_path %>">Agents</a></li>
+        <li>New</li>
+      </ul>
+    </div>
+    <%= form_with model: @agent do |form| %>
+      <%= form.label :name %>
+      <%= form.text_field :name, class: "input input-bordered w-full max-w-xs" %>
+      <%= form.submit "Create Agent", class: "btn btn-primary btn-sm"  %>
+    <% end %>
+  </div>
 <% end %>

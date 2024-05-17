@@ -8,4 +8,7 @@ class Organization < ApplicationRecord
   has_many :access_tokens, as: :token_authable
   has_many :plans
   has_many :applies
+
+  has_many :registry_modules
+  has_many :providers
 end

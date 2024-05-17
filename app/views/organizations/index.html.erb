@@ -8,7 +8,7 @@
   </tr>
   <% @organizations.each do |organization| %>
   <tr>
-    <td><%= organization.id %></td>
+    <td><a href="<%= organization_path organization %>"><%= organization.id %></a></td>
     <td><%= organization.name %></td>
     <td><%= organization.allow_auto_create_workspace %></td>
     <td><%= organization.organization_type %></td>

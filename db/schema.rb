@@ -135,24 +135,25 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
     t.index ["organization_id"], name: "index_plans_on_organization_id"
   end
 
-  create_table "providers", force: :cascade do |t|
+  create_table "providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "namespace"
     t.string "provider_type"
     t.string "version"
     t.json "protocols"
     t.json "platforms"
     t.json "gpg_public_keys"
+    t.datetime "published_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["namespace", "provider_type", "version"], name: "index_providers_on_namespace_and_provider_type_and_version", unique: true
   end
 
-  create_table "registry_modules", force: :cascade do |t|
-    t.string "registry_id"
+  create_table "registry_modules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "owner"
     t.string "namespace"
     t.string "name"
     t.string "provider"
-    t.string "description"
+    t.string "version"
     t.string "location"
     t.string "definition"
     t.json "root"
@@ -161,11 +162,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
     t.integer "downloads"
     t.boolean "verified"
     t.datetime "published_at", precision: nil
-    t.string "version"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["namespace", "name", "provider", "version"], name: "idx_on_namespace_name_provider_version_e3589d1e1f", unique: true
-    t.index ["registry_id"], name: "index_registry_modules_on_registry_id", unique: true
   end
 
   create_table "runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

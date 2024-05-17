@@ -6,10 +6,10 @@ class Api::V1::RunsController < Api::ApiController
       "plan-only",
       :message,
       :workspace,
-      "configuration_version"
+      "configuration-version"
     ])
-    render json: nil
-    # @run = @organization.runs.new(run_params)
+    @run = @organization.runs.new(run_params)
+    
   end
 
   def discard
