@@ -14,14 +14,18 @@
   <body>
     <% if current_user %>
       <%= render "partials/navbar" %>
+
       <%= yield %>
+
     <% else %>
-    <% flash.each do |type, msg| %>
-      <div>
-        <%= msg %>
-      </div>
-    <% end %>
+      <% flash.each do |type, msg| %>
+        <div>
+          <%= msg %>
+        </div>
+      <% end %>
+
     <%= yield %>
+
     <% end %>
 
 

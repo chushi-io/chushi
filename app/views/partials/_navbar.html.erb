@@ -5,7 +5,10 @@
   <div class="flex-none gap-2">
     <div class="form-control">
       <details class="dropdown">
-        <summary class="m-1 btn"><%= current_user.organizations.find { |item| item[:id] == session[:organization]}.name %></summary>
+        <summary class="m-1 btn">
+          <% org = current_user.organizations.find { |item| item[:id] == session[:organization]} %>
+          <%= org.name if defined? org.name %>
+        </summary>
         <ul class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
           <% current_user.organizations.each do |org| %>
             <li><a><%= org.name %></a></li>
@@ -27,7 +30,13 @@
           </a>
         </li>
         <li><a href="<%= access_tokens_path %>">Access Tokens</a></li>
-        <li><a>Logout</a></li>
+        <li>
+          <%= button_to(
+                "Log Out",
+                destroy_user_session_path,
+                method: :delete
+              ) %>
+        </li>
       </ul>
     </div>
   </div>
