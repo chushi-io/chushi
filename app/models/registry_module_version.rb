@@ -1,0 +1,2 @@
+class RegistryModuleVersion < ApplicationRecord
+end

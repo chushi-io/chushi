@@ -24,7 +24,7 @@ class Registry::V1::ModulesController < Registry::RegistryController
       name: params[:name],
       provider: params[:provider]
     )
-    render json: @modules
+    render json: @module.versions
   end
 
   def download

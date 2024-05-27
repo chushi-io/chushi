@@ -1,0 +1,2 @@
+class ProviderVersion < ApplicationRecord
+end

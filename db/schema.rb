@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -135,17 +135,42 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
     t.index ["organization_id"], name: "index_plans_on_organization_id"
   end
 
-  create_table "providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "namespace"
-    t.string "provider_type"
+  create_table "provider_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "version"
     t.json "protocols"
     t.json "platforms"
     t.json "gpg_public_keys"
     t.datetime "published_at", precision: nil
+    t.uuid "provider_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["namespace", "provider_type", "version"], name: "index_providers_on_namespace_and_provider_type_and_version", unique: true
+    t.index ["provider_id", "version"], name: "index_provider_versions_on_provider_id_and_version", unique: true
+    t.index ["provider_id"], name: "index_provider_versions_on_provider_id"
+  end
+
+  create_table "providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "namespace"
+    t.string "provider_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["namespace", "provider_type"], name: "index_providers_on_namespace_and_provider_type", unique: true
+  end
+
+  create_table "registry_module_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "version"
+    t.string "location"
+    t.string "source"
+    t.string "definition"
+    t.json "root"
+    t.json "submodules"
+    t.integer "downloads"
+    t.boolean "verified"
+    t.datetime "published_at", precision: nil
+    t.uuid "registry_module_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["registry_module_id", "version"], name: "idx_on_registry_module_id_version_b4b67eee77", unique: true
+    t.index ["registry_module_id"], name: "index_registry_module_versions_on_registry_module_id"
   end
 
   create_table "registry_modules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -153,18 +178,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
     t.string "namespace"
     t.string "name"
     t.string "provider"
-    t.string "version"
-    t.string "location"
-    t.string "definition"
-    t.json "root"
-    t.json "submodules"
     t.string "source"
-    t.integer "downloads"
-    t.boolean "verified"
-    t.datetime "published_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["namespace", "name", "provider", "version"], name: "idx_on_namespace_name_provider_version_e3589d1e1f", unique: true
+    t.index ["namespace", "name", "provider"], name: "index_registry_modules_on_namespace_and_name_and_provider", unique: true
   end
 
   create_table "runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -367,6 +384,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_01_021752) do
   add_foreign_key "organization_users", "users"
   add_foreign_key "organizations", "agents"
   add_foreign_key "plans", "organizations"
+  add_foreign_key "provider_versions", "providers"
+  add_foreign_key "registry_module_versions", "registry_modules"
   add_foreign_key "runs", "agents"
   add_foreign_key "runs", "applies"
   add_foreign_key "runs", "configuration_versions"

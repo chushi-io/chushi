@@ -43,3 +43,7 @@ gem "jsonapi-serializer", "~> 2.2"
 gem "jsonapi.rb", "~> 2.0"
 
 gem "tailwindcss-rails", "~> 2.6"
+
+gem "gruf", "~> 2.20"
+gem 'grpc', '~> 1.52.0'
+gem 'grpc-tools', '~> 1.52.0'

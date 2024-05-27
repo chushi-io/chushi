@@ -14,7 +14,11 @@
   <body>
     <% if current_user %>
       <%= render "partials/navbar" %>
-
+      <% flash.each do |type, msg| %>
+        <div>
+          <%= msg %>
+        </div>
+      <% end %>
       <%= yield %>
 
     <% else %>

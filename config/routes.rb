@@ -85,6 +85,15 @@ Rails.application.routes.draw do
     end
 
   end
+
+  namespace :agents, defaults: {format: :json} do
+    namespace :v1 do
+      put "runs/:id", action: :update, :controller => :runs
+      put "plans/:id", action: :update, :controller => :plans
+      put "applies/:id", action: :update, :controller => :applies
+      put "runs/:id/logs", action: :create, :controller => :logs
+    end
+  end
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
