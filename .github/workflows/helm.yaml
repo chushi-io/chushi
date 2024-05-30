@@ -1,0 +1,37 @@
+#name: Helm
+#
+#on:
+#  push:
+#    branches:
+#      - main
+#
+#permissions:
+#  contents: read
+#  packages: write
+#
+#jobs:
+#  publish:
+#    name: Publish Helm Chart
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout the code
+#        uses: actions/checkout@v2
+#      - uses: chrisdickinson/setup-yq@latest
+#        with:
+#          yq-version: v4.25.3
+#      - name: Get Chart version
+#        id: chart_version
+#        run: |
+#          version=$(yq .version 'deploy/charts/chushi/Chart.yaml')
+#          echo "version=$version" >> "$GITHUB_OUTPUT"
+#      - name: Chart | Push
+#        uses: appany/helm-oci-chart-releaser@v0.3.0
+#        with:
+#          name: chushi
+#          repository: chushi-io/chushi/helm
+#          tag: ${{ steps.chart_version.outputs.version }}
+#          path: deploy/charts/chushi
+#          registry: ghcr.io
+#          registry_username: ${{ github.actor }}
+#          registry_password: ${{ secrets.GITHUB_TOKEN }}
+#          update_dependencies: 'true' # Defaults to false
