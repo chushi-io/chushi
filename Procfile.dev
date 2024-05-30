@@ -1,3 +1,4 @@
 server: rails s
 sidekiq: bundle exec sidekiq
 tailwind: rails tailwindcss:watch
+proxy: ngrok http --domain=$NGROK_DOMAIN --log=stdout 3000

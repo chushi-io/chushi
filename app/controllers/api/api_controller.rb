@@ -1,7 +1,17 @@
 class Api::ApiController < ActionController::API
   include JSONAPI::Deserialization
-  before_action :set_default_response_format
+  include ActionPolicy::Controller
+
   before_action :verify_access_token
+
+  authorize :user, through: :current_user
+  authorize :organization, through: :current_organization
+  authorize :agent, through: :current_agent
+  authorize :run, through: :current_run
+
+  before_action :set_default_response_format
+
+  verify_authorized
 
   protected
 
@@ -24,27 +34,42 @@ class Api::ApiController < ActionController::API
     end
   end
 
-  def current_organization
-    if @access_token.token_authable_type == "Organization"
-      Organization.find(@access_token.token_authable_id)
-    end
-  end
-
   def is_organization
     @access_token.token_authable_type == "Organization"
+  end
+
+  def current_organization
+    if is_organization
+      Organization.find(@access_token.token_authable_id)
+    end
   end
 
   def is_user
     @access_token.token_authable_type == "User"
   end
+
   def current_user
-    if @access_token.token_authable_type == "User"
+    if is_user
       User.find(@access_token.token_authable_id)
     end
   end
 
+  def is_run
+    @access_token.token_authable_type == "Run"
+  end
+
+  def current_run
+    if is_run
+      Run.find(@access_token.token_authable_id)
+    end
+  end
+
+  def is_agent
+    @access_token.token_authable_type == "Agent"
+  end
+
   def current_agent
-    if @access_token.token_authable_type == "Agent"
+    if is_agent
       Agent.find(@access_token.token_authable_id)
     end
   end
@@ -55,6 +80,9 @@ class Api::ApiController < ActionController::API
       @organization = current_organization
     elsif current_user
       @organization = current_user.organizations.find(params[:organization_id])
+      render json: {}, status: :forbidden unless @organization
+    elsif current_run
+      @organization = current_run.organization
       render json: {}, status: :forbidden unless @organization
     else
       @agent = current_agent
@@ -73,18 +101,18 @@ class Api::ApiController < ActionController::API
   def can_access_run(run)
     if current_agent
       return run.agent_id == current_agent.id
+    elsif current_run
+      return current_run.id == run.id
     end
     can_access_organization(run.organization_id)
   end
 
   def can_access_organization(organization_id)
-    puts organization_id
     if current_organization && current_organization != organization_id
       false
     elsif current_agent
       return current_agent.organization.id == organization_id
     else
-      puts current_user.organizations.map{ |org| org.id }
       unless current_user.organizations.find(organization_id)
         return false
       end

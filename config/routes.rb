@@ -52,19 +52,31 @@ Rails.application.routes.draw do
         get "workspaces", action: :index, :controller => "workspaces"
         get "workspaces/:id", action: :show, :controller => "workspaces"
         get "runs/queue", action: :queue, :controller => "organizations"
+        match "tags", via: [:get, :post, :delete], :controller => "organizations"
       end
       resources :workspaces, :except => [:index] do
         member do
           post "actions/lock", action: :lock, :controller => "workspaces"
           post "actions/unlock", action: :unlock, :controller => "workspaces"
-          match "state-versions", via: [:get, :post]
-          get "current-state-version"
+          match "state-versions", via: [:get, :post], :controller => "workspaces"
+          get "current-state-version", action: :current_state_version, :controller => "workspaces"
+          match "relationships/tags", via: [:get, :post, :delete], action: :tags, :controller => :workspaces
           get :runs
           post :configuration_versions, action: :create, :controller => "configuration_versions", path: "configuration-versions"
         end
       end
 
-      resources :plans
+      resources :plans do
+        member do
+          match "logs", via: [:get, :post], :controller => "plans"
+          get "logs", action: :logs, :controller => "plans"
+          post "upload"
+          post "upload_json"
+          post "upload_structured"
+          post "download"
+          get "json-output-redacted", action: :json_output_redacted
+        end
+      end
       resources :applies
       resources :runs, :except => [:index] do
         member do
@@ -73,6 +85,7 @@ Rails.application.routes.draw do
           post "actions/force-cancel", action: :force_cancel, :controller => "runs"
           post "actions/force-execute", action: :force_execute, :controller => "runs"
           get "configuration-version/download", action: :download, :controller => "configuration_versions", param: :run_id
+          get "run-events", action: :events, :controller => :runs
         end
       end
       resources :agents
@@ -89,6 +102,8 @@ Rails.application.routes.draw do
   namespace :agents, defaults: {format: :json} do
     namespace :v1 do
       put "runs/:id", action: :update, :controller => :runs
+      get "runs/:id/token", action: :token, :controller => :runs
+
       put "plans/:id", action: :update, :controller => :plans
       put "applies/:id", action: :update, :controller => :applies
       put "runs/:id/logs", action: :create, :controller => :logs

@@ -1,10 +1,11 @@
-class Api::V1::PingController < Api::ApiController
+class Api::V1::PingController < ActionController::API
   # skip_before_action :verify_access_token
 
   def ping
-    @agent = current_agent
-    @agent.last_ping_at = Time.now
-    @agent.ip_address = request.remote_ip
-    @agent.save
+    response.set_header('tfp-api-version', '2.6')
+    # Ideally we'd set this to Chushi, but the opentofu binary
+    # is still hardcoded to "Terraform Cloud" and we want to configure
+    # as Cloud, not Enterprise
+    response.set_header('tfp-appname', 'Terraform Cloud')
   end
 end

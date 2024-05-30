@@ -17,7 +17,6 @@ class RunsController < AuthenticatedController
     @run.organization = @organization
     begin
       RunCreator.call(@run)
-      GenerateConfigurationVersionJob.perform_async(@run.id)
       flash[:info] = "Run created"
       redirect_to @workspace
     rescue => exception

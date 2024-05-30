@@ -11,6 +11,14 @@ class Agents::V1::RunsController < Agents::V1::AgentsController
     end
   end
 
+  def token
+    @token = AccessToken.where(
+      token_authable_id: params[:id],
+      token_authable_type: "Run"
+    ).first!
+    render json: { token: @token.token }
+  end
+
   private
   def update_params
     params.require(:run).permit(:status, :add, :change, :destroy)

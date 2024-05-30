@@ -9,12 +9,16 @@ class GenerateConfigurationVersionJob
     @workspace = @run.workspace
 
     if @run.configuration_version.nil?
-      version = @workspace.configuration_versions.create(
+      puts "Configuration version nil, preseeding"
+      version = @workspace.configuration_versions.new(
         source: @workspace.source,
         speculative: false,
         status: "fetching",
         provisional: true
       )
+      version.organization = @workspace.organization
+      version.save!
+      puts version.id
       @run.configuration_version = version
       @run.save!
     end
@@ -33,7 +37,8 @@ class GenerateConfigurationVersionJob
       return
     end
 
-
+    puts "Fetching the configuration version"
+    @run.update(status: "fetching")
 
     path = SecureRandom.hex
     uri = URI(@workspace.source)
@@ -69,10 +74,7 @@ class GenerateConfigurationVersionJob
       FileUtils.remove_dir(path) if File.exist?(path)
     end
 
-
-    # Check for appropriate next state. For now, we'll just set
-    # it to "plan_queued"
-
+    puts "Configuration version completed"
     @run.update(status: "plan_queued")
   end
 end

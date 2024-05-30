@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_29_040554) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -184,6 +184,19 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
     t.index ["namespace", "name", "provider"], name: "index_registry_modules_on_namespace_and_name_and_provider", unique: true
   end
 
+  create_table "run_tasks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "category"
+    t.string "name"
+    t.string "url"
+    t.string "hmac_key"
+    t.boolean "enabled"
+    t.string "description"
+    t.uuid "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_run_tasks_on_organization_id"
+  end
+
   create_table "runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "agent_id"
     t.boolean "has_changes"
@@ -250,6 +263,48 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
     t.index ["organization_id"], name: "index_state_versions_on_organization_id"
     t.index ["run_id"], name: "index_state_versions_on_run_id"
     t.index ["workspace_id"], name: "index_state_versions_on_workspace_id"
+  end
+
+  create_table "taggings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "tag_id"
+    t.string "taggable_type"
+    t.uuid "taggable_id"
+    t.string "tagger_type"
+    t.uuid "tagger_id"
+    t.string "context", limit: 128
+    t.datetime "created_at"
+    t.string "tenant", limit: 128
+    t.index ["context"], name: "index_taggings_on_context"
+    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
+    t.index ["tag_id"], name: "index_taggings_on_tag_id"
+    t.index ["taggable_id", "taggable_type", "context"], name: "taggings_taggable_context_idx"
+    t.index ["taggable_id", "taggable_type", "tagger_id", "context"], name: "taggings_idy"
+    t.index ["taggable_id"], name: "index_taggings_on_taggable_id"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable"
+    t.index ["taggable_type"], name: "index_taggings_on_taggable_type"
+    t.index ["tagger_id", "tagger_type"], name: "index_taggings_on_tagger_id_and_tagger_type"
+    t.index ["tagger_id"], name: "index_taggings_on_tagger_id"
+    t.index ["tagger_type", "tagger_id"], name: "index_taggings_on_tagger"
+    t.index ["tenant"], name: "index_taggings_on_tenant"
+  end
+
+  create_table "tags", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "taggings_count", default: 0
+    t.index ["name"], name: "index_tags_on_name", unique: true
+  end
+
+  create_table "task_stages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "stage"
+    t.string "status"
+    t.uuid "run_id"
+    t.uuid "run_task_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["run_id"], name: "index_task_stages_on_run_id"
+    t.index ["run_task_id"], name: "index_task_stages_on_run_task_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -368,7 +423,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
     t.uuid "vcs_connection_id"
     t.uuid "organization_id"
     t.uuid "agent_id"
+    t.uuid "current_state_version_id"
     t.index ["agent_id"], name: "index_workspaces_on_agent_id"
+    t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_workspaces_on_organization_id"
     t.index ["vcs_connection_id"], name: "index_workspaces_on_vcs_connection_id"
@@ -386,6 +443,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
   add_foreign_key "plans", "organizations"
   add_foreign_key "provider_versions", "providers"
   add_foreign_key "registry_module_versions", "registry_modules"
+  add_foreign_key "run_tasks", "organizations"
   add_foreign_key "runs", "agents"
   add_foreign_key "runs", "applies"
   add_foreign_key "runs", "configuration_versions"
@@ -397,6 +455,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
   add_foreign_key "state_versions", "organizations"
   add_foreign_key "state_versions", "runs"
   add_foreign_key "state_versions", "workspaces"
+  add_foreign_key "taggings", "tags"
+  add_foreign_key "task_stages", "run_tasks"
+  add_foreign_key "task_stages", "runs"
   add_foreign_key "variable_sets", "organizations"
   add_foreign_key "variables", "organizations"
   add_foreign_key "variables", "variable_sets"
@@ -406,5 +467,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_19_001718) do
   add_foreign_key "workspace_resources", "state_versions"
   add_foreign_key "workspaces", "agents"
   add_foreign_key "workspaces", "organizations"
+  add_foreign_key "workspaces", "state_versions", column: "current_state_version_id"
   add_foreign_key "workspaces", "vcs_connections"
 end

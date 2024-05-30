@@ -1,5 +1,6 @@
 class Agents::V1::AgentsController < Api::ApiController
   before_action :authenticate_agent
+  skip_verify_authorized
 
   protected
   def authenticate_agent

@@ -29,21 +29,15 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
-
 gem "devise", "~> 4.9"
-
 gem "sidekiq", "~> 7.2"
-
 gem "git", "~> 1.19"
-
 gem "aws-sdk", "~> 3.2"
-
 gem "jsonapi-serializer", "~> 2.2"
-
 gem "jsonapi.rb", "~> 2.0"
-
 gem "tailwindcss-rails", "~> 2.6"
-
 gem "gruf", "~> 2.20"
 gem 'grpc', '~> 1.52.0'
 gem 'grpc-tools', '~> 1.52.0'
+gem 'acts-as-taggable-on', '~> 10.0'
+gem 'action_policy'

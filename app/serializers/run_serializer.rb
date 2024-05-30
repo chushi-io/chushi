@@ -1,5 +1,6 @@
 class RunSerializer
   include JSONAPI::Serializer
+  set_key_transform :dash
 
   set_type :runs
   attribute :actions do |object| {} end
@@ -24,4 +25,8 @@ class RunSerializer
   attribute :variables do |o| [] end
 
   belongs_to :workspace
+  has_one :configuration_version, key: "configuration-version"
+  has_one :plan
+  has_one :apply
+  has_many :task_stages
 end
