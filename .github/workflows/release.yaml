@@ -5,12 +5,12 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '**/*.rb'
-      - 'Gemfile'
-      - '.github/workflows/release.yaml'
-      - '.github/workflows/docker.yaml'
-      - '.releaserc.json'
+#    paths:
+#      - '**/*.rb'
+#      - 'Gemfile'
+#      - '.github/workflows/release.yaml'
+#      - '.github/workflows/docker.yaml'
+#      - '.releaserc.json'
 
 jobs:
   release:

@@ -19,7 +19,12 @@ FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config
+    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config curl
+
+RUN curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh  && \
+    bash nodesource_setup.sh && \
+    apt install nodejs
+RUN npm i -D daisyui@latest
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
