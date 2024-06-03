@@ -24,6 +24,7 @@ class Api::V1::PlansController < Api::ApiController
     @run = Run.find(params[:id])
     authorize! @run.plan, to: :upload?
 
+    puts request.body
     request.body.rewind
     @run.plan.plan_json_file.attach(io: request.body, filename: "plan")
     head :ok
@@ -71,9 +72,30 @@ class Api::V1::PlansController < Api::ApiController
     @plan = Plan.find(params[:id])
     authorize! @plan, to: :show?
 
-    head :no_content and return unless @plan.plan_json_file.attached?
+    if @plan.plan_json_file.attached?
+      render json: @plan.plan_json_file.download
+    else
+      render json: {}
+    end
+  end
 
-    render json: @plan.plan_json_file.download
+  def update
+    @plan = Plan.find(params[:id])
+    authorize! @plan
+
+    puts params
+    @plan.has_changes = params[:has_changes]
+    @plan.resource_additions = params[:resource_additions]
+    @plan.resource_changes = params[:resource_changes]
+    @plan.resource_destructions = params[:resource_destructions]
+    @plan.resource_imports = params[:resource_imports]
+
+    if @plan.has_changes
+      @plan.run.update(has_changes: true)
+    end
+    @plan.save
+
+    render json: ::PlanSerializer.new(@plan, {}).serializable_hash
   end
 end
 

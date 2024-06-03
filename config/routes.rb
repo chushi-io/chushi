@@ -54,11 +54,18 @@ Rails.application.routes.draw do
         get "runs/queue", action: :queue, :controller => "organizations"
         match "tags", via: [:get, :post, :delete], :controller => "organizations"
       end
+
+      get "state-versions/:id", action: :get_state_version, :controller => "workspaces"
+      match "state-versions/:id/state", via: [:get, :put], action: :state_version_state, :controller => "workspaces", :as => :state_version_state
+      match "state-versions/:id/state-json", via: [:get, :put], action: :state_version_state_json, :controller => "workspaces", :as => :state_version_state_json
+
       resources :workspaces, :except => [:index] do
         member do
           post "actions/lock", action: :lock, :controller => "workspaces"
           post "actions/unlock", action: :unlock, :controller => "workspaces"
-          match "state-versions", via: [:get, :post], :controller => "workspaces"
+          post "actions/force-unlock", action: :force_unlock, :controller => "workspaces"
+          match "state-versions", via: [:get, :post], action: :state_versions, :controller => "workspaces"
+
           get "current-state-version", action: :current_state_version, :controller => "workspaces"
           match "relationships/tags", via: [:get, :post, :delete], action: :tags, :controller => :workspaces
           get :runs
@@ -77,13 +84,18 @@ Rails.application.routes.draw do
           get "json-output-redacted", action: :json_output_redacted
         end
       end
-      resources :applies
+      resources :applies do
+        member do
+          get "logs", action: :logs
+        end
+      end
       resources :runs, :except => [:index] do
         member do
           post "actions/discard", action: :discard, :controller => "runs"
           post "actions/cancel", action: :cancel, :controller => "runs"
           post "actions/force-cancel", action: :force_cancel, :controller => "runs"
           post "actions/force-execute", action: :force_execute, :controller => "runs"
+          post "actions/apply", action: :apply, :controller => :runs
           get "configuration-version/download", action: :download, :controller => "configuration_versions", param: :run_id
           get "run-events", action: :events, :controller => :runs
         end

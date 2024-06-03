@@ -3,11 +3,13 @@ class RunSerializer
   set_key_transform :dash
 
   set_type :runs
-  attribute :actions do |object| {} end
+  attribute :actions do |object| {
+    "is-confirmable": true
+  } end
   attribute :canceled_at do |o| nil end
   attribute :created_at
-  attribute :has_changes do |o| false end
-  attribute :auto_apply do |o| false end
+  attribute :has_changes
+  attribute :auto_apply
   attribute :allow_empty_apply do |o| true end
   attribute :allow_config_generation do |o| false end
   attribute :is_destroy do |o| false end

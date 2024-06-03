@@ -16,6 +16,11 @@ class RunPolicy < ApplicationPolicy
     can_access_run
   end
 
+  def apply?
+    # We only allow users to approve runs
+    (user.present? && user.organizations.map{|org| org.id}.include?(record.workspace.organization_id))
+  end
+
   private
   def can_access_run
     if run.present?

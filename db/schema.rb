@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_29_040554) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_02_182639) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -123,10 +123,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_29_040554) do
   create_table "plans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "execution_mode"
     t.boolean "has_changes"
-    t.boolean "resource_additions"
-    t.boolean "resource_changes"
-    t.boolean "resource_destructions"
-    t.boolean "resource_imports"
+    t.integer "resource_additions"
+    t.integer "resource_changes"
+    t.integer "resource_destructions"
+    t.integer "resource_imports"
     t.string "status"
     t.string "logs_url"
     t.uuid "organization_id"
@@ -424,6 +424,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_29_040554) do
     t.uuid "organization_id"
     t.uuid "agent_id"
     t.uuid "current_state_version_id"
+    t.string "locked_by"
+    t.datetime "locked_at", precision: nil
+    t.string "lock_id"
     t.index ["agent_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true

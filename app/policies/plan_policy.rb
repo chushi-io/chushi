@@ -46,4 +46,8 @@ class PlanPolicy < ApplicationPolicy
       false
     end
   end
+
+  def update?
+    (run.present? && run.plan.id == record.id)
+  end
 end

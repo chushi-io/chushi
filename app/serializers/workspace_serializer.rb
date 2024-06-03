@@ -5,7 +5,11 @@ class WorkspaceSerializer
   set_type :workspaces
 
   attribute :permissions do |o|
-    {"can-queue-run": true }
+    {
+      "can-queue-run": true,
+      "can-queue-apply": true,
+      "can-queue-destroy": true,
+    }
   end
 
   attribute :allow_destroy_plan

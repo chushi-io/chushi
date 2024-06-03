@@ -11,7 +11,6 @@ class Api::V1::RunsController < Api::ApiController
     authorize! @workspace, to: :create_run?
 
 
-
     @run = @workspace.organization.runs.new(run_params)
     @run.workspace = @workspace
     begin
@@ -49,6 +48,18 @@ class Api::V1::RunsController < Api::ApiController
   def events
     authorize! @run
     render json: {}
+  end
+
+  def update
+    authorize! @run
+
+    render json: ::RunSerializer.new(@run, {}).serializable_hash
+  end
+
+  def apply
+    authorize! @run
+    @run.update(status: "apply_queued")
+    render json: ::RunSerializer.new(@run, {}).serializable_hash
   end
 
   private

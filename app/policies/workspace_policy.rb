@@ -11,6 +11,18 @@ class WorkspacePolicy < ApplicationPolicy
     can_access_workspace
   end
 
+  def force_unlock?
+    can_access_workspace
+  end
+
+  def state_version_state?
+    can_access_workspace
+  end
+
+  def state_version_state_json?
+    can_access_workspace
+  end
+
   def tags?
     can_access_workspace
   end
@@ -27,6 +39,12 @@ class WorkspacePolicy < ApplicationPolicy
   def create_run?
     (agent.present? && agent.id == record.agent_id) ||
       (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id))
+  end
+
+  def state_versions?
+    (agent.present? && agent.id == record.agent_id) ||
+      (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id)) ||
+      (run.present? && run.workspace_id == record.id)
   end
 
   protected

@@ -1,6 +1,8 @@
 class Apply < ApplicationRecord
   has_one :run
 
+  has_many :state_versions
+
   # pending	The initial status of a apply once it has been created.
   # managed_queued/queued	The apply has been queued, awaiting backend service capacity to run terraform.
   # running	The apply is running.

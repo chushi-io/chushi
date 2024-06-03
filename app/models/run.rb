@@ -9,6 +9,7 @@ class Run < ApplicationRecord
   belongs_to :apply, optional: true
 
   has_many :task_stages
+  has_many :state_versions
 
   scope :for_agent, ->(agent_id) {
     left_joins(:workspace).where(workspaces: {agent_id: agent_id})
