@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/chushi-io/chushi/compare/v1.0.0...v1.1.0) (2024-06-22)
+
+
+### Features
+
+* **release:** 1.1.0 release ([8e1899b](https://github.com/chushi-io/chushi/commit/8e1899bd04faffd6b6a6e817500d65dc82e3072d))
+
 ## 1.0.0 (2024-05-30)
 
 
