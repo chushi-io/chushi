@@ -1,5 +1,4 @@
-<%= render layout: 'partials/default_sidebar' do %>
-  <div class="w-full max-w-xs">
+<div class="w-full max-w-xs">
   <%= form_with model: @vcs_connection do |form| %>
     <%= form.label :name %>
     <%= form.text_field :name, class: "input input-bordered w-full max-w-xs" %>
@@ -11,4 +10,3 @@
     <%= form.submit "Create VCS Connection", class: "btn btn-primary btn-sm"  %>
   <% end %>
 </div>
-<% end %>

@@ -1,0 +1,20 @@
+<div class="w-full max-w-xs">
+  <%= form_with model: @policy do |form| %>
+    <%= form.label :name %>
+    <%= form.text_field :name, class: "input input-bordered w-full max-w-xs" %>
+
+    <%= form.label :description %>
+    <%= form.text_field :description, class: "input input-bordered w-full max-w-xs" %>
+
+    <%= form.label :type %>
+    <%= form.select :type, ["opa"], {}, class: "select select-bordered w-full max-w-xs" %>
+
+    <%= form.label :enforcement_level %>
+    <%= form.select :enforcement_level, ["mandatory", "advisory"], {}, class: "select select-bordered w-full max-w-xs" %>
+
+    <%= form.label :query %>
+    <%= form.text_field :query, class: "input input-bordered w-full max-w-xs" %>
+
+    <%= form.submit "Create Policy", class: "btn btn-primary btn-sm" %>
+  <% end %>
+</div>

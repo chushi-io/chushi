@@ -1,14 +1,19 @@
-<%= render layout: 'workspaces/partials/sidebar' do %>
-  <div class="text-sm breadcrumbs">
-    <ul>
-      <li><a href="<%= workspaces_path %>">Workspaces</a></li>
-      <li><%= @workspace.name %></li>
-    </ul>
+<div class="text-sm breadcrumbs">
+  <ul>
+    <li><a href="<%= workspaces_path %>">Workspaces</a></li>
+    <li><%= @workspace.name %></li>
+  </ul>
+</div>
+
+<div class="hero bg-base-200">
+  <div class="hero-content flex-col lg:flex-row-reverse">
+    <div>
+      <h2>Some stuff about our workspace</h2>
+    </div>
   </div>
+</div>
+<h2><%= @workspace.name %></h2>
+<h3>ID: <%= @workspace.id %></h3>
 
-  <h2><%= @workspace.name %></h2>
-  <h3>ID: <%= @workspace.id %></h3>
-
-  <h2>Current State</h2>
-  <a href="<%= workspace_runs_path @workspace %>">View Runs</a>
-<% end %>
+<h2>Current State</h2>
+<a href="<%= workspace_runs_path @workspace %>">View Runs</a>

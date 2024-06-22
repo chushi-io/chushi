@@ -1,0 +1,25 @@
+<table class="table">
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Query</th>
+    <th>Enforcement Level</th>
+    <th>Policy Set</th>
+  </tr>
+  <% @policies.each do |policy| %>
+    <tr>
+      <td><%= policy.name %></td>
+      <td><%= policy.description %></td>
+      <td><%= policy.type %></td>
+      <td><%= policy.query %></td>
+      <td><%= policy.enforcement_level %></td>
+    </tr>
+  <% end %>
+</table>
+
+<div class="w-full max-w-xs">
+  <div class="grid grid-cols-1">
+    <a class="btn btn-primary btn-sm" href="<%= new_policy_path %>">Create Policy</a>
+  </div>
+</div>

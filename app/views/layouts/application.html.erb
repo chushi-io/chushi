@@ -9,30 +9,20 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.35.0/ace.min.js" integrity="sha512-GvzpUyByBrTHeLRBgrFrSnDcXdakzubmOAwoC7Jo2FNayYURzIeX1tRZKGyRxVCfz0Go2EIV69o7i/vvbyywgQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
 
   <body>
     <% if current_user %>
       <%= render "partials/navbar" %>
-      <% flash.each do |type, msg| %>
-        <div>
-          <%= msg %>
-        </div>
-      <% end %>
-      <%= yield %>
-
-    <% else %>
-      <% flash.each do |type, msg| %>
-        <div>
-          <%= msg %>
-        </div>
-      <% end %>
-
-    <%= yield %>
-
+      <%= render "partials/sidebar" %>
     <% end %>
-
-
-
+    <% flash.each do |type, msg| %>
+      <div>
+        <%= msg %>
+      </div>
+    <% end %>
+    <%= yield %>
   </body>
 </html>

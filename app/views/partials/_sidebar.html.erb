@@ -1,0 +1,70 @@
+<div class="drawer lg:drawer-open">
+  <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-content flex flex-col m-5">
+    <%= yield %>
+  </div>
+  <div class="drawer-side">
+    <ul class="menu p-4 w-60 min-h-full bg-base-100 border-r border-l  text-base-content">
+      <li>
+        <details>
+          <summary>
+            <a href="<%= workspaces_path %>">Workspaces</a>
+          </summary>
+          <% if @workspace %>
+          <ul>
+            <li><a href="<%= workspace_path @workspace %>">Workspace</a></li>
+            <li><a href="<%= workspace_runs_path @workspace %>">Runs</a></li>
+            <li><a>Managed Resources</a></li>
+            <li><a>Settings</a></li>
+          </ul>
+          <% end %>
+        </details>
+      </li>
+      <li>
+        <a href="<%= vcs_connections_path %>">VCS Connections</a>
+      </li>
+      <li>
+        <a href="">Registry</a>
+      </li>
+      <li>
+        <a href="<%= agents_path %>">Agents</a>
+      </li>
+      <li>
+        <details>
+          <summary>
+            <a href="<%= organizations_path %>">Organizations</a>
+          </summary>
+          <% if @organization %>
+            <ul>
+              <li><a>Users</a></li>
+              <li><a>Teams</a></li>
+              <li><a>Settings</a></li>
+            </ul>
+          <% end %>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>
+            <a href="<%= policies_path %>">Policies</a>
+          </summary>
+          <ul>
+            <li>
+              <a href="<%= policy_sets_path %>">Policy Sets</a>
+            </li>
+          </ul>
+        </details>
+      </li>
+      <li>
+        <details>
+          <summary>
+            <a href="<%= variables_path %>">Variables</a>
+          </summary>
+          <ul>
+            <li><a>Variable Sets</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -15,6 +15,8 @@ Rails.application.routes.draw do
   resources :variables
   resources :variable_sets
   resources :vcs_connections
+  resources :policies
+  resources :policy_sets
   resources :organizations do
     resources :access_tokens, :controller => "organization_tokens", as: :access_tokens
   end

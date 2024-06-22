@@ -19,6 +19,12 @@ class Api::ApiController < ActionController::API
     request.format = :json
   end
 
+  def authenticated
+    token = request.headers['Authorization'].to_s.split(' ').last
+    @access_token = AccessToken.find_by_token(token)
+    not access_token.nil?
+  end
+
   def verify_access_token
     token = request.headers['Authorization'].to_s.split(' ').last
     @access_token = AccessToken.find_by_token(token)

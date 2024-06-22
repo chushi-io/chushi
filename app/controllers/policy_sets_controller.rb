@@ -1,0 +1,2 @@
+class PolicySetsController < ApplicationController
+end

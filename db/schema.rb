@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_02_182639) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_11_005526) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -133,6 +133,38 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_02_182639) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_plans_on_organization_id"
+  end
+
+  create_table "policies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.string "type"
+    t.string "query"
+    t.string "enforcement_level"
+    t.uuid "organization_id"
+    t.uuid "policy_set_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "name"], name: "index_policies_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_policies_on_organization_id"
+    t.index ["policy_set_id"], name: "index_policies_on_policy_set_id"
+  end
+
+  create_table "policy_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.boolean "global"
+    t.string "kind"
+    t.boolean "overridable"
+    t.string "vcs_repo_branch"
+    t.string "vcs_repo_identifier"
+    t.string "ingress_submodules"
+    t.string "vcs_repo_oauth_token_id"
+    t.uuid "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "name"], name: "index_policy_sets_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_policy_sets_on_organization_id"
   end
 
   create_table "provider_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -444,6 +476,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_02_182639) do
   add_foreign_key "organization_users", "users"
   add_foreign_key "organizations", "agents"
   add_foreign_key "plans", "organizations"
+  add_foreign_key "policies", "organizations"
+  add_foreign_key "policies", "policy_sets"
+  add_foreign_key "policy_sets", "organizations"
   add_foreign_key "provider_versions", "providers"
   add_foreign_key "registry_module_versions", "registry_modules"
   add_foreign_key "run_tasks", "organizations"
