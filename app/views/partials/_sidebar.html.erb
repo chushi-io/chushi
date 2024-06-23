@@ -10,7 +10,7 @@
           <summary>
             <a href="<%= workspaces_path %>">Workspaces</a>
           </summary>
-          <% unless @workspace.nil? %>
+          <% if @workspace.present? %>
           <ul>
             <li><a href="<%= workspace_path @workspace %>">Workspace</a></li>
             <li><a href="<%= workspace_runs_path @workspace %>">Runs</a></li>
