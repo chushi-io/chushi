@@ -10,6 +10,7 @@
           <summary>
             <a href="<%= workspaces_path %>">Workspaces</a>
           </summary>
+          <%= @workspace %>
           <% if @workspace.present? %>
           <ul>
             <li><a href="<%= workspace_path @workspace %>">Workspace</a></li>
