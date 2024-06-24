@@ -48,6 +48,7 @@ Rails.application.routes.draw do
   match "org_selector" => "organizations#selector", as: :organization_selector, via: [:get, :post]
   namespace :api, defaults: {format: :json} do
     namespace :v1 do
+      post :webhooks, action: :create, :controller => "webhooks"
       get :ping, action: :ping, :controller => "ping"
       scope "/organizations/:organization_id", as: :organization do
         get "entitlement-set", action: :entitlements, :controller => "organizations"
