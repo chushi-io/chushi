@@ -3,6 +3,9 @@ require 'rubygems/package'
 class GenerateConfigurationVersionJob
   include Sidekiq::Job
 
+  # TODO: Fix authentication with github app
+  # https://api.github.com/repos/:org/:repo/zipball/:ref will redirect p
+  # to a URL for downloading the tarball?
   def perform(run_id)
     # Get our workspace / VCS connection ID
     @run = Run.find(run_id)

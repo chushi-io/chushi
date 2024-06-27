@@ -41,3 +41,6 @@ gem 'grpc', '~> 1.52.0'
 gem 'grpc-tools', '~> 1.52.0'
 gem 'acts-as-taggable-on', '~> 10.0'
 gem 'action_policy'
+gem 'octokit'
+
+gem "jwt", "~> 2.8"

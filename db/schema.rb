@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_11_005526) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_27_014521) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -406,6 +406,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_11_005526) do
     t.string "webhook_secret"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "github_installation_id"
     t.index ["organization_id", "name"], name: "index_vcs_connections_on_organization_id_and_name"
     t.index ["organization_id"], name: "index_vcs_connections_on_organization_id"
   end
@@ -447,7 +448,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_11_005526) do
     t.boolean "structured_run_output_enabled"
     t.string "tofu_version"
     t.json "trigger_prefixes"
-    t.string "vcs_repo"
     t.string "vcs_repo_identifier"
     t.string "working_directory"
     t.datetime "created_at", null: false
@@ -459,6 +459,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_11_005526) do
     t.string "locked_by"
     t.datetime "locked_at", precision: nil
     t.string "lock_id"
+    t.string "vcs_repo_branch"
     t.index ["agent_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true

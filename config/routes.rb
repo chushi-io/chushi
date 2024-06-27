@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   get '.well-known/terraform.json', :controller => :well_known, :action => :terraform
 
+  get 'github/setup', :controller => :github, :action => :setup
   resources :workspaces do
     resources :runs
   end
