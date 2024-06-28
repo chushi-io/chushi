@@ -1,4 +1,5 @@
 require 'rubygems/package'
+require 'open-uri'
 
 class GenerateConfigurationVersionJob
   include Sidekiq::Job
@@ -14,7 +15,7 @@ class GenerateConfigurationVersionJob
     if @run.configuration_version.nil?
       puts "Configuration version nil, preseeding"
       version = @workspace.configuration_versions.new(
-        source: @workspace.source,
+        source: @workspace.vcs_repo_identifier,
         speculative: false,
         status: "fetching",
         provisional: true
@@ -44,37 +45,67 @@ class GenerateConfigurationVersionJob
     @run.update(status: "fetching")
 
     path = SecureRandom.hex
-    uri = URI(@workspace.source)
-    uri.user = "chushi"
-    uri.password = @workspace.vcs_connection.github_personal_access_token
-
-    # TODO: Shallow clone only the required directory(ies)
-    Git.clone(uri, path)
-
     archive_name = "#{path}.tar.gz"
 
-    begin
-      # Generate a tar.gz file
-      File.open(archive_name, "wb") do |file|
-        Zlib::GzipWriter.wrap(file) do |gzip|
-          Gem::Package::TarWriter.new(gzip) do |tar|
-            Dir["#{path}/#{@workspace.working_directory}/**"].reject{|f|f==archive_name}.each do |source_file|
-              data = File.read(source_file)
-              tar.add_file_simple(source_file.delete_prefix("#{path}/"), 0444, data.length) do |io|
-                io.write(data)
+    if @workspace.vcs_connection.github_personal_access_token
+      uri = URI(@workspace.vcs_repo_identifier)
+      uri.user = "chushi"
+      uri.password = @workspace.vcs_connection.github_personal_access_token
+
+      # TODO: Shallow clone only the required directory(ies)
+      Git.clone(uri, path)
+
+
+      begin
+        # Generate a tar.gz file
+        File.open(archive_name, "wb") do |file|
+          Zlib::GzipWriter.wrap(file) do |gzip|
+            Gem::Package::TarWriter.new(gzip) do |tar|
+              Dir["#{path}/#{@workspace.working_directory}/**"].reject{|f|f==archive_name}.each do |source_file|
+                data = File.read(source_file)
+                tar.add_file_simple(source_file.delete_prefix("#{path}/"), 0444, data.length) do |io|
+                  io.write(data)
+                end
               end
             end
           end
         end
-      end
 
-      @run.configuration_version.archive.attach(io: File.open(archive_name), filename: "archive")
+        @run.configuration_version.archive.attach(io: File.open(archive_name), filename: "archive")
+        @run.configuration_version.update(status: "uploaded")
+        @run.update(status: "fetching_completed")
+
+      ensure
+        FileUtils.remove_file(archive_name) if File.exist?(archive_name)
+        FileUtils.remove_dir(path) if File.exist?(path)
+      end
+    else
+      priv_key = OpenSSL::PKey::RSA.new(File.read("private_key.pem"))
+
+      @app_id = @workspace.vcs_connection.github_application_id || 930341
+      payload = {
+        # The time that this JWT was issued, _i.e._ now.
+        iat: Time.now.to_i,
+        # JWT expiration time (10 minute maximum)
+        exp: Time.now.to_i + (10 * 60),
+        # Your GitHub App's identifier number
+        iss: @app_id
+      }
+
+      jwt = JWT.encode(payload, priv_key, 'RS256')
+      @app_client ||= Octokit::Client.new(bearer_token: jwt)
+
+      @installation_id = @workspace.vcs_connection.github_installation_id
+      @installation_token = @app_client.create_app_installation_access_token(@installation_id)[:token]
+      @installation_client = Octokit::Client.new(bearer_token: @installation_token)
+
+      link = @installation_client.archive_link(@workspace.vcs_repo_identifier, {
+        ref: "main"
+      })
+
+      @run.configuration_version.archive.attach(io: URI.open(link), filename: "archive")
       @run.configuration_version.update(status: "uploaded")
       @run.update(status: "fetching_completed")
-
-    ensure
-      FileUtils.remove_file(archive_name) if File.exist?(archive_name)
-      FileUtils.remove_dir(path) if File.exist?(path)
     end
 
     puts "Configuration version completed"

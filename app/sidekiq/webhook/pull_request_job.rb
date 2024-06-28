@@ -25,6 +25,7 @@ class Webhook::PullRequestJob
       # TODO: Check if workspace should plan on pull request event at all
       run = workspace.organization.runs.new
       run.plan_only = true
+
       run.workspace = workspace
       begin
         RunCreator.call(run)

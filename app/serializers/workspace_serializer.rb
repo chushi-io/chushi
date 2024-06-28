@@ -35,8 +35,13 @@ class WorkspaceSerializer
     object.tofu_version
   end
   attribute :trigger_prefixes
-  attribute :vcs_repo
-  attribute :vcs_repo_identifier
+  attribute :vcs_repo do |o|
+    {
+      "branch": o.vcs_repo_branch,
+      "identifier": o.vcs_repo_identifier
+    }
+  end
+
   attribute :working_directory
 
   has_one :current_state_version, serializer: :state_version

@@ -22,6 +22,8 @@ class Webhook::PushEventJob
       # TODO: Check if workspace should plan on push event at all
       run = workspace.organization.runs.new
       run.plan_only = false
+      run.auto_apply = workspace.auto_apply
+      run.trigger_reason = "push_event"
       run.workspace = workspace
       begin
         RunCreator.call(run)

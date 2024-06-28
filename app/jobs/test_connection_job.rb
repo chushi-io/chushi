@@ -27,6 +27,5 @@ class TestConnectionJob < ApplicationJob
     @repo_source = URI.parse("//#{@workspace.source}").path
     @repo = @installation_client.repository(@repo_source.delete_prefix("/"))
 
-    puts @repo
   end
 end
