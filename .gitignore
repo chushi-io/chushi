@@ -40,4 +40,4 @@ requests
 
 
 test.rb
-private_key.pem
+*.pem

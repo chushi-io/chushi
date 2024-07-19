@@ -1,12 +1,17 @@
 Rails.application.routes.draw do
+
+  # Authentication / Authorizat
+  use_doorkeeper
+  use_doorkeeper_openid_connect
   devise_for :users
-
   get '.well-known/terraform.json', :controller => :well_known, :action => :terraform
-
   get 'github/setup', :controller => :github, :action => :setup
+
+  # Application Routing
   resources :workspaces do
     resources :runs
   end
+
   resources :state_versions
   resources :applies
   resources :plans
@@ -24,6 +29,7 @@ Rails.application.routes.draw do
 
   resources :access_tokens, :controller => "user_tokens", as: :access_tokens
 
+  # Registry Routes
   namespace :registry, defaults: {format: :json} do
     namespace :v1 do
       scope "modules", :controller => "modules" do
@@ -47,6 +53,8 @@ Rails.application.routes.draw do
   end
 
   match "org_selector" => "organizations#selector", as: :organization_selector, via: [:get, :post]
+
+  # API Routes
   namespace :api, defaults: {format: :json} do
     namespace :v1 do
       post :webhooks, action: :create, :controller => "webhooks"
@@ -74,7 +82,12 @@ Rails.application.routes.draw do
           match "relationships/tags", via: [:get, :post, :delete], action: :tags, :controller => :workspaces
           get :runs
           post :configuration_versions, action: :create, :controller => "configuration_versions", path: "configuration-versions"
+
         end
+      end
+
+      scope "workspaces/:workspace_id" do
+        resources :vars, :controller => "variables", as: :workspace
       end
 
       resources :plans do
@@ -115,6 +128,7 @@ Rails.application.routes.draw do
 
   end
 
+  # Agents routes
   namespace :agents, defaults: {format: :json} do
     namespace :v1 do
       put "runs/:id", action: :update, :controller => :runs

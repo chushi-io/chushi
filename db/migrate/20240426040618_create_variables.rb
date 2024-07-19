@@ -1,7 +1,7 @@
 class CreateVariables < ActiveRecord::Migration[7.1]
   def change
     create_table :variables, id: :uuid do |t|
-      t.string :type
+      t.string :variable_type
 
       t.string :name
       t.string :value

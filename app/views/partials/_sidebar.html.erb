@@ -14,6 +14,7 @@
           <ul>
             <li><a href="<%= workspace_path @workspace %>">Workspace</a></li>
             <li><a href="<%= workspace_runs_path @workspace %>">Runs</a></li>
+            <li><a href="<%= new_variable_path(:workspace => @workspace.id, :type => "workspace") %>">Variables</a></li>
             <li><a>Managed Resources</a></li>
             <li><a>Settings</a></li>
           </ul>

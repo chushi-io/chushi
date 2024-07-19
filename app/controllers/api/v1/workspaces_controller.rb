@@ -161,5 +161,6 @@ class Api::V1::WorkspacesController < Api::ApiController
   private
   def load_workspace
     @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
+    render(status: 404) unless @workspace
   end
 end
