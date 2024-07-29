@@ -1,0 +1,26 @@
+{
+  "name": "chushi",
+  "version": "1.0.0",
+  "description": "TODO:  - State versions are created, but we need to support storing the actual file contents - Better error handling and status management of workspace / run / plan / apply - UX handling of locked workspace - Streaming of logs for plan / apply operations - Support for destroy, refresh, etc - Implementation of Drift detection schedule - Implementation of Auto Destroy",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chushi-io/chushi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chushi-io/chushi/issues"
+  },
+  "homepage": "https://github.com/chushi-io/chushi#readme",
+  "devDependencies": {
+    "daisyui": "^4.12.10"
+  }
+}

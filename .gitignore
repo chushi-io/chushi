@@ -42,3 +42,4 @@ requests
 
 test.rb
 *.pem
+node_modules
