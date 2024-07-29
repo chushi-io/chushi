@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/chushi-io/chushi#readme",
   "devDependencies": {
-    "daisyui": "^4.12.10"
+    "daisyui": "^4.12.10",
+    "flowbite": "^2.4.1"
   }
 }
