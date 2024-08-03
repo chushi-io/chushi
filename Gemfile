@@ -54,3 +54,7 @@ end
 
 
 gem "doorkeeper", "~> 5.7"
+
+gem "bunny", "~> 2.23"
+
+gem "sneakers", "~> 2.11"
