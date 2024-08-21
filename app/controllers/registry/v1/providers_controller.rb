@@ -1,18 +1,31 @@
 class Registry::V1::ProvidersController < Registry::RegistryController
   def index
+    render json: ::ProviderSerializer.new(@current_organization.providers, {}).serializable_hash
+  end
 
+  def show
+    @provider = @current_organization.providers.find(params[:id])
+    render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
   end
 
   def create
-    @provider = Provider.new(
+    @provider = @current_organization.providers.new(
       namespace: params[:namespace],
-      provider_type: params[:type],
-      version: params[:version]
+      provider_type: params[:type]
     )
-    @provider.published_at = Time.now
     @provider.save!
-    request.body.rewind
-    @provider.archive.attach(io: request.body, filename: "#{params[:namespace]}-#{params[:name]}-#{params[:provider]}-#{params[:version]}.tar.gz")
-    render json: @provider
+    render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
   end
+  # def create
+  #   @provider = Provider.new(
+  #     namespace: params[:namespace],
+  #     provider_type: params[:type],
+  #     version: params[:version]
+  #   )
+  #   @provider.published_at = Time.now
+  #   @provider.save!
+  #   request.body.rewind
+  #   @provider.archive.attach(io: request.body, filename: "#{params[:namespace]}-#{params[:name]}-#{params[:provider]}-#{params[:version]}.tar.gz")
+  #   render json: @provider
+  # end
 end

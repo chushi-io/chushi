@@ -45,10 +45,14 @@ Rails.application.routes.draw do
         get "/:namespace/:name/:provider/:version", action: :show, constraints: { version: /[^\/]+/ }
         post "/:namespace/:name/:provider/:version", action: :create, constraints: { version: /[^\/]+/ }
       end
-      scope "providers", :controller => "providers" do
-        post "/:namespace/:type/:version", action: :create, constraints: { version: /[^\/]+/ }
-        get "/:namespace/:type/versions", action: :index
+
+      resources :providers do
+        resources :provider_versions
       end
+      # scope "providers", :controller => "providers" do
+      #   post "/:namespace/:type/:version", action: :create, constraints: { version: /[^\/]+/ }
+      #   get "/:namespace/:type/versions", action: :index
+      # end
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_13_012656) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -222,12 +222,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   create_table "provider_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "version"
     t.json "protocols"
-    t.json "platforms"
-    t.json "gpg_public_keys"
     t.datetime "published_at", precision: nil
     t.uuid "provider_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "key_id"
     t.index ["provider_id", "version"], name: "index_provider_versions_on_provider_id_and_version", unique: true
     t.index ["provider_id"], name: "index_provider_versions_on_provider_id"
   end
@@ -237,7 +236,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.string "provider_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "organization_id"
     t.index ["namespace", "provider_type"], name: "index_providers_on_namespace_and_provider_type", unique: true
+    t.index ["organization_id"], name: "index_providers_on_organization_id"
   end
 
   create_table "registry_module_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -536,6 +537,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   add_foreign_key "policies", "policy_sets"
   add_foreign_key "policy_sets", "organizations"
   add_foreign_key "provider_versions", "providers"
+  add_foreign_key "providers", "organizations"
   add_foreign_key "registry_module_versions", "registry_modules"
   add_foreign_key "run_tasks", "organizations"
   add_foreign_key "runs", "agents"
