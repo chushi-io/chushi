@@ -1,6 +1,7 @@
 class CreatePlans < ActiveRecord::Migration[7.1]
   def change
     create_table :plans, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :execution_mode
       t.boolean :has_changes
       t.boolean :resource_additions

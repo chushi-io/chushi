@@ -3,7 +3,7 @@ class Api::V1::AppliesController < Api::ApiController
   skip_verify_authorized only: :logs
 
   def show
-    @apply = Apply.find(params[:id])
+    @apply = Apply.first(external_id: params[:id])
     authorize! @apply
 
     render json: ::ApplySerializer.new(@apply, {}).serializable_hash

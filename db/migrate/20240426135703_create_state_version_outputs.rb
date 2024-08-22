@@ -1,6 +1,7 @@
 class CreateStateVersionOutputs < ActiveRecord::Migration[7.1]
   def change
     create_table :state_version_outputs, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :name
       t.boolean :sensitive
       t.string :type

@@ -34,6 +34,8 @@ class DeviseCreateUsers < ActiveRecord::Migration[7.1]
 
 
       t.timestamps null: false
+
+      t.string :external_id, index: { unique: true }
     end
 
     add_index :users, :email,                unique: true

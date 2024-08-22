@@ -1,6 +1,7 @@
 class CreateVcsConnections < ActiveRecord::Migration[7.1]
   def change
     create_table :vcs_connections, id: :uuid  do |t|
+      t.string :external_id, index: { unique: true }
       t.string :name
       t.string :provider
       t.string :github_type

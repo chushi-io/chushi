@@ -1,6 +1,7 @@
 class CreateWorkspaces < ActiveRecord::Migration[7.1]
   def change
     create_table :workspaces, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.boolean :allow_destroy_plan
       t.boolean :auto_apply
 

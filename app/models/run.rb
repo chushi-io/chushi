@@ -14,4 +14,6 @@ class Run < ApplicationRecord
   scope :for_agent, ->(agent_id) {
     left_joins(:workspace).where(workspaces: {agent_id: agent_id})
   }
+
+  before_create -> { generate_id("run") }
 end

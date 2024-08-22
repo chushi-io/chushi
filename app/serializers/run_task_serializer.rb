@@ -3,6 +3,7 @@ class RunTaskSerializer
   set_key_transform :dash
 
   set_type :tasks
+  set_id :external_id
 
   attribute :category
   attribute :name

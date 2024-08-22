@@ -7,4 +7,5 @@ class Plan < ApplicationRecord
   has_many :state_versions, :through => :run
   has_one :run
 
+  before_create -> { generate_id("plan") }
 end

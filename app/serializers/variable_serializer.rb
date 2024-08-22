@@ -1,6 +1,7 @@
 class VariableSerializer
   include JSONAPI::Serializer
   set_type :vars
+  set_id :external_id
   set_key_transform :dash
 
   attribute :key do |o|

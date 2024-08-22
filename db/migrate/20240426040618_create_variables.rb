@@ -1,6 +1,7 @@
 class CreateVariables < ActiveRecord::Migration[7.1]
   def change
     create_table :variables, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :variable_type
 
       t.string :name

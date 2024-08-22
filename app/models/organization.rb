@@ -1,4 +1,5 @@
 class Organization < ApplicationRecord
+  @id_prefix = "org"
   acts_as_taggable_on :tags
 
   has_many :workspaces
@@ -17,4 +18,6 @@ class Organization < ApplicationRecord
 
   has_many :registry_modules
   has_many :providers
+
+  before_create -> { generate_id("org") }
 end

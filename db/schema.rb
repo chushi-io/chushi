@@ -16,6 +16,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
 
   create_table "access_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
+    t.string "external_id"
     t.string "token"
     t.string "token_authable_type", null: false
     t.uuid "token_authable_id", null: false
@@ -56,6 +57,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   end
 
   create_table "agents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.uuid "organization_id"
     t.string "status"
     t.string "name"
@@ -66,11 +68,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.datetime "last_ping_at", precision: nil
     t.string "ip_address"
     t.index ["api_key"], name: "index_agents_on_api_key", unique: true
+    t.index ["external_id"], name: "index_agents_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_agents_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_agents_on_organization_id"
   end
 
   create_table "applies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "execution_mode"
     t.string "status"
     t.string "logs_url"
@@ -81,10 +85,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_applies_on_external_id", unique: true
     t.index ["organization_id"], name: "index_applies_on_organization_id"
   end
 
   create_table "configuration_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.uuid "workspace_id"
     t.uuid "organization_id"
     t.string "source"
@@ -95,6 +101,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "auto_queue_runs", default: false
+    t.index ["external_id"], name: "index_configuration_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_configuration_versions_on_organization_id"
     t.index ["workspace_id"], name: "index_configuration_versions_on_workspace_id"
   end
@@ -152,11 +159,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   end
 
   create_table "organization_users", force: :cascade do |t|
+    t.string "external_id"
     t.uuid "organization_id"
     t.uuid "user_id"
     t.string "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_organization_users_on_external_id", unique: true
     t.index ["organization_id"], name: "index_organization_users_on_organization_id"
     t.index ["user_id"], name: "index_organization_users_on_user_id"
   end
@@ -167,12 +176,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.string "organization_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "external_id"
     t.uuid "agent_id"
     t.index ["agent_id"], name: "index_organizations_on_agent_id"
+    t.index ["external_id"], name: "index_organizations_on_external_id", unique: true
     t.index ["name"], name: "index_organizations_on_name", unique: true
   end
 
   create_table "plans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "execution_mode"
     t.boolean "has_changes"
     t.integer "resource_additions"
@@ -184,10 +196,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_plans_on_external_id", unique: true
     t.index ["organization_id"], name: "index_plans_on_organization_id"
   end
 
   create_table "policies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "name"
     t.string "description"
     t.string "type"
@@ -197,12 +211,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "policy_set_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_policies_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_policies_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_policies_on_organization_id"
     t.index ["policy_set_id"], name: "index_policies_on_policy_set_id"
   end
 
   create_table "policy_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "name"
     t.string "description"
     t.boolean "global"
@@ -215,6 +231,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_policy_sets_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_policy_sets_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_policy_sets_on_organization_id"
   end
@@ -269,6 +286,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   end
 
   create_table "run_tasks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "category"
     t.string "name"
     t.string "url"
@@ -278,10 +296,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_run_tasks_on_external_id", unique: true
     t.index ["organization_id"], name: "index_run_tasks_on_organization_id"
   end
 
   create_table "runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.uuid "agent_id"
     t.boolean "has_changes"
     t.boolean "auto_apply"
@@ -304,12 +324,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.index ["agent_id"], name: "index_runs_on_agent_id"
     t.index ["apply_id"], name: "index_runs_on_apply_id"
     t.index ["configuration_version_id"], name: "index_runs_on_configuration_version_id"
+    t.index ["external_id"], name: "index_runs_on_external_id", unique: true
     t.index ["organization_id"], name: "index_runs_on_organization_id"
     t.index ["plan_id"], name: "index_runs_on_plan_id"
     t.index ["workspace_id"], name: "index_runs_on_workspace_id"
   end
 
   create_table "state_version_outputs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "name"
     t.boolean "sensitive"
     t.string "type"
@@ -318,11 +340,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_state_version_outputs_on_external_id", unique: true
     t.index ["organization_id"], name: "index_state_version_outputs_on_organization_id"
     t.index ["state_version_id"], name: "index_state_version_outputs_on_state_version_id"
   end
 
   create_table "state_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.integer "size"
     t.string "hosted_state_download_url"
     t.string "hosted_state_upload_url"
@@ -344,6 +368,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_state_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_state_versions_on_organization_id"
     t.index ["run_id"], name: "index_state_versions_on_run_id"
     t.index ["workspace_id"], name: "index_state_versions_on_workspace_id"
@@ -381,12 +406,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   end
 
   create_table "task_stages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "stage"
     t.string "status"
     t.uuid "run_id"
     t.uuid "run_task_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_task_stages_on_external_id", unique: true
     t.index ["run_id"], name: "index_task_stages_on_run_id"
     t.index ["run_task_id"], name: "index_task_stages_on_run_task_id"
   end
@@ -411,13 +438,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.datetime "locked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "external_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["external_id"], name: "index_users_on_external_id", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
   create_table "variable_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.uuid "organization_id"
     t.string "name"
     t.string "description"
@@ -425,10 +455,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.integer "priority"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_variable_sets_on_external_id", unique: true
     t.index ["organization_id"], name: "index_variable_sets_on_organization_id"
   end
 
   create_table "variables", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "variable_type"
     t.string "name"
     t.string "value"
@@ -439,12 +471,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.uuid "variable_set_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_variables_on_external_id", unique: true
     t.index ["organization_id"], name: "index_variables_on_organization_id"
     t.index ["variable_set_id"], name: "index_variables_on_variable_set_id"
     t.index ["workspace_id"], name: "index_variables_on_workspace_id"
   end
 
   create_table "vcs_connections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.string "name"
     t.string "provider"
     t.string "github_type"
@@ -459,6 +493,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "github_installation_id"
+    t.index ["external_id"], name: "index_vcs_connections_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_vcs_connections_on_organization_id_and_name"
     t.index ["organization_id"], name: "index_vcs_connections_on_organization_id"
   end
@@ -479,6 +514,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   end
 
   create_table "workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
     t.boolean "allow_destroy_plan"
     t.boolean "auto_apply"
     t.boolean "auto_apply_run_trigger"
@@ -514,6 +550,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.string "vcs_repo_branch"
     t.index ["agent_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
+    t.index ["external_id"], name: "index_workspaces_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_workspaces_on_organization_id"
     t.index ["vcs_connection_id"], name: "index_workspaces_on_vcs_connection_id"
