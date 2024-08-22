@@ -64,6 +64,6 @@ class Api::V1::RunsController < Api::ApiController
 
   private
   def load_run
-    @run = Run.find(params[:id])
+    @run = Run.first(external_id: params[:id])
   end
 end

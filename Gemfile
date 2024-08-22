@@ -54,3 +54,5 @@ end
 
 
 gem "doorkeeper", "~> 5.7"
+
+gem "seedbank", "~> 0.5.0"

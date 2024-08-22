@@ -7,4 +7,5 @@ class Workspace < ApplicationRecord
   has_many :state_versions
 
   has_many :variables
+  before_create -> { generate_id("workspace") }
 end

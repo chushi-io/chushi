@@ -1,5 +1,41 @@
 # Chushi 
 
+## Development 
+
+```shell 
+git clone git@github.com:chushi-io/chushi
+cd chushi 
+
+docker compose up -d
+cp .env.example .env # And change NGROK_DOMAIN= to have your domain from above
+bundle install
+npm install
+openssl genpkey -algorithm RSA -out oidc_key.pem -pkeyopt rsa_keygen_bits:2048
+
+bundle exec rails db:create 
+bundle exec rails db:migrate
+bundle exec rails db:seeds:development
+./bin/dev
+```
+
+### Credentials
+
+#### Organization Access Token 
+```shell
+echo 'Organization.first.access_tokens.first.token' | bundle exec rails c
+```
+
+#### Organization ID
+```shell
+echo 'Organization.first.id' | bundle exec rails c
+```
+
+#### User Access Token
+```shell
+echo 'User.first.access_tokens.first.token' | bundle exec rails c
+```
+
+
 TODO: 
 - State versions are created, but we need to support storing the actual file contents
 - Better error handling and status management of workspace / run / plan / apply

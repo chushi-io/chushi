@@ -49,7 +49,7 @@ class Api::V1::OrganizationsController < Api::ApiController
   end
 
   def tags
-    @organization = Organization.find(params[:organization_id])
+    @organization = Organization.find(external_id: params[:organization_id])
     if request.get?
       # Simply get the organization tags
     else

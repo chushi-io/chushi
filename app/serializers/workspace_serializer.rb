@@ -3,6 +3,7 @@ class WorkspaceSerializer
   set_key_transform :dash
 
   set_type :workspaces
+  set_id :external_id
 
   attribute :permissions do |o|
     {

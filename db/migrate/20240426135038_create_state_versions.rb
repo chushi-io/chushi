@@ -1,6 +1,7 @@
 class CreateStateVersions < ActiveRecord::Migration[7.1]
   def change
     create_table :state_versions, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.integer :size
       t.string :hosted_state_download_url
       t.string :hosted_state_upload_url

@@ -4,6 +4,7 @@ class ConfigurationVersionSerializer
   include JSONAPI::Serializer
 
   set_type "configuration-versions"
+  set_id :external_id
   set_key_transform :dash
 
   attribute :source

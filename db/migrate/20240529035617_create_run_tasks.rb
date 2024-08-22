@@ -1,6 +1,7 @@
 class CreateRunTasks < ActiveRecord::Migration[7.1]
   def change
     create_table :run_tasks, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :category
       t.string :name
       t.string :url

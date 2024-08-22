@@ -5,6 +5,7 @@ class StateVersionSerializer
   set_key_transform :dash
 
   set_type :state_versions
+  set_id :external_id
   attribute :created_at
   attribute :size
   attribute :hosted_state_download_url do |object|

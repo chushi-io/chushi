@@ -1,6 +1,7 @@
 class TaskStage < ApplicationRecord
   belongs_to :run_task
   belongs_to :run
+  before_create -> { generate_id("ts") }
 end
 
 # pending	The initial status of a run task stage after creation.

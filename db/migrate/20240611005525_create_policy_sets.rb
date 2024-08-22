@@ -1,6 +1,7 @@
 class CreatePolicySets < ActiveRecord::Migration[7.1]
   def change
     create_table :policy_sets, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :name
       t.string :description
       t.boolean :global

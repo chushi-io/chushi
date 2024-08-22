@@ -108,7 +108,7 @@ class Api::V1::WorkspacesController < Api::ApiController
   end
 
   def get_state_version
-    @version = StateVersion.find(params[:id])
+    @version = StateVersion.find(external_id: params[:id])
     authorize! @version.workspace, to: :show?
 
     render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
@@ -117,7 +117,7 @@ class Api::V1::WorkspacesController < Api::ApiController
   def state_version_state
     # @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
     # authorize! @workspace, to: :show?
-    @version = StateVersion.find(params[:id])
+    @version = StateVersion.find(external_id: params[:id])
 
     if request.get?
       head :no_content and return unless @version.state_file.attached?
@@ -134,7 +134,7 @@ class Api::V1::WorkspacesController < Api::ApiController
   def state_version_state_json
     # @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
     # authorize! @workspace, to: :show?
-    @version = StateVersion.find(params[:id])
+    @version = StateVersion.find(external_id: params[:id])
 
     if request.get?
       head :no_content and return unless @version.json_state_file.attached?
@@ -160,7 +160,7 @@ class Api::V1::WorkspacesController < Api::ApiController
 
   private
   def load_workspace
-    @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
+    @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
     render(status: 404) unless @workspace
   end
 end

@@ -3,6 +3,7 @@ class RunSerializer
   set_key_transform :dash
 
   set_type :runs
+  set_id :external_id
   attribute :actions do |object| {
     "is-confirmable": true
   } end

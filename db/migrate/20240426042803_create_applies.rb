@@ -1,6 +1,7 @@
 class CreateApplies < ActiveRecord::Migration[7.1]
   def change
     create_table :applies, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :execution_mode
       t.string :status
       t.string :logs_url

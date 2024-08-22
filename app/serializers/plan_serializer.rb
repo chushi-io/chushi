@@ -4,6 +4,7 @@ class PlanSerializer
   include JSONAPI::Serializer
 
   set_type :plans
+  set_id :external_id
   set_key_transform :dash
   attributes
 

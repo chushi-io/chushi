@@ -1,6 +1,7 @@
 class CreateTaskStages < ActiveRecord::Migration[7.1]
   def change
     create_table :task_stages, id: :uuid do |t|
+      t.string :external_id, index: { unique: true }
       t.string :stage
       t.string :status
 

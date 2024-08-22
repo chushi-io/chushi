@@ -4,6 +4,7 @@ class ApplySerializer
   include JSONAPI::Serializer
 
   set_type :applies
+  set_id :external_id
   set_key_transform :dash
 
   attribute :execution_details do |object|
