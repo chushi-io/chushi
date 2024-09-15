@@ -1,6 +1,6 @@
 class Api::V2::StateVersionsController < Api::ApiController
-  before_action :load_workspace, :only => [:create, :index]
-  skip_verify_authorized :only => [:state_version_state, :state_version_state_json]
+  before_action :load_workspace, :except => [:show, :state, :state_json, :upload_state, :upload_state_json]
+  skip_verify_authorized :only => [:state_version_state, :state_version_state_json, :current]
 
   def index
     authorize! @workspace, to: :show?
@@ -10,7 +10,6 @@ class Api::V2::StateVersionsController < Api::ApiController
 
   def create
     authorize! @workspace, to: :state_version_state?
-    puts params
     version_params = jsonapi_deserialize(params, only: [
       # :force,
       # "json_state_outputs",
@@ -23,12 +22,12 @@ class Api::V2::StateVersionsController < Api::ApiController
     if @version
       render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
     else
-      puts @version.errors.full_messages
       head :bad_request
     end
   end
 
   def current
+    puts @workspace.to_json
     authorize! @workspace, to: :show?
     version = StateVersion.find(@workspace.current_state_version_id)
     if version
@@ -46,6 +45,8 @@ class Api::V2::StateVersionsController < Api::ApiController
   end
 
   def state
+
+
     @version = StateVersion.find_by(external_id: params[:id])
     head :no_content and return unless @version.state_file.attached?
     render plain: @version.state_file.download, layout: false, content_type: 'text/plain'

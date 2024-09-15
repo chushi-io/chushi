@@ -7,7 +7,7 @@ class Api::V2::RunsController < Api::ApiController
       :workspace,
       "configuration_version"
     ])
-    @workspace = Workspace.find(run_params["workspace_id"])
+    @workspace = Workspace.find_by(external_id: run_params["workspace_id"])
     authorize! @workspace, to: :create_run?
 
 
@@ -64,6 +64,6 @@ class Api::V2::RunsController < Api::ApiController
 
   private
   def load_run
-    @run = Run.first(external_id: params[:id])
+    @run = Run.find_by(external_id: params[:id])
   end
 end

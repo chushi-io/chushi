@@ -1,9 +1,6 @@
-class RunSerializer
-  include JSONAPI::Serializer
-  set_key_transform :dash
-
+class RunSerializer < ApplicationSerializer
   set_type :runs
-  set_id :external_id
+
   attribute :actions do |object| {
     "is-confirmable": true
   } end
@@ -27,9 +24,19 @@ class RunSerializer
   attribute :save_plan do |o| true end
   attribute :variables do |o| [] end
 
-  belongs_to :workspace
-  has_one :configuration_version, key: "configuration-version"
-  has_one :plan
-  has_one :apply
-  has_many :task_stages
+  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
+    object.workspace
+  end
+  has_one :configuration_version, key: "configuration-version", serializer: ConfigurationVersionSerializer, id_method_name: :external_id do |object|
+    object.configuration_version
+  end
+  has_one :plan, serializer: PlanSerializer, id_method_name: :external_id do |object|
+    object.plan
+  end
+  has_one :apply, serializer: ApplySerializer, id_method_name: :external_id do |object|
+    object.apply
+  end
+  has_many :task_stages, serializer: TaskStageSerializer, id_method_name: :external_id do |object|
+    object.task_stages
+  end
 end

@@ -4,7 +4,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   skip_verify_authorized only: :upload
 
   def create
-    @workspace = Workspace.find(external_id: params[:id])
+    @workspace = Workspace.find_by(external_id: params[:id])
     authorize! @workspace, to: :create_configuration_version?
 
     version = @workspace.configuration_versions.new(
@@ -20,7 +20,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   end
 
   def upload
-    @version = ConfigurationVersion.find(external_id: params[:id])
+    @version = ConfigurationVersion.find_by(external_id: params[:id])
 
     head :bad_request and return if @version.archive.attached?
 
@@ -39,14 +39,14 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   end
 
   def download
-    @version = ConfigurationVersion.find(external_id: params[:id])
+    @version = ConfigurationVersion.find_by(external_id: params[:id])
     authorize! @version
     # Generate the URL, and return a redirect
     redirect_to @version.archive.url
   end
 
   def show
-    @version = ConfigurationVersion.find(external_id: params[:id])
+    @version = ConfigurationVersion.find_by(external_id: params[:id])
     authorize! @version
     render json: ::ConfigurationVersionSerializer.new(@version, {}).serializable_hash
   end

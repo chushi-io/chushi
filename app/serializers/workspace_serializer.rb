@@ -1,9 +1,5 @@
-class WorkspaceSerializer
-  include JSONAPI::Serializer
-  set_key_transform :dash
-
+class WorkspaceSerializer < ApplicationSerializer
   set_type :workspaces
-  set_id :external_id
 
   belongs_to :organization, serializer: ::OrganizationSerializer, id_method_name: :name do |workspace|
     workspace.organization

@@ -1,11 +1,7 @@
-class ConfigurationVersionSerializer
+class ConfigurationVersionSerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
-  include JSONAPI::Serializer
-
   set_type "configuration-versions"
-  set_id :external_id
-  set_key_transform :dash
 
   attribute :source
   attribute :speculative
@@ -14,16 +10,16 @@ class ConfigurationVersionSerializer
   attribute :auto_queue_runs
 
   attribute :upload_url do |object|
-    upload_api_v1_configuration_version_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    upload_api_v2_configuration_version_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
   end
 
   # link :self, :url
   link :self do |object|
-    api_v1_configuration_version_path(object)
+    api_v2_configuration_version_path(object)
   end
 
   link :download do |object|
-    download_api_v1_configuration_version_path(object)
+    download_api_v2_configuration_version_path(object)
   end
 end
 

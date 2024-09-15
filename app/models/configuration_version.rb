@@ -1,4 +1,8 @@
 class ConfigurationVersion < ApplicationRecord
+  def to_param
+    external_id
+  end
+
   has_one_attached :archive
 
   belongs_to :workspace

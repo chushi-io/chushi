@@ -65,7 +65,6 @@ class Api::V2::OrganizationsController < Api::ApiController
         :id,
         :type,
       ])
-      puts tag_params
       if request.post?
 
       elsif request.delete?

@@ -2,7 +2,7 @@ class Api::V2::PlansController < Api::ApiController
   skip_before_action :verify_access_token, :only => [:logs]
   skip_verify_authorized only: :logs
   def show
-    @plan = Plan.first(external_id: params[:id])
+    @plan = Plan.find_by(external_id: params[:id])
     authorize! @plan, to: :show?
     render json: ::PlanSerializer.new(@plan, {}).serializable_hash
   end
@@ -12,7 +12,7 @@ class Api::V2::PlansController < Api::ApiController
   end
 
   def upload
-    @run = Run.first(external_id: params[:id])
+    @run = Run.find_by(external_id: params[:id])
     authorize! @run.plan
 
     request.body.rewind
@@ -21,7 +21,7 @@ class Api::V2::PlansController < Api::ApiController
   end
 
   def upload_json
-    @run = Run.first(external_id: params[:id])
+    @run = Run.find_by(external_id: params[:id])
     authorize! @run.plan, to: :upload?
 
     puts request.body
@@ -31,7 +31,7 @@ class Api::V2::PlansController < Api::ApiController
   end
 
   def upload_structured
-    @run = Run.first(external_id: params[:id])
+    @run = Run.find_by(external_id: params[:id])
     authorize! @run.plan, to: :upload?
 
     request.body.rewind
@@ -45,7 +45,7 @@ class Api::V2::PlansController < Api::ApiController
 
   def logs
     if request.post?
-      @run = Run.first(external_id: params[:id])
+      @run = Run.find_by(external_id: params[:id])
       # authorize! @run.plan, to: :upload?
 
       request.body.rewind
@@ -69,7 +69,7 @@ class Api::V2::PlansController < Api::ApiController
   end
 
   def json_output_redacted
-    @plan = Plan.first(external_id: params[:id])
+    @plan = Plan.find_by(external_id: params[:id])
     authorize! @plan, to: :show?
 
     if @plan.plan_json_file.attached?
@@ -80,10 +80,9 @@ class Api::V2::PlansController < Api::ApiController
   end
 
   def update
-    @plan = Plan.first(external_id: params[:id])
+    @plan = Plan.find_by(external_id: params[:id])
     authorize! @plan
 
-    puts params
     @plan.has_changes = params[:has_changes]
     @plan.resource_additions = params[:resource_additions]
     @plan.resource_changes = params[:resource_changes]

@@ -1,9 +1,5 @@
-class TaskStageSerializer
-  include JSONAPI::Serializer
-  set_key_transform :dash
-
+class TaskStageSerializer < ApplicationSerializer
   set_type "task-stages"
-  set_id :external_id
 
   attribute :status
   attribute :stage

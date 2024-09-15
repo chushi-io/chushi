@@ -1,7 +1,5 @@
-class OrganizationSerializer
-  include JSONAPI::Serializer
+class OrganizationSerializer < ApplicationSerializer
 
-  set_key_transform :dash
   set_type :organizations
   set_id :name
 

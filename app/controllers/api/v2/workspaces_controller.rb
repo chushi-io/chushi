@@ -30,7 +30,6 @@ class Api::V2::WorkspacesController < Api::ApiController
     authorize! @workspace
     #
     patch_params=jsonapi_deserialize(params)
-    puts patch_params
     if patch_params.key?("vcs-repo")
       if patch_params["vcs-repo"] == nil
         @workspace.vcs_repo_branch = nil
@@ -42,7 +41,6 @@ class Api::V2::WorkspacesController < Api::ApiController
     # @workspace.update!(jsonapi_deserialize(params))
     # end
     if patch_params.key?("auto-apply")
-      puts patch_params["auto-apply"]
       @workspace.auto_apply = patch_params["auto-apply"]
     end
     if patch_params.key?("file-triggers-enabled")
@@ -90,7 +88,6 @@ class Api::V2::WorkspacesController < Api::ApiController
     if request.get?
       # Simply get the workspace tags
     else
-      puts tag_params
       if request.post?
 
       elsif request.delete?

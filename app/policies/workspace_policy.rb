@@ -32,13 +32,14 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def create_configuration_version?
-    (agent.present? && agent.id == record.agent_id) ||
-      (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id))
+      (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id)) ||
+        (organization.present? && record.organization_id == organization.id)
   end
 
   def create_run?
     (agent.present? && agent.id == record.agent_id) ||
-      (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id))
+      (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id)) ||
+      (organization.present? && organization.id == record.organization_id)
   end
 
   def state_versions?

@@ -1,12 +1,7 @@
-class PlanSerializer
+class PlanSerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
-  include JSONAPI::Serializer
-
   set_type :plans
-  set_id :external_id
-  set_key_transform :dash
-  attributes
 
   attribute :execution_details do |object|
     {
@@ -21,7 +16,7 @@ class PlanSerializer
   attribute :resource_imports
   attribute :status
   attribute :log_read_url do |object|
-    logs_api_v1_plan_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    logs_api_v2_plan_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
   end
 
 end

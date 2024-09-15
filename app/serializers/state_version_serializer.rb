@@ -1,11 +1,7 @@
-class StateVersionSerializer
+class StateVersionSerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
-  include JSONAPI::Serializer
-  set_key_transform :dash
-
   set_type :state_versions
-  set_id :external_id
 
   attribute :created_at
   attribute :size
