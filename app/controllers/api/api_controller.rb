@@ -30,12 +30,10 @@ class Api::ApiController < ActionController::API
     @access_token = AccessToken.find_by_token(token)
 
     if @access_token.nil?
-      puts "Access Token is nil"
       render json: nil,  status: :forbidden and return
     end
 
     if @access_token.expires_at.present? && @access_token.expires_at.after?(Time.now)
-      puts "Access token is expired"
       render json: nil, status: :forbidden
     end
   end

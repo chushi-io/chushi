@@ -1,4 +1,4 @@
-class Api::V1::ConfigurationVersionsController < Api::ApiController
+class Api::V2::ConfigurationVersionsController < Api::ApiController
   include ActiveStorage::SetCurrent
   skip_before_action :verify_access_token, :only => [:upload]
   skip_verify_authorized only: :upload

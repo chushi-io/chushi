@@ -1,4 +1,4 @@
-class Api::V1::VariablesController < Api::ApiController
+class Api::V2::VariablesController < Api::ApiController
   skip_verify_authorized
 
   def index

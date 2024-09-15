@@ -1,11 +1,11 @@
 class Workspace < ApplicationRecord
   acts_as_taggable_on :tags
   belongs_to :organization
-  belongs_to :vcs_connection
+  belongs_to :vcs_connection, optional: true
   has_many :runs
   has_many :configuration_versions
   has_many :state_versions
 
   has_many :variables
-  before_create -> { generate_id("workspace") }
+  before_create -> { generate_id("ws") }
 end

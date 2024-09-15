@@ -56,10 +56,11 @@ Rails.application.routes.draw do
 
   # API Routes
   namespace :api, defaults: {format: :json} do
-    namespace :v1 do
+    namespace :v2 do
       post :webhooks, action: :create, :controller => "webhooks"
       get :ping, action: :ping, :controller => "ping"
       scope "/organizations/:organization_id", as: :organization do
+        get "", action: :show, :controller => "organizations"
         get "entitlement-set", action: :entitlements, :controller => "organizations"
         get "workspaces", action: :index, :controller => "workspaces"
         get "workspaces/:id", action: :show, :controller => "workspaces"

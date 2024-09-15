@@ -1,4 +1,4 @@
-class Api::V1::AppliesController < Api::ApiController
+class Api::V2::AppliesController < Api::ApiController
   skip_before_action :verify_access_token, :only => [:logs]
   skip_verify_authorized only: :logs
 

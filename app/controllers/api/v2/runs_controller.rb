@@ -1,4 +1,4 @@
-class Api::V1::RunsController < Api::ApiController
+class Api::V2::RunsController < Api::ApiController
   before_action :load_run, :except => [:create]
   def create
     run_params=jsonapi_deserialize(params, only: [
