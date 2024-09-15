@@ -68,18 +68,23 @@ Rails.application.routes.draw do
         match "tags", via: [:get, :post, :delete], :controller => "organizations"
       end
 
-      get "state-versions/:id", action: :get_state_version, :controller => "workspaces"
-      match "state-versions/:id/state", via: [:get, :put], action: :state_version_state, :controller => "workspaces", :as => :state_version_state
-      match "state-versions/:id/state-json", via: [:get, :put], action: :state_version_state_json, :controller => "workspaces", :as => :state_version_state_json
+      get "state-versions/:id", action: :show, :controller => "state_versions"
+      get "state-versions/:id/state", action: :state, :controller => "state_versions"
+      put "state-versions/:id/state", action: :upload_state, :controller => "state_versions"
+      get "state-versions/:id/state-json", action: :state_json, :controller => "state_versions"
+      put "state-versions/:id/state-json", action: :upload_state_json, :controller => "state_versions"
 
       resources :workspaces, :except => [:index] do
         member do
           post "actions/lock", action: :lock, :controller => "workspaces"
           post "actions/unlock", action: :unlock, :controller => "workspaces"
           post "actions/force-unlock", action: :force_unlock, :controller => "workspaces"
-          match "state-versions", via: [:get, :post], action: :state_versions, :controller => "workspaces"
 
-          get "current-state-version", action: :current_state_version, :controller => "workspaces"
+
+          get "state-versions", action: :index, :controller => "state_versions"
+          post "state-versions", action: :create, :controller => "state_versions"
+          get "current-state-version", action: :current, :controller => "state_versions"
+
           match "relationships/tags", via: [:get, :post, :delete], action: :tags, :controller => :workspaces
           get :runs
           post :configuration_versions, action: :create, :controller => "configuration_versions", path: "configuration-versions"

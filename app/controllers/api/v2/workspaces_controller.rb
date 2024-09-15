@@ -1,7 +1,5 @@
 class Api::V2::WorkspacesController < Api::ApiController
-  before_action :load_workspace, :except => [:index, :state_version_state, :state_version_state_json, :get_state_version]
-  skip_before_action :verify_access_token, :only => [:state_version_state, :state_version_state_json]
-  skip_verify_authorized :only => [:state_version_state, :state_version_state_json]
+  before_action :load_workspace
 
   def index
     @org = Organization.find_by(name: params[:organization_id])
@@ -81,42 +79,6 @@ class Api::V2::WorkspacesController < Api::ApiController
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
 
-  def state_versions
-    if request.get?
-      authorize! @workspace, to: :show?
-      versions = @workspace.state_versions
-      render json: ::StateVersionSerializer.new(versions, {}).serializable_hash
-    else
-      authorize! @workspace, to: :state_version_state?
-      puts params
-      version_params = jsonapi_deserialize(params, only: [
-        # :force,
-        # "json_state_outputs",
-        # :lineage,
-        # :md5,
-        :serial,
-        :run
-      ])
-      @version = @workspace.state_versions.create!(version_params)
-      if @version
-        render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
-      else
-        puts @version.errors.full_messages
-        head :bad_request
-      end
-    end
-  end
-
-  def current_state_version
-    authorize! @workspace, to: :show?
-    version = StateVersion.find(@workspace.current_state_version_id)
-    if version
-      render json: ::StateVersionSerializer.new(version, {}).serializable_hash
-    else
-      head :not_found
-    end
-  end
-
   def runs
 
   end
@@ -134,53 +96,6 @@ class Api::V2::WorkspacesController < Api::ApiController
       elsif request.delete?
 
       end
-    end
-  end
-
-  def get_state_version
-    @version = StateVersion.find_by(external_id: params[:id])
-    authorize! @version.workspace, to: :show?
-
-    render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
-  end
-
-  def state_version_state
-    # @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
-    # authorize! @workspace, to: :show?
-    @version = StateVersion.find_by(external_id: params[:id])
-
-    if request.get?
-      head :no_content and return unless @version.state_file.attached?
-
-      render plain: @version.state_file.download, layout: false, content_type: 'text/plain'
-    else
-      puts "Authorizing"
-      # authorize! @version.workspace, to: :state_version_state?
-      puts "Uploading file"
-      request.body.rewind
-      @version.state_file.attach(io: request.body, filename: "state")
-      puts "Updating workspace with new state version"
-      @version.workspace.update(current_state_version_id: @version.id)
-      render plain: nil, status: :created
-
-
-
-    end
-  end
-
-  def state_version_state_json
-    # @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
-    # authorize! @workspace, to: :show?
-    @version = StateVersion.find_by(external_id: params[:id])
-
-    if request.get?
-      head :no_content and return unless @version.json_state_file.attached?
-
-      render plain: @version.json_state_file.download, layout: false, content_type: 'text/plain'
-    else
-      request.body.rewind
-      @version.json_state_file.attach(io: request.body, filename: "json_state")
-      head :ok
     end
   end
 
