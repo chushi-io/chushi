@@ -13,7 +13,6 @@ class GenerateConfigurationVersionJob
     @workspace = @run.workspace
 
     if @run.configuration_version.nil?
-      puts "Configuration version nil, preseeding"
       version = @workspace.configuration_versions.new(
         source: @workspace.vcs_repo_identifier,
         speculative: false,
@@ -22,7 +21,6 @@ class GenerateConfigurationVersionJob
       )
       version.organization = @workspace.organization
       version.save!
-      puts version.id
       @run.configuration_version = version
       @run.save!
     end

@@ -24,7 +24,6 @@ class Api::V2::PlansController < Api::ApiController
     @run = Run.find_by(external_id: params[:id])
     authorize! @run.plan, to: :upload?
 
-    puts request.body
     request.body.rewind
     @run.plan.plan_json_file.attach(io: request.body, filename: "plan")
     head :ok

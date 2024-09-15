@@ -548,6 +548,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.datetime "locked_at", precision: nil
     t.string "lock_id"
     t.string "vcs_repo_branch"
+    t.boolean "queue_all_runs"
     t.index ["agent_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["external_id"], name: "index_workspaces_on_external_id", unique: true

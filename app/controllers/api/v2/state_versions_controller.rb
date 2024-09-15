@@ -1,6 +1,7 @@
 class Api::V2::StateVersionsController < Api::ApiController
   before_action :load_workspace, :except => [:show, :state, :state_json, :upload_state, :upload_state_json]
-  skip_verify_authorized :only => [:state_version_state, :state_version_state_json, :current]
+  skip_verify_authorized :only => [:upload_state, :upload_state_json, :state, :state_json]
+  skip_before_action :verify_access_token, :only => [:upload_state, :upload_state_json]
 
   def index
     authorize! @workspace, to: :show?
@@ -27,7 +28,6 @@ class Api::V2::StateVersionsController < Api::ApiController
   end
 
   def current
-    puts @workspace.to_json
     authorize! @workspace, to: :show?
     version = StateVersion.find(@workspace.current_state_version_id)
     if version

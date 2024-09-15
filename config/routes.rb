@@ -61,18 +61,25 @@ Rails.application.routes.draw do
       get :ping, action: :ping, :controller => "ping"
       scope "/organizations/:organization_id", as: :organization do
         get "", action: :show, :controller => "organizations"
+        patch "", action: :update, :controller => "organizations"
         get "entitlement-set", action: :entitlements, :controller => "organizations"
         get "workspaces", action: :index, :controller => "workspaces"
         get "workspaces/:id", action: :show, :controller => "workspaces"
         get "runs/queue", action: :queue, :controller => "organizations"
         match "tags", via: [:get, :post, :delete], :controller => "organizations"
+
+        get "agent-pools", action: :index, :controller => "agents"
+        post "agent-pools", action: :create, :controller => "agents"
+
+        get "tasks", action: :index, :controller => "run_tasks"
+        post "tasks", action: :create, :controller => "run_tasks"
       end
 
       get "state-versions/:id", action: :show, :controller => "state_versions"
-      get "state-versions/:id/state", action: :state, :controller => "state_versions"
-      put "state-versions/:id/state", action: :upload_state, :controller => "state_versions"
-      get "state-versions/:id/state-json", action: :state_json, :controller => "state_versions"
-      put "state-versions/:id/state-json", action: :upload_state_json, :controller => "state_versions"
+      get "state-versions/:id/state", action: :state, :controller => "state_versions", as: :get_state
+      put "state-versions/:id/state", action: :upload_state, :controller => "state_versions", as: :upload_state
+      get "state-versions/:id/state-json", action: :state_json, :controller => "state_versions", as: :get_state_json
+      put "state-versions/:id/state-json", action: :upload_state_json, :controller => "state_versions", as: :upload_state_json
 
       resources :workspaces, :except => [:index] do
         member do
@@ -123,7 +130,10 @@ Rails.application.routes.draw do
           get "run-events", action: :events, :controller => :runs
         end
       end
-      resources :agents
+      # resources :agents
+      resources :agents, path: "agent-pools", :except => [:index, :create]
+      resources :run_tasks, path: "tasks", :except => [:index, :create]
+
       resources :configuration_versions, :except => [:create], path: "configuration-versions" do
         member do
           put "upload", action: :upload, :controller => "configuration_versions"

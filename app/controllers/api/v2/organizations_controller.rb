@@ -50,6 +50,16 @@ class Api::V2::OrganizationsController < Api::ApiController
     render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
   end
 
+  def update
+    @organization = Organization.
+      where(name: params[:organization_id]).
+      first!
+    authorize! @organization
+    puts org_params
+    @organization.update!(org_params)
+    render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+  end
+
   def queue
     authorize!
     @runs = Run.for_agent(current_agent.id).where(status: %w[plan_queued apply_queued])
@@ -71,5 +81,12 @@ class Api::V2::OrganizationsController < Api::ApiController
 
       end
     end
+  end
+
+  def org_params
+    map_params([
+      :name,
+      "default-execution-mode"
+    ])
   end
 end

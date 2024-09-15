@@ -4,6 +4,7 @@ class CreateAgents < ActiveRecord::Migration[7.1]
       t.string :external_id, index: { unique: true }
       t.references :organization, foreign_key: true, type: :uuid
 
+      t.bool :organization_scoped, default: false
       t.string :status
       t.string :name
 

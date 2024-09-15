@@ -123,4 +123,8 @@ class Api::ApiController < ActionController::API
     end
     true
   end
+
+  def map_params(attributes)
+    jsonapi_deserialize(params, only: attributes).transform_keys{ |key| key.gsub("-", "_")}
+  end
 end

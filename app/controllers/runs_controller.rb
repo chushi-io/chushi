@@ -20,7 +20,6 @@ class RunsController < AuthenticatedController
       flash[:info] = "Run created"
       redirect_to @workspace
     rescue => exception
-      puts exception
       flash[:error] = @run.errors.full_messages
       render "new"
     end

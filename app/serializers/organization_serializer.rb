@@ -5,6 +5,8 @@ class OrganizationSerializer < ApplicationSerializer
 
   attribute :external_id
   attribute :created_at
-  attribute :email do |o| "" end
+  attribute :email
+  attribute :collaborator_auth_policy do |o| "password" end
+  attribute :default_execution_mode
 
 end
