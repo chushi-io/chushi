@@ -6,6 +6,7 @@ class CreateWorkspaces < ActiveRecord::Migration[7.1]
       t.boolean :auto_apply
 
       t.boolean :auto_apply_run_trigger
+      t.boolean :queue_all_runs
       t.timestamp :auto_destroy_at
 
       t.string :description

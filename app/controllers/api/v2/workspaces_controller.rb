@@ -1,10 +1,10 @@
-class Api::V1::WorkspacesController < Api::ApiController
-  before_action :load_workspace, :except => [:index]
+class Api::V2::WorkspacesController < Api::ApiController
+  before_action :load_workspace, :except => [:index, :state_version_state, :state_version_state_json, :get_state_version]
   skip_before_action :verify_access_token, :only => [:state_version_state, :state_version_state_json]
   skip_verify_authorized :only => [:state_version_state, :state_version_state_json]
 
   def index
-    @org = Organization.find(params[:organization_id])
+    @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :list_workspaces?
 
     @workspaces = @org.workspaces
@@ -18,13 +18,44 @@ class Api::V1::WorkspacesController < Api::ApiController
 
   def lock
     authorize! @workspace
-
-    if @workspace.locked
-      head :bad_request
-    end
+    head :conflict and return if @workspace.locked
     @workspace.update(locked: true)
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
+  end
 
+  def create
+
+  end
+
+  def update
+    # JSONAPI::De
+    authorize! @workspace
+    #
+    patch_params=jsonapi_deserialize(params)
+    puts patch_params
+    if patch_params.key?("vcs-repo")
+      if patch_params["vcs-repo"] == nil
+        @workspace.vcs_repo_branch = nil
+        @workspace.vcs_repo_branch = nil
+      else
+        # Set the VCS repo configuration
+      end
+    end
+    # @workspace.update!(jsonapi_deserialize(params))
+    # end
+    if patch_params.key?("auto-apply")
+      puts patch_params["auto-apply"]
+      @workspace.auto_apply = patch_params["auto-apply"]
+    end
+    if patch_params.key?("file-triggers-enabled")
+      @workspace.file_triggers_enabled = patch_params["file-triggers-enabled"]
+    end
+    if patch_params.key?("queue-all-runs").present?
+      @workspace.queue_all_runs = patch_params["queue-all-runs"]
+    end
+
+    @workspace.save!
+    render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
 
   def unlock
@@ -56,7 +87,7 @@ class Api::V1::WorkspacesController < Api::ApiController
       versions = @workspace.state_versions
       render json: ::StateVersionSerializer.new(versions, {}).serializable_hash
     else
-      authorize! @workspace
+      authorize! @workspace, to: :state_version_state?
       puts params
       version_params = jsonapi_deserialize(params, only: [
         # :force,
@@ -66,7 +97,6 @@ class Api::V1::WorkspacesController < Api::ApiController
         :serial,
         :run
       ])
-      puts version_params
       @version = @workspace.state_versions.create!(version_params)
       if @version
         render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
@@ -108,7 +138,7 @@ class Api::V1::WorkspacesController < Api::ApiController
   end
 
   def get_state_version
-    @version = StateVersion.find(external_id: params[:id])
+    @version = StateVersion.find_by(external_id: params[:id])
     authorize! @version.workspace, to: :show?
 
     render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
@@ -117,24 +147,31 @@ class Api::V1::WorkspacesController < Api::ApiController
   def state_version_state
     # @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
     # authorize! @workspace, to: :show?
-    @version = StateVersion.find(external_id: params[:id])
+    @version = StateVersion.find_by(external_id: params[:id])
 
     if request.get?
       head :no_content and return unless @version.state_file.attached?
 
       render plain: @version.state_file.download, layout: false, content_type: 'text/plain'
     else
+      puts "Authorizing"
+      # authorize! @version.workspace, to: :state_version_state?
+      puts "Uploading file"
       request.body.rewind
       @version.state_file.attach(io: request.body, filename: "state")
+      puts "Updating workspace with new state version"
       @version.workspace.update(current_state_version_id: @version.id)
-      head :ok
+      render plain: nil, status: :created
+
+
+
     end
   end
 
   def state_version_state_json
     # @workspace = Workspace.where(id: params[:id]).or(Workspace.where(name: params[:id])).first
     # authorize! @workspace, to: :show?
-    @version = StateVersion.find(external_id: params[:id])
+    @version = StateVersion.find_by(external_id: params[:id])
 
     if request.get?
       head :no_content and return unless @version.json_state_file.attached?
@@ -161,6 +198,6 @@ class Api::V1::WorkspacesController < Api::ApiController
   private
   def load_workspace
     @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
-    render(status: 404) unless @workspace
+    raise ActiveRecord::RecordNotFound unless @workspace
   end
 end

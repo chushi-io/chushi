@@ -7,6 +7,10 @@ class WorkspacePolicy < ApplicationPolicy
     can_access_workspace
   end
 
+  def update?
+    can_access_workspace
+  end
+
   def unlock?
     can_access_workspace
   end
@@ -28,10 +32,6 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def create_configuration_version?
-    puts agent
-    puts user
-    puts organization
-    puts run
     (agent.present? && agent.id == record.agent_id) ||
       (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id))
   end

@@ -1,4 +1,4 @@
-class Api::V1::OrganizationsController < Api::ApiController
+class Api::V2::OrganizationsController < Api::ApiController
   def entitlements
     authorize!
     render json: {
@@ -40,6 +40,14 @@ class Api::V1::OrganizationsController < Api::ApiController
       }
     }
 
+  end
+
+  def show
+    @organization = Organization.
+      where(name: params[:organization_id]).
+      first!
+    authorize! @organization
+    render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
   end
 
   def queue

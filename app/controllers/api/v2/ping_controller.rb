@@ -1,4 +1,4 @@
-class Api::V1::PingController < ActionController::API
+class Api::V2::PingController < ActionController::API
   # skip_before_action :verify_access_token
 
   def ping

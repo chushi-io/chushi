@@ -5,6 +5,10 @@ class WorkspaceSerializer
   set_type :workspaces
   set_id :external_id
 
+  belongs_to :organization, serializer: ::OrganizationSerializer, id_method_name: :name do |workspace|
+    workspace.organization
+  end
+
   attribute :permissions do |o|
     {
       "can-queue-run": true,
@@ -12,6 +16,8 @@ class WorkspaceSerializer
       "can-queue-destroy": true,
     }
   end
+
+  attribute :queue_all_runs
 
   attribute :allow_destroy_plan
   attribute :auto_apply
@@ -36,7 +42,9 @@ class WorkspaceSerializer
     object.tofu_version
   end
   attribute :trigger_prefixes
-  attribute :vcs_repo do |o|
+  attribute :vcs_repo, if: Proc.new { |record|
+    record.vcs_repo_branch.present? || record.vcs_repo_identifier.present?
+  } do |o|
     {
       "branch": o.vcs_repo_branch,
       "identifier": o.vcs_repo_identifier
