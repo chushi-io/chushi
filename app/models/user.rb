@@ -4,8 +4,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  has_many :organization_users
-  has_many :organizations, through: :organization_users
+  has_many :organizations, through: :organization_memberships
   has_many :access_tokens, as: :token_authable
+  has_many :teams, through: :team_memberships
   before_create -> { generate_id("user") }
 end

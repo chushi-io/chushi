@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_16_022016) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_17_004659) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -157,6 +157,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_16_022016) do
     t.uuid "access_grant_id", null: false
     t.string "nonce", null: false
     t.index ["access_grant_id"], name: "index_oauth_openid_requests_on_access_grant_id"
+  end
+
+  create_table "organization_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "organization_id"
+    t.uuid "user_id"
+    t.string "email"
+    t.string "external_id"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_organization_memberships_on_external_id", unique: true
+    t.index ["organization_id", "email"], name: "index_organization_memberships_on_organization_id_and_email", unique: true
+    t.index ["organization_id", "user_id"], name: "index_organization_memberships_on_organization_id_and_user_id", unique: true
+    t.index ["organization_id"], name: "index_organization_memberships_on_organization_id"
+    t.index ["user_id"], name: "index_organization_memberships_on_user_id"
   end
 
   create_table "organization_users", force: :cascade do |t|
@@ -624,6 +639,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_16_022016) do
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_openid_requests", "oauth_access_grants", column: "access_grant_id", on_delete: :cascade
+  add_foreign_key "organization_memberships", "organizations"
+  add_foreign_key "organization_memberships", "users"
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
   add_foreign_key "organizations", "agents"

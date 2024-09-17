@@ -38,7 +38,12 @@ class OrganizationPolicy < ApplicationPolicy
   def list_team_projects?
     read_organization?
   end
+
   def list_variable_sets?
+    read_organization?
+  end
+
+  def list_memberships?
     read_organization?
   end
 
@@ -63,6 +68,10 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   def create_team_projects?
+    write_organization?
+  end
+
+  def create_memberships?
     write_organization?
   end
 

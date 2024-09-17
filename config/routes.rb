@@ -82,6 +82,9 @@ Rails.application.routes.draw do
 
         get "varsets", action: :index, :controller => :variable_sets
         post "varsets", action: :create, :controller => :variable_sets
+
+        post "organization-memberships", action: :create, :controller => :organization_memberships
+        get "organization-memberships", action: :index, :controller => :organization_memberships
       end
 
       get "state-versions/:id", action: :show, :controller => "state_versions"
@@ -177,8 +180,9 @@ Rails.application.routes.draw do
           get "download", action: :download, :controller => "configuration_versions"
         end
       end
-    end
 
+      resources :organization_memberships, :except => [:create, :index], path: "organization-memberships"
+    end
   end
 
   # Agents routes

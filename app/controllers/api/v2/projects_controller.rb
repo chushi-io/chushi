@@ -1,10 +1,10 @@
 class Api::V2::ProjectsController < Api::ApiController
   def index
-    @org = Organization.find_by(external_id: params[:organization_id])
+    @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :list_projects?
 
     @projects = @org.projects
-    render ::ProjectSerializer.new(@projects, {}).serializable_hash
+    render json: ::ProjectSerializer.new(@projects, {}).serializable_hash
   end
 
   def create
