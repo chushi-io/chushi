@@ -1,4 +1,4 @@
-class RunTaskPolicy < ApplicationPolicy
+class TeamProjectPolicy < ApplicationPolicy
   def show?
     (organization.present? && organization.id == record.organization_id)
   end

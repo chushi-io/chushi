@@ -27,11 +27,42 @@ class OrganizationPolicy < ApplicationPolicy
     read_organization?
   end
 
+  def list_projects?
+    read_organization?
+  end
+
+  def list_teams?
+    read_organization?
+  end
+
+  def list_team_projects?
+    read_organization?
+  end
+  def list_variable_sets?
+    read_organization?
+  end
+
   def create_agent_pools?
     write_organization?
   end
 
   def create_run_tasks?
+    write_organization?
+  end
+
+  def create_projects?
+    write_organization?
+  end
+
+  def create_teams?
+    write_organization?
+  end
+
+  def create_variable_sets?
+    write_organization?
+  end
+
+  def create_team_projects?
     write_organization?
   end
 

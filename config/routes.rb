@@ -73,6 +73,15 @@ Rails.application.routes.draw do
 
         get "tasks", action: :index, :controller => "run_tasks"
         post "tasks", action: :create, :controller => "run_tasks"
+
+        get "projects", action: :index, :controller => :projects
+        post "projects", action: :create, :controller => :projects
+
+        get "teams", action: :index, :controller => :teams
+        post "teams", action: :create, :controller => :teams
+
+        get "varsets", action: :index, :controller => :variable_sets
+        post "varsets", action: :create, :controller => :variable_sets
       end
 
       get "state-versions/:id", action: :show, :controller => "state_versions"
@@ -100,7 +109,7 @@ Rails.application.routes.draw do
       end
 
       scope "workspaces/:workspace_id" do
-        resources :vars, :controller => "variables", as: :workspace
+        resources :vars, path: "relationships/vars", :controller => :variables, :except => [:show]
       end
 
       resources :plans do
@@ -114,6 +123,8 @@ Rails.application.routes.draw do
           get "json-output-redacted", action: :json_output_redacted
         end
       end
+
+      resources :vars, :controller => :variables, :except => [:show]
       resources :applies do
         member do
           get "logs", action: :logs
@@ -133,6 +144,32 @@ Rails.application.routes.draw do
       # resources :agents
       resources :agents, path: "agent-pools", :except => [:index, :create]
       resources :run_tasks, path: "tasks", :except => [:index, :create]
+      resources :projects, :except => [:index, :create]
+      resources :teams, :except => [:index, :create] do
+        member do
+          post "relationships/users", action: :add_users
+          delete "relationships/users", action: :remove_users
+          post "relationships/organization-memberships", action: :add_org_memberships
+          delete "relationships/organization-memberships", action: :remove_org_memberships
+        end
+      end
+
+      resources :team_projects, path: "team-projects"
+
+      resources :varsets, :except => [:index, :create], :controller => :variable_sets do
+        member do
+          get "relationships/vars", action: :list_variables
+          post "relationships/vars", action: :add_variable
+          patch "relationships/vars/:variable_id", action: :update_variable
+          delete "relationships/vars/:variable_id", action: :delete_variable
+
+          post "relationships/workspaces", action: :add_workspaces
+          delete "relationships/workspaces", action: :delete_workspaces
+
+          post "relationships/projects", action: :add_projects
+          delete "relationships/projects", action: :delete_projects
+        end
+      end
 
       resources :configuration_versions, :except => [:create], path: "configuration-versions" do
         member do

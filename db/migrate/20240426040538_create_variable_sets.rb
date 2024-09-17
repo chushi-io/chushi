@@ -7,7 +7,8 @@ class CreateVariableSets < ActiveRecord::Migration[7.1]
       t.string :name
       t.string :description
       t.boolean :auto_attach
-      t.integer :priority
+      t.boolean :global
+      t.boolean :priority
       t.timestamps
     end
   end

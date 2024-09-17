@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_16_022016) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.string "api_secret"
     t.datetime "last_ping_at", precision: nil
     t.string "ip_address"
+    t.boolean "organization_scoped", default: false
     t.index ["api_key"], name: "index_agents_on_api_key", unique: true
     t.index ["external_id"], name: "index_agents_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_agents_on_organization_id_and_name", unique: true
@@ -178,6 +179,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.datetime "updated_at", null: false
     t.string "external_id"
     t.uuid "agent_id"
+    t.string "email", limit: 255
+    t.string "default_execution_mode", limit: 255
     t.index ["agent_id"], name: "index_organizations_on_agent_id"
     t.index ["external_id"], name: "index_organizations_on_external_id", unique: true
     t.index ["name"], name: "index_organizations_on_name", unique: true
@@ -234,6 +237,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.index ["external_id"], name: "index_policy_sets_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_policy_sets_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_policy_sets_on_organization_id"
+  end
+
+  create_table "projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.string "name"
+    t.string "description"
+    t.integer "team_count"
+    t.integer "workspace_count"
+    t.string "auto_destroy_activity_duration"
+    t.uuid "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_projects_on_external_id", unique: true
+    t.index ["organization_id", "name"], name: "index_projects_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_projects_on_organization_id"
   end
 
   create_table "provider_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -418,6 +436,45 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.index ["run_task_id"], name: "index_task_stages_on_run_task_id"
   end
 
+  create_table "team_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "organization_id"
+    t.uuid "project_id"
+    t.uuid "team_id"
+    t.string "external_id"
+    t.string "access", default: "read"
+    t.string "project_settings", default: "null"
+    t.string "project_teams", default: "null"
+    t.string "workspace_create", default: "null"
+    t.string "workspace_move", default: "null"
+    t.string "workspace_locking", default: "null"
+    t.string "workspace_delete", default: "null"
+    t.string "workspace_runs", default: "null"
+    t.string "workspace_variables", default: "null"
+    t.string "workspace_state_versions", default: "null"
+    t.string "workspace_run_tasks", default: "null"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_team_projects_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_team_projects_on_organization_id"
+    t.index ["project_id"], name: "index_team_projects_on_project_id"
+    t.index ["team_id"], name: "index_team_projects_on_team_id"
+  end
+
+  create_table "teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.string "name"
+    t.string "sso_team_id"
+    t.integer "users_count"
+    t.string "visibility"
+    t.boolean "allow_member_token_management"
+    t.uuid "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_teams_on_external_id", unique: true
+    t.index ["organization_id", "name"], name: "index_teams_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_teams_on_organization_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -452,9 +509,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
     t.string "name"
     t.string "description"
     t.boolean "auto_attach"
-    t.integer "priority"
+    t.boolean "priority"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "global"
     t.index ["external_id"], name: "index_variable_sets_on_external_id", unique: true
     t.index ["organization_id"], name: "index_variable_sets_on_organization_id"
   end
@@ -573,6 +631,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   add_foreign_key "policies", "organizations"
   add_foreign_key "policies", "policy_sets"
   add_foreign_key "policy_sets", "organizations"
+  add_foreign_key "projects", "organizations"
   add_foreign_key "provider_versions", "providers"
   add_foreign_key "registry_module_versions", "registry_modules"
   add_foreign_key "run_tasks", "organizations"
@@ -590,6 +649,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_013309) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "task_stages", "run_tasks"
   add_foreign_key "task_stages", "runs"
+  add_foreign_key "team_projects", "organizations"
+  add_foreign_key "team_projects", "projects"
+  add_foreign_key "team_projects", "teams"
+  add_foreign_key "teams", "organizations"
   add_foreign_key "variable_sets", "organizations"
   add_foreign_key "variables", "organizations"
   add_foreign_key "variables", "variable_sets"

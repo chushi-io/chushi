@@ -15,6 +15,10 @@ class Organization < ApplicationRecord
   has_many :run_tasks
   has_many :policies
   has_many :policy_sets
+  has_many :projects
+  has_many :teams
+  has_many :team_projects
+  has_many :variable_sets
 
   has_many :registry_modules
   has_many :providers
