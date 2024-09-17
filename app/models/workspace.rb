@@ -7,5 +7,8 @@ class Workspace < ApplicationRecord
   has_many :state_versions
 
   has_many :variables
+
+  has_many :run_triggers
+
   before_create -> { generate_id("ws") }
 end

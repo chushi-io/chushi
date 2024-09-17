@@ -75,6 +75,10 @@ class OrganizationPolicy < ApplicationPolicy
     write_organization?
   end
 
+  def create_workspaces?
+    write_organization?
+  end
+
   def read_organization?
     (agent.present? && agent.organization_id == record.id) ||
       (user.present? && user.organizations.map{|org| org.id}.include?(record.id)) ||

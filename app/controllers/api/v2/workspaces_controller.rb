@@ -1,5 +1,5 @@
 class Api::V2::WorkspacesController < Api::ApiController
-  before_action :load_workspace
+  before_action :load_workspace, except: [:index, :create]
 
   def index
     @org = Organization.find_by(name: params[:organization_id])
@@ -22,7 +22,15 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def create
+    @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :create_workspaces?
 
+    @workspace = @org.workspaces.new(workspace_params)
+    if @workspace.save
+      render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
+    else
+      render json: @workspace.errors.full_messages, status: :bad_request
+    end
   end
 
   def update
@@ -111,5 +119,29 @@ class Api::V2::WorkspacesController < Api::ApiController
   def load_workspace
     @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
     raise ActiveRecord::RecordNotFound unless @workspace
+  end
+
+  def workspace_params
+    map_params([
+      :name,
+      "agent-pool-id",
+      "allow-destroy-plan",
+      "auto-apply",
+      "auto-apply-run-trigger",
+      "auto-destroy-at",
+      "auto-destroy-at-activity-duration",
+      "description",
+      "execution-mode",
+      "file-triggers-enabled",
+      "global-remote-state",
+      "queue-all-runs",
+      "source-name",
+      "source-url",
+      "speculative-enabled",
+      "terraform-version",
+      "trigger-patterns",
+      "trigger-prefixes",
+      "working-directory",
+               ])
   end
 end

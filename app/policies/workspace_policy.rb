@@ -27,6 +27,18 @@ class WorkspacePolicy < ApplicationPolicy
     can_access_workspace
   end
 
+  def list_run_triggers?
+    can_access_workspace
+  end
+
+  def create_run_triggers?
+    can_access_workspace
+  end
+
+  def attach_trigger?
+    can_access_workspace
+  end
+
   def tags?
     can_access_workspace
   end

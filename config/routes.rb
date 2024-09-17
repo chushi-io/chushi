@@ -85,6 +85,8 @@ Rails.application.routes.draw do
 
         post "organization-memberships", action: :create, :controller => :organization_memberships
         get "organization-memberships", action: :index, :controller => :organization_memberships
+
+        post :workspaces, action: :create, :controller => :workspaces
       end
 
       get "state-versions/:id", action: :show, :controller => "state_versions"
@@ -93,7 +95,7 @@ Rails.application.routes.draw do
       get "state-versions/:id/state-json", action: :state_json, :controller => "state_versions", as: :get_state_json
       put "state-versions/:id/state-json", action: :upload_state_json, :controller => "state_versions", as: :upload_state_json
 
-      resources :workspaces, :except => [:index] do
+      resources :workspaces, :except => [:index, :create] do
         member do
           post "actions/lock", action: :lock, :controller => "workspaces"
           post "actions/unlock", action: :unlock, :controller => "workspaces"
@@ -108,6 +110,8 @@ Rails.application.routes.draw do
           get :runs
           post :configuration_versions, action: :create, :controller => "configuration_versions", path: "configuration-versions"
 
+          get :run_triggers, action: :index, path: "run-triggers", :controller => :run_triggers
+          post :run_triggers, action: :create, path: "run-triggers", :controller => :run_triggers
         end
       end
 
@@ -182,6 +186,7 @@ Rails.application.routes.draw do
       end
 
       resources :organization_memberships, :except => [:create, :index], path: "organization-memberships"
+      resources :run_triggers, :except => [:create, :index, :update], path: "run-triggers"
     end
   end
 

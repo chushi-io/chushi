@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_17_004659) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_17_015342) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -333,6 +333,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_004659) do
     t.index ["organization_id"], name: "index_run_tasks_on_organization_id"
   end
 
+  create_table "run_triggers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "workspace_id"
+    t.uuid "sourceable_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_run_triggers_on_external_id", unique: true
+    t.index ["sourceable_id"], name: "index_run_triggers_on_sourceable_id"
+    t.index ["workspace_id", "sourceable_id"], name: "index_run_triggers_on_workspace_id_and_sourceable_id", unique: true
+    t.index ["workspace_id"], name: "index_run_triggers_on_workspace_id"
+  end
+
   create_table "runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.uuid "agent_id"
@@ -652,6 +664,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_004659) do
   add_foreign_key "provider_versions", "providers"
   add_foreign_key "registry_module_versions", "registry_modules"
   add_foreign_key "run_tasks", "organizations"
+  add_foreign_key "run_triggers", "workspaces"
+  add_foreign_key "run_triggers", "workspaces", column: "sourceable_id"
   add_foreign_key "runs", "agents"
   add_foreign_key "runs", "applies"
   add_foreign_key "runs", "configuration_versions"
