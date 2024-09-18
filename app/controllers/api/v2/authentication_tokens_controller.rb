@@ -1,5 +1,5 @@
 class Api::V2::AuthenticationTokensController < Api::ApiController
-  before_action :get_token, only: [:get_team_token, :get_agent_token, :show, :destroy_team_token, :destroy]
+  before_action :get_token, only: [:get_team_token, :show, :destroy_team_token, :destroy]
   def index
 
   end
@@ -54,7 +54,17 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
   end
 
   def destroy_team_token
+    @team = Team.find_by(external_id: params[:id])
+    unless @team
+      skip_verify_authorized!
+      head :not_found and return
+    end
 
+    authorize! @team, to: :create_access_token?
+    if @team.access_token.delete
+      head :accepted and return
+    end
+    render json: @team.access_token.errors.full_messages, status: :bad_request
   end
 
   def create_organization_token
@@ -74,7 +84,9 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     end
 
     if @token.save
-      render json: ::AuthenticationTokenSerializer.new(@token, {}).serializable_hash
+      render json: ::AuthenticationTokenSerializer.new(@token, {
+        params: { show_token: true }
+      }).serializable_hash
     else
       render json: @token.errors.full_messages, status: :bad_request
     end
@@ -95,28 +107,54 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     render json: ::AuthenticationTokenSerializer.new(@organization.access_token, {}).serializable_hash
   end
 
-  def get_agent_token
+  def get_agent_tokens
+    @agent = Agent.find_by(external_id: params[:id])
+    unless @organization
+      skip_verify_authorized!
+      head :not_found and return
+    end
 
+    authorize! @agent, to: :create_access_token?
+    render json: ::AuthenticationTokenSerializer.new(@agent.access_tokens, {}).serializable_hash
   end
 
   def create_agent_token
-
-  end
-  def show
-    @token = AccessToken.find_by(external_id: params[:token_id])
-    unless verify_token_access
-      head :bad_request and return
+    @agent = Agent.find_by(external_id: params[:id])
+    unless @agent
+      skip_verify_authorized!
+      head :not_found and return
     end
 
+    authorize! @agent, to: :create_access_token?
+    @token = @agent.access_tokens.create(token_params)
+    if @token
+      render json: ::AuthenticationTokenSerializer.new(@token, {
+        params: { show_token: true }
+      }).serializable_hash
+    else
+      head :bad_request
+    end
+  end
 
+  def show
+    @token = AccessToken.find_by(external_id: params[:token_id])
+    unless @token
+      skip_verify_authorized!
+      head :not_found and return
+    end
+
+    authorize! @token
+    render json: ::AuthenticationTokenSerializer.new(@token, {}).serializable_hash
   end
 
   def destroy
     @token = AccessToken.find_by(external_id: params[:token_id])
-    unless verify_token_access
-      head :bad_request and return
+    unless @token
+      skip_verify_authorized!
+      head :not_found and return
     end
 
+    authorize! @token
     if @token.delete
       head :accepted and return
     end
@@ -125,33 +163,11 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
   end
 
   private
-  def verify_token_access
-    case @token.token_authable_type
-    when "User"
-      # Require a user token for auth
-      # Ensure its the users token
-    when "Organization"
-      # Require authenticated entity be either
-      # - member of owner team
-      # - owners team token
-      # - organization token
-      # Ensure token is for the same organization
-    when "Agent"
-      # Simply require the entity have ability
-      # to manage the authentication scheme
-    when "Team"
-      # Verify entity has access to the team
-      # or is an organization admin
-    else
-      return false
-    end
-  end
-
   def get_token
     @token = AccessToken.find_by(external_id: params[:token_id])
   end
 
   def token_params
-    map_params(["expired-at"])
+    map_params(["expired-at", :description])
   end
 end

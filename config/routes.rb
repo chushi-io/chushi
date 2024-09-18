@@ -160,8 +160,8 @@ Rails.application.routes.draw do
       # resources :agents
       resources :agents, path: "agent-pools", :except => [:index, :create] do
         member do
-          get "authentication-token", action: :get_agent_token, :controller => :authentication_tokens
-          post "authentication-token", action: :create_agent_token, :controller => :authentication_tokens
+          get "authentication-tokens", action: :get_agent_tokens, :controller => :authentication_tokens
+          post "authentication-tokens", action: :create_agent_token, :controller => :authentication_tokens
         end
       end
       resources :run_tasks, path: "tasks", :except => [:index, :create]
