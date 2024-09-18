@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_17_185354) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_18_144341) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,9 +21,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_185354) do
     t.string "token_authable_type", null: false
     t.uuid "token_authable_id", null: false
     t.string "scopes"
-    t.datetime "expires_at", precision: nil
+    t.datetime "expired_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "description", limit: 255
+    t.datetime "last_used_at", precision: nil
     t.index ["token"], name: "index_access_tokens_on_token", unique: true
     t.index ["token_authable_type", "token_authable_id"], name: "index_access_tokens_on_token_authable"
   end
@@ -105,6 +107,36 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_185354) do
     t.index ["external_id"], name: "index_configuration_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_configuration_versions_on_organization_id"
     t.index ["workspace_id"], name: "index_configuration_versions_on_workspace_id"
+  end
+
+  create_table "notification_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "workspace_id"
+    t.string "destination_type"
+    t.boolean "enabled"
+    t.string "name"
+    t.string "token"
+    t.text "triggers", default: [], array: true
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_notification_configurations_on_external_id", unique: true
+    t.index ["workspace_id", "name"], name: "index_notification_configurations_on_workspace_id_and_name", unique: true
+    t.index ["workspace_id", "url"], name: "index_notification_configurations_on_workspace_id_and_url", unique: true
+    t.index ["workspace_id"], name: "index_notification_configurations_on_workspace_id"
+  end
+
+  create_table "notification_delivery_responses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "notification_configuration_id"
+    t.string "url"
+    t.text "body"
+    t.string "code"
+    t.json "headers"
+    t.datetime "sent_at", precision: nil
+    t.boolean "successful"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["notification_configuration_id"], name: "idx_on_notification_configuration_id_635bebe214"
   end
 
   create_table "oauth_access_grants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -391,7 +423,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_185354) do
     t.string "external_id"
     t.string "name"
     t.boolean "sensitive"
-    t.string "type"
+    t.string "output_type"
     t.text "value"
     t.uuid "state_version_id"
     t.uuid "organization_id"
@@ -680,6 +712,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_185354) do
   add_foreign_key "applies", "organizations"
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
+  add_foreign_key "notification_configurations", "workspaces"
+  add_foreign_key "notification_delivery_responses", "notification_configurations"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_openid_requests", "oauth_access_grants", column: "access_grant_id", on_delete: :cascade

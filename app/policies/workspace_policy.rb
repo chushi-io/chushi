@@ -47,6 +47,14 @@ class WorkspacePolicy < ApplicationPolicy
     (organization.present? && organization.id == record.organization_id)
   end
 
+  def list_notification_configurations?
+    can_access_workspace
+  end
+
+  def create_notification_configurations?
+    can_access_workspace
+  end
+
   def tags?
     can_access_workspace
   end

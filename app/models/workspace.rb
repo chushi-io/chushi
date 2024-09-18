@@ -5,6 +5,7 @@ class Workspace < ApplicationRecord
   has_many :runs
   has_many :configuration_versions
   has_many :state_versions
+  has_many :notification_configurations
 
   has_many :variables
 

@@ -121,6 +121,9 @@ Rails.application.routes.draw do
 
           get :run_triggers, action: :index, path: "run-triggers", :controller => :run_triggers
           post :run_triggers, action: :create, path: "run-triggers", :controller => :run_triggers
+
+          get :notification_configurations, action: :index, path: "notification-configurations", :controller => :notification_configurations
+          post :notification_configurations, action: :create, path: "notification-configurations", :controller => :notification_configurations
         end
       end
 
@@ -203,6 +206,11 @@ Rails.application.routes.draw do
       end
 
       resources :organization_memberships, :except => [:create, :index], path: "organization-memberships"
+      resources :notification_configurations, :except => [:create, :index], path: "notification-configurations" do
+        member do
+          post "verify", action: :verify, :controller => :notification_configurations
+        end
+      end
       resources :run_triggers, :except => [:create, :index, :update], path: "run-triggers"
       resources :ssh_keys, :except => [:create, :index], path: "ssh-keys"
       resources :workspace_teams, path: "team-workspaces"
