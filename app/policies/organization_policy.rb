@@ -47,6 +47,10 @@ class OrganizationPolicy < ApplicationPolicy
     read_organization?
   end
 
+  def list_ssh_keys?
+    read_organization?
+  end
+
   def create_agent_pools?
     write_organization?
   end
@@ -76,6 +80,14 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   def create_workspaces?
+    write_organization?
+  end
+
+  def create_ssh_keys?
+    write_organization?
+  end
+
+  def create_access_token?
     write_organization?
   end
 

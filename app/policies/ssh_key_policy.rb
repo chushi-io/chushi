@@ -1,4 +1,4 @@
-class TeamPolicy < ApplicationPolicy
+class SshKeyPolicy < ApplicationPolicy
   def show?
     (organization.present? && organization.id == record.organization_id)
   end
@@ -8,10 +8,6 @@ class TeamPolicy < ApplicationPolicy
   end
 
   def destroy?
-    (organization.present? && organization.id == record.organization_id)
-  end
-
-  def create_access_token?
     (organization.present? && organization.id == record.organization_id)
   end
 end

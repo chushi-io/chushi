@@ -39,6 +39,14 @@ class WorkspacePolicy < ApplicationPolicy
     can_access_workspace
   end
 
+  def attach_team?
+    (organization.present? && organization.id == record.organization_id)
+  end
+
+  def detach_team?
+    (organization.present? && organization.id == record.organization_id)
+  end
+
   def tags?
     can_access_workspace
   end

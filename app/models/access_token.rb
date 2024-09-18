@@ -6,4 +6,6 @@ class AccessToken < ApplicationRecord
   def generate_access_token
     self.token = SecureRandom::base58(48)
   end
+
+
 end

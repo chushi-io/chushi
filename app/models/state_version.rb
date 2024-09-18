@@ -5,5 +5,7 @@ class StateVersion < ApplicationRecord
   belongs_to :run, optional: true
   belongs_to :workspace
 
+  has_many :state_version_outputs
+
   before_create -> { generate_id("sv") }
 end

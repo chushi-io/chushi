@@ -27,13 +27,14 @@ class Api::ApiController < ActionController::API
 
   def verify_access_token
     token = request.headers['Authorization'].to_s.split(' ').last
+    puts token
     @access_token = AccessToken.find_by_token(token)
 
     if @access_token.nil?
       render json: nil,  status: :forbidden and return
     end
 
-    if @access_token.expires_at.present? && @access_token.expires_at.after?(Time.now)
+    if @access_token.expired_at.present? && @access_token.expired_at.after?(Time.now)
       render json: nil, status: :forbidden
     end
   end

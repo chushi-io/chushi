@@ -4,7 +4,7 @@ class CreateStateVersionOutputs < ActiveRecord::Migration[7.1]
       t.string :external_id, index: { unique: true }
       t.string :name
       t.boolean :sensitive
-      t.string :type
+      t.string :output_type
       t.text :value
 
       t.references :state_version, foreign_key: true, type: :uuid

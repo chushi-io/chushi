@@ -37,6 +37,12 @@ class Api::V2::StateVersionsController < Api::ApiController
     end
   end
 
+  def current_outputs
+    authorize! @workspace, to: :show?
+    @version = StateVersion.find(@workspace.current_state_version_id)
+    render json: ::StateVersionOutputSerializer.new(@version.state_version_outputs, {}).serializable_hash
+  end
+
   def show
     @version = StateVersion.find_by(external_id: params[:id])
     authorize! @version.workspace, to: :show?
@@ -45,8 +51,6 @@ class Api::V2::StateVersionsController < Api::ApiController
   end
 
   def state
-
-
     @version = StateVersion.find_by(external_id: params[:id])
     head :no_content and return unless @version.state_file.attached?
     render plain: @version.state_file.download, layout: false, content_type: 'text/plain'
@@ -63,6 +67,7 @@ class Api::V2::StateVersionsController < Api::ApiController
     request.body.rewind
     @version.state_file.attach(io: request.body, filename: "state")
     @version.workspace.update(current_state_version_id: @version.id)
+    ProcessStateVersionJob.perform_async(@version.id)
     render plain: nil, status: :created
   end
 

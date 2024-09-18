@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_17_015342) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_17_185354) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -375,6 +375,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_015342) do
     t.index ["workspace_id"], name: "index_runs_on_workspace_id"
   end
 
+  create_table "ssh_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "organization_id"
+    t.string "name"
+    t.text "private_key"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_ssh_keys_on_external_id", unique: true
+    t.index ["organization_id", "name"], name: "index_ssh_keys_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_ssh_keys_on_organization_id"
+  end
+
   create_table "state_version_outputs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.string "name"
@@ -598,6 +610,26 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_015342) do
     t.index ["state_version_id"], name: "index_workspace_resources_on_state_version_id"
   end
 
+  create_table "workspace_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "organization_id"
+    t.uuid "workspace_id"
+    t.uuid "team_id"
+    t.string "access", default: "null"
+    t.string "runs", default: "null"
+    t.string "variables", default: "null"
+    t.string "state_versions", default: "null"
+    t.boolean "workspace_locking", default: false
+    t.boolean "run_tasks", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_workspace_teams_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_workspace_teams_on_organization_id"
+    t.index ["team_id"], name: "index_workspace_teams_on_team_id"
+    t.index ["workspace_id", "team_id"], name: "index_workspace_teams_on_workspace_id_and_team_id", unique: true
+    t.index ["workspace_id"], name: "index_workspace_teams_on_workspace_id"
+  end
+
   create_table "workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.boolean "allow_destroy_plan"
@@ -672,6 +704,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_015342) do
   add_foreign_key "runs", "organizations"
   add_foreign_key "runs", "plans"
   add_foreign_key "runs", "workspaces"
+  add_foreign_key "ssh_keys", "organizations"
   add_foreign_key "state_version_outputs", "organizations"
   add_foreign_key "state_version_outputs", "state_versions"
   add_foreign_key "state_versions", "organizations"
@@ -691,6 +724,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_17_015342) do
   add_foreign_key "vcs_connections", "organizations"
   add_foreign_key "workspace_resources", "organizations"
   add_foreign_key "workspace_resources", "state_versions"
+  add_foreign_key "workspace_teams", "organizations"
+  add_foreign_key "workspace_teams", "teams"
+  add_foreign_key "workspace_teams", "workspaces"
   add_foreign_key "workspaces", "agents"
   add_foreign_key "workspaces", "organizations"
   add_foreign_key "workspaces", "state_versions", column: "current_state_version_id"

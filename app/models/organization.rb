@@ -6,7 +6,7 @@ class Organization < ApplicationRecord
 
   has_many :agents
   has_many :vcs_connections
-  has_many :access_tokens, as: :token_authable
+  has_one :access_token, as: :token_authable
   has_many :plans
   has_many :applies
   has_many :runs
@@ -17,6 +17,7 @@ class Organization < ApplicationRecord
   has_many :teams
   has_many :team_projects
   has_many :variable_sets
+  has_many :ssh_keys
 
   has_many :registry_modules
   has_many :providers

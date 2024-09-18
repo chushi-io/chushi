@@ -87,28 +87,37 @@ Rails.application.routes.draw do
         get "organization-memberships", action: :index, :controller => :organization_memberships
 
         post :workspaces, action: :create, :controller => :workspaces
-      end
 
-      get "state-versions/:id", action: :show, :controller => "state_versions"
-      get "state-versions/:id/state", action: :state, :controller => "state_versions", as: :get_state
-      put "state-versions/:id/state", action: :upload_state, :controller => "state_versions", as: :upload_state
-      get "state-versions/:id/state-json", action: :state_json, :controller => "state_versions", as: :get_state_json
-      put "state-versions/:id/state-json", action: :upload_state_json, :controller => "state_versions", as: :upload_state_json
+        get "ssh-keys", action: :index, :controller => :ssh_keys
+        post "ssh-keys", action: :create, :controller => :ssh_keys
+
+        get "team-tokens", action: :list_team_tokens, :controller => :authentication_tokens
+        post "authentication-token", action: :create_organization_token, :controller => :authentication_tokens
+        get "authentication-token", action: :get_organization_token, :controller => :authentication_tokens
+      end
+      get "authentication-tokens/:token_id", action: :show, :controller => :authentication_tokens
+      delete "authentication-tokens/:token_id", action: :destroy, :controller => :authentication_tokens
+      get "state-versions/:id", action: :show, :controller => :state_versions
+      get "state-versions/:id/state", action: :state, :controller => :state_versions, as: :get_state
+      put "state-versions/:id/state", action: :upload_state, :controller => :state_versions, as: :upload_state
+      get "state-versions/:id/state-json", action: :state_json, :controller => :state_versions, as: :get_state_json
+      put "state-versions/:id/state-json", action: :upload_state_json, :controller => :state_versions, as: :upload_state_json
+      get "state-version-outputs/:id", action: :show, :controller => :state_version_outputs
 
       resources :workspaces, :except => [:index, :create] do
         member do
-          post "actions/lock", action: :lock, :controller => "workspaces"
-          post "actions/unlock", action: :unlock, :controller => "workspaces"
-          post "actions/force-unlock", action: :force_unlock, :controller => "workspaces"
+          post "actions/lock", action: :lock, :controller => :workspaces
+          post "actions/unlock", action: :unlock, :controller => :workspaces
+          post "actions/force-unlock", action: :force_unlock, :controller => :workspaces
 
 
-          get "state-versions", action: :index, :controller => "state_versions"
-          post "state-versions", action: :create, :controller => "state_versions"
-          get "current-state-version", action: :current, :controller => "state_versions"
-
+          get "state-versions", action: :index, :controller => :state_versions
+          post "state-versions", action: :create, :controller => :state_versions
+          get "current-state-version", action: :current, :controller => :state_versions
+          get "current-state-version-outputs", action: :current_outputs, :controller => :state_versions
           match "relationships/tags", via: [:get, :post, :delete], action: :tags, :controller => :workspaces
           get :runs
-          post :configuration_versions, action: :create, :controller => "configuration_versions", path: "configuration-versions"
+          post :configuration_versions, action: :create, :controller => :configuration_versions, path: "configuration-versions"
 
           get :run_triggers, action: :index, path: "run-triggers", :controller => :run_triggers
           post :run_triggers, action: :create, path: "run-triggers", :controller => :run_triggers
@@ -121,8 +130,8 @@ Rails.application.routes.draw do
 
       resources :plans do
         member do
-          match "logs", via: [:get, :post], :controller => "plans"
-          get "logs", action: :logs, :controller => "plans"
+          match "logs", via: [:get, :post], :controller => :plans
+          get "logs", action: :logs, :controller => :plans
           post "upload"
           post "upload_json"
           post "upload_structured"
@@ -139,17 +148,22 @@ Rails.application.routes.draw do
       end
       resources :runs, :except => [:index] do
         member do
-          post "actions/discard", action: :discard, :controller => "runs"
-          post "actions/cancel", action: :cancel, :controller => "runs"
-          post "actions/force-cancel", action: :force_cancel, :controller => "runs"
-          post "actions/force-execute", action: :force_execute, :controller => "runs"
+          post "actions/discard", action: :discard, :controller => :runs
+          post "actions/cancel", action: :cancel, :controller => :runs
+          post "actions/force-cancel", action: :force_cancel, :controller => :runs
+          post "actions/force-execute", action: :force_execute, :controller => :runs
           post "actions/apply", action: :apply, :controller => :runs
-          get "configuration-version/download", action: :download, :controller => "configuration_versions", param: :run_id
+          get "configuration-version/download", action: :download, :controller => :configuration_versions, param: :run_id
           get "run-events", action: :events, :controller => :runs
         end
       end
       # resources :agents
-      resources :agents, path: "agent-pools", :except => [:index, :create]
+      resources :agents, path: "agent-pools", :except => [:index, :create] do
+        member do
+          get "authentication-token", action: :get_agent_token, :controller => :authentication_tokens
+          post "authentication-token", action: :create_agent_token, :controller => :authentication_tokens
+        end
+      end
       resources :run_tasks, path: "tasks", :except => [:index, :create]
       resources :projects, :except => [:index, :create]
       resources :teams, :except => [:index, :create] do
@@ -158,6 +172,9 @@ Rails.application.routes.draw do
           delete "relationships/users", action: :remove_users
           post "relationships/organization-memberships", action: :add_org_memberships
           delete "relationships/organization-memberships", action: :remove_org_memberships
+          get "authentication-token", action: :get_team_token, :controller => :authentication_tokens
+          post "authentication-token", action: :create_team_token, :controller => :authentication_tokens
+          delete "authentication-token", action: :destroy_team_token, :controller => :authentication_tokens
         end
       end
 
@@ -180,13 +197,15 @@ Rails.application.routes.draw do
 
       resources :configuration_versions, :except => [:create], path: "configuration-versions" do
         member do
-          put "upload", action: :upload, :controller => "configuration_versions"
-          get "download", action: :download, :controller => "configuration_versions"
+          put "upload", action: :upload, :controller => :configuration_versions
+          get "download", action: :download, :controller => :configuration_versions
         end
       end
 
       resources :organization_memberships, :except => [:create, :index], path: "organization-memberships"
       resources :run_triggers, :except => [:create, :index, :update], path: "run-triggers"
+      resources :ssh_keys, :except => [:create, :index], path: "ssh-keys"
+      resources :workspace_teams, path: "team-workspaces"
     end
   end
 

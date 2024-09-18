@@ -20,7 +20,7 @@ class Api::V2::RunTriggersController < Api::ApiController
     end
     authorize! @workspace, to: :create_run_triggers?
     @trigger = @workspace.run_triggers.new
-    @sourceable = Workspace.find_by(external_id: params[:id])
+    @sourceable = Workspace.find_by(external_id: run_trigger_params["sourceable_id"])
     authorize! @sourceable, to: :attach_trigger?
 
     @trigger.sourceable = @sourceable
@@ -42,7 +42,8 @@ class Api::V2::RunTriggersController < Api::ApiController
   end
 
   def destroy
-
+    skip_verify_authorized!
+    head :no_content
   end
 
   private
