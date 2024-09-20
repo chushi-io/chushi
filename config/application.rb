@@ -28,6 +28,6 @@ module Chushi
       g.orm :active_record, foreign_key_type: :uuid
     end
 
-    config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL") }
+    config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
   end
 end

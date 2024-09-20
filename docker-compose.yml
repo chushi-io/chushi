@@ -36,11 +36,11 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-#  opa:
-#    image: openpolicyagent/opa
-#    ports:
-#      - "8181:8181"
-#    command: run --server --addr :8181
+  opa:
+    image: openpolicyagent/opa
+    ports:
+      - "8181:8181"
+    command: run --server --addr :8181
 volumes:
   minio_data:
   c_postgres_data:
