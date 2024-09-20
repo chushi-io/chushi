@@ -124,6 +124,8 @@ Rails.application.routes.draw do
 
           get :notification_configurations, action: :index, path: "notification-configurations", :controller => :notification_configurations
           post :notification_configurations, action: :create, path: "notification-configurations", :controller => :notification_configurations
+
+          resources :tasks, :controller => :workspace_tasks, param: :task_id
         end
       end
 

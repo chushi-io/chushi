@@ -4,5 +4,15 @@ class TaskStageSerializer < ApplicationSerializer
   attribute :status
   attribute :stage
 
-  belongs_to :run
+  belongs_to :run, serializer: RunSerializer, id_method_name: :external_id do |object|
+    object.run
+  end
+
+  has_many :task_results, serializer: TaskResultSerializer, id_method_name: :external_id do |object|
+    object.task_results
+  end
+
+  # has_many :policy_evaluations, serializer: PolicyEvaluationsSerializer, id_method_name: :external_id do |object|
+  #   object.policy_evaluations
+  # end
 end

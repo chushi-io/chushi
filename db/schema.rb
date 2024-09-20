@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_18_144341) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_20_025320) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -494,6 +494,25 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_144341) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
+  create_table "task_results", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "task_stage_id"
+    t.uuid "workspace_task_id"
+    t.uuid "run_task_id"
+    t.string "message"
+    t.string "status"
+    t.json "status_timestamps"
+    t.string "url"
+    t.string "stage"
+    t.boolean "is_speculative"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_task_results_on_external_id", unique: true
+    t.index ["run_task_id"], name: "index_task_results_on_run_task_id"
+    t.index ["task_stage_id"], name: "index_task_results_on_task_stage_id"
+    t.index ["workspace_task_id"], name: "index_task_results_on_workspace_task_id"
+  end
+
   create_table "task_stages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.string "stage"
@@ -642,6 +661,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_144341) do
     t.index ["state_version_id"], name: "index_workspace_resources_on_state_version_id"
   end
 
+  create_table "workspace_tasks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "workspace_id"
+    t.uuid "run_task_id"
+    t.string "stage"
+    t.text "stages", default: [], array: true
+    t.string "enforcement_level"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_workspace_tasks_on_external_id", unique: true
+    t.index ["run_task_id"], name: "index_workspace_tasks_on_run_task_id"
+    t.index ["workspace_id", "run_task_id"], name: "index_workspace_tasks_on_workspace_id_and_run_task_id", unique: true
+    t.index ["workspace_id"], name: "index_workspace_tasks_on_workspace_id"
+  end
+
   create_table "workspace_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.uuid "organization_id"
@@ -745,6 +779,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_144341) do
   add_foreign_key "state_versions", "runs"
   add_foreign_key "state_versions", "workspaces"
   add_foreign_key "taggings", "tags"
+  add_foreign_key "task_results", "run_tasks"
+  add_foreign_key "task_results", "task_stages"
+  add_foreign_key "task_results", "workspace_tasks"
   add_foreign_key "task_stages", "run_tasks"
   add_foreign_key "task_stages", "runs"
   add_foreign_key "team_projects", "organizations"
@@ -758,6 +795,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_144341) do
   add_foreign_key "vcs_connections", "organizations"
   add_foreign_key "workspace_resources", "organizations"
   add_foreign_key "workspace_resources", "state_versions"
+  add_foreign_key "workspace_tasks", "run_tasks"
+  add_foreign_key "workspace_tasks", "workspaces"
   add_foreign_key "workspace_teams", "organizations"
   add_foreign_key "workspace_teams", "teams"
   add_foreign_key "workspace_teams", "workspaces"

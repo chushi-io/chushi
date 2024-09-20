@@ -6,7 +6,6 @@ class CreateTaskStages < ActiveRecord::Migration[7.1]
       t.string :status
 
       t.references :run, foreign_key: true, type: :uuid
-      t.references :run_task, foreign_key: true, type: :uuid
 
       t.timestamps
     end

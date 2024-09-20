@@ -1,22 +1,21 @@
 class Api::V2::RunsController < Api::ApiController
   before_action :load_run, :except => [:create]
   def create
-    run_params=jsonapi_deserialize(params, only: [
-      "plan-only",
-      :message,
-      :workspace,
-      "configuration_version"
-    ])
     @workspace = Workspace.find_by(external_id: run_params["workspace_id"])
     authorize! @workspace, to: :create_run?
 
-
     @run = @workspace.organization.runs.new(run_params)
+    if run_params["configuration_version_id"]
+      @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params["configuration_version_id"])
+    end
     @run.workspace = @workspace
     begin
       RunCreator.call(@run)
       render json: ::RunSerializer.new(@run, {}).serializable_hash
     rescue => exception
+      puts exception
+      puts "Run errors"
+      puts @run.errors.full_messages
       render status: :internal_server_error
     end
   end
@@ -65,5 +64,14 @@ class Api::V2::RunsController < Api::ApiController
   private
   def load_run
     @run = Run.find_by(external_id: params[:id])
+  end
+
+  def run_params
+    map_params([
+                 "plan-only",
+                 :message,
+                 :workspace,
+                 "configuration-version"
+               ])
   end
 end

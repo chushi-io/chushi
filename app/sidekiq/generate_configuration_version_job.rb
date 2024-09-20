@@ -72,7 +72,7 @@ class GenerateConfigurationVersionJob
         @run.configuration_version.archive.attach(io: File.open(archive_name), filename: "archive")
         @run.configuration_version.update(status: "uploaded")
         @run.update(status: "fetching_completed")
-
+        RunStage::FetchingCompletedJob.perform_async(@run.id)
       ensure
         FileUtils.remove_file(archive_name) if File.exist?(archive_name)
         FileUtils.remove_dir(path) if File.exist?(path)

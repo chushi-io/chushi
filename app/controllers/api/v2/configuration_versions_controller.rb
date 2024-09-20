@@ -35,6 +35,10 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
 
     @version.status = "uploaded"
     @version.save
+
+    # Update the run(s)
+    # @version.runs.update(status: "fetching_completed")
+    ConfigurationVersionUploadedJob.perform_async(@version.id)
     render json: @version
   end
 

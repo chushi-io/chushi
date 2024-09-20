@@ -36,30 +36,12 @@ class Api::V2::WorkspacesController < Api::ApiController
   def update
     # JSONAPI::De
     authorize! @workspace
-    #
-    patch_params=jsonapi_deserialize(params)
-    if patch_params.key?("vcs-repo")
-      if patch_params["vcs-repo"] == nil
-        @workspace.vcs_repo_branch = nil
-        @workspace.vcs_repo_branch = nil
-      else
-        # Set the VCS repo configuration
-      end
-    end
-    # @workspace.update!(jsonapi_deserialize(params))
-    # end
-    if patch_params.key?("auto-apply")
-      @workspace.auto_apply = patch_params["auto-apply"]
-    end
-    if patch_params.key?("file-triggers-enabled")
-      @workspace.file_triggers_enabled = patch_params["file-triggers-enabled"]
-    end
-    if patch_params.key?("queue-all-runs").present?
-      @workspace.queue_all_runs = patch_params["queue-all-runs"]
-    end
 
-    @workspace.save!
-    render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
+    if @workspace.update(workspace_params)
+      render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
+    else
+      render json: @workspace.errors.full_messages, status: :bad_request
+    end
   end
 
   def unlock

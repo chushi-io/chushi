@@ -1,6 +1,8 @@
 class TaskStage < ApplicationRecord
-  belongs_to :run_task
+  # belongs_to :run_task
   belongs_to :run
+
+  has_many :task_results
   before_create -> { generate_id("ts") }
 end
 
