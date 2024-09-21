@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_20_025320) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -518,12 +518,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_025320) do
     t.string "stage"
     t.string "status"
     t.uuid "run_id"
-    t.uuid "run_task_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["external_id"], name: "index_task_stages_on_external_id", unique: true
     t.index ["run_id"], name: "index_task_stages_on_run_id"
-    t.index ["run_task_id"], name: "index_task_stages_on_run_task_id"
   end
 
   create_table "team_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -732,11 +730,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_025320) do
     t.string "lock_id"
     t.string "vcs_repo_branch"
     t.boolean "queue_all_runs"
+    t.uuid "project_id"
     t.index ["agent_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["external_id"], name: "index_workspaces_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_workspaces_on_organization_id"
+    t.index ["project_id"], name: "index_workspaces_on_project_id"
     t.index ["vcs_connection_id"], name: "index_workspaces_on_vcs_connection_id"
   end
 
@@ -782,7 +782,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_025320) do
   add_foreign_key "task_results", "run_tasks"
   add_foreign_key "task_results", "task_stages"
   add_foreign_key "task_results", "workspace_tasks"
-  add_foreign_key "task_stages", "run_tasks"
   add_foreign_key "task_stages", "runs"
   add_foreign_key "team_projects", "organizations"
   add_foreign_key "team_projects", "projects"
@@ -802,6 +801,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_025320) do
   add_foreign_key "workspace_teams", "workspaces"
   add_foreign_key "workspaces", "agents"
   add_foreign_key "workspaces", "organizations"
+  add_foreign_key "workspaces", "projects"
   add_foreign_key "workspaces", "state_versions", column: "current_state_version_id"
   add_foreign_key "workspaces", "vcs_connections"
 end

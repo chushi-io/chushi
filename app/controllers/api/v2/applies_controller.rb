@@ -12,4 +12,14 @@ class Api::V2::AppliesController < Api::ApiController
   def logs
     head :no_content
   end
+
+
+  ### Agent-only routes
+  def update
+
+  end
+
+  def upload_logs
+
+  end
 end

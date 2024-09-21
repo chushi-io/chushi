@@ -55,7 +55,6 @@ class Api::V2::OrganizationsController < Api::ApiController
       where(name: params[:organization_id]).
       first!
     authorize! @organization
-    puts org_params
     @organization.update!(org_params)
     render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
   end

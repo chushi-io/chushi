@@ -55,9 +55,6 @@ class RunCreator < ApplicationService
             @stage.task_results << @result
           }
           @stage.save
-          puts "Stage errors"
-          puts @stage.errors.full_messages
-
           @run.task_stages << @stage
         end
       end
@@ -70,7 +67,6 @@ class RunCreator < ApplicationService
       @token.save!
 
       RunCreatedJob.perform_async(@run.id)
-      puts @run.configuration_version
       if @run.configuration_version.nil?
         GenerateConfigurationVersionJob.perform_async(@run.id)
       end

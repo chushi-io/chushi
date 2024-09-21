@@ -142,6 +142,7 @@ Rails.application.routes.draw do
           post "upload_structured"
           post "download"
           get "json-output-redacted", action: :json_output_redacted
+          post "logs", action: :upload_logs
         end
       end
 
@@ -149,6 +150,7 @@ Rails.application.routes.draw do
       resources :applies do
         member do
           get "logs", action: :logs
+          post "logs", action: :upload_logs
         end
       end
       resources :runs, :except => [:index] do
@@ -160,6 +162,7 @@ Rails.application.routes.draw do
           post "actions/apply", action: :apply, :controller => :runs
           get "configuration-version/download", action: :download, :controller => :configuration_versions, param: :run_id
           get "run-events", action: :events, :controller => :runs
+          get "token"
         end
       end
       # resources :agents
@@ -235,3 +238,10 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "workspaces#index"
 end
+
+#     puts resource_owner.to_json
+#     organization = resource_owner.workspace.organization.name
+#     project = resource_owner.workspace.project.external_id
+#     workspace = resource_owner.workspace.name
+#     operation = "plan"
+#     "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"

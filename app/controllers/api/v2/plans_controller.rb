@@ -95,4 +95,8 @@ class Api::V2::PlansController < Api::ApiController
 
     render json: ::PlanSerializer.new(@plan, {}).serializable_hash
   end
+
+  def upload_logs
+
+  end
 end

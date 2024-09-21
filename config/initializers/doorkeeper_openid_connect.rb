@@ -2,7 +2,7 @@
 
 Doorkeeper::OpenidConnect.configure do
   issuer do |resource_owner, application|
-    'issuer string'
+    'https://caring-foxhound-whole.ngrok-free.app'
   end
 
   signing_key File.read("oidc_key.pem")
@@ -10,7 +10,7 @@ Doorkeeper::OpenidConnect.configure do
   subject_types_supported [:public]
 
   resource_owner_from_access_token do |access_token|
-    Workspace.find_by(id: access_token.resource_owner_id)
+    Run.find_by(id: access_token.resource_owner_id)
   end
 
   auth_time_from_resource_owner do |resource_owner|
@@ -38,23 +38,22 @@ Doorkeeper::OpenidConnect.configure do
   end
 
   subject do |resource_owner, application|
+    organization = resource_owner.workspace.organization.name
+    project = resource_owner.workspace.project.external_id
+    workspace = resource_owner.workspace.name
+    operation = "plan"
+    "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"
 
-    "workspace:#{resource_owner.id}"
-    # Example implementation:
-    # resource_owner.id
-
-    # or if you need pairwise subject identifier, implement like below:
-    # Digest::SHA256.hexdigest("#{resource_owner.id}#{URI.parse(application.redirect_uri).host}#{'your_secret_salt'}")
   end
 
   # Protocol to use when generating URIs for the discovery endpoint,
   # for example if you also use HTTPS in development
-  # protocol do
-  #   :https
-  # end
+  protocol do
+    :https
+  end
 
   # Expiration time on or after which the ID Token MUST NOT be accepted for processing. (default 120 seconds).
-  # expiration 600
+  expiration 3600
 
   # Example claims:
   claims do
@@ -62,7 +61,7 @@ Doorkeeper::OpenidConnect.configure do
       resource_owner.id
     end
 
-    claim :agent, response: [:id_token, :user_info] do |resource_owner|
+    claim :project, response: [:id_token, :user_info] do |resource_owner|
       resource_owner.agent_id
     end
 

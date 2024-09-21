@@ -11,6 +11,7 @@ class Workspace < ApplicationRecord
   has_many :variables
 
   has_many :run_triggers
+  belongs_to :project
 
   before_create -> { generate_id("ws") }
 end

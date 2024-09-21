@@ -27,7 +27,6 @@ class Api::ApiController < ActionController::API
 
   def verify_access_token
     token = request.headers['Authorization'].to_s.split(' ').last
-    puts token
     @access_token = AccessToken.find_by_token(token)
 
     if @access_token.nil?

@@ -21,6 +21,10 @@ class RunPolicy < ApplicationPolicy
     (user.present? && user.organizations.map{|org| org.id}.include?(record.workspace.organization_id))
   end
 
+  def token?
+    # (agent.present? && record.workspace.agent.id == agent.id) ||
+      (organization.present? && record.workspace.organization.id == organization.id)
+  end
   private
   def can_access_run
     if run.present?

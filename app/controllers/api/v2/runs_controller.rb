@@ -13,9 +13,6 @@ class Api::V2::RunsController < Api::ApiController
       RunCreator.call(@run)
       render json: ::RunSerializer.new(@run, {}).serializable_hash
     rescue => exception
-      puts exception
-      puts "Run errors"
-      puts @run.errors.full_messages
       render status: :internal_server_error
     end
   end
@@ -59,6 +56,19 @@ class Api::V2::RunsController < Api::ApiController
     authorize! @run
     @run.update(status: "apply_queued")
     render json: ::RunSerializer.new(@run, {}).serializable_hash
+  end
+
+  def token
+    authorize! @run, to: :token?
+    @access_token = Doorkeeper::AccessToken.new(
+      application_id: Doorkeeper::Application.first.id
+    )
+    @access_token.resource_owner = @run
+    @access_token.save!
+    @id_token = Doorkeeper::OpenidConnect::IdToken.new(@access_token)
+    render json: {
+      token: @id_token.as_jws_token
+    }
   end
 
   private

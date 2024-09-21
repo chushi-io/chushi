@@ -35,6 +35,10 @@ echo 'Organization.first.id' | bundle exec rails c
 echo 'User.first.access_tokens.first.token' | bundle exec rails c
 ```
 
+#### Generate an application for OIDC tokens 
+```shell 
+@app = Doorkeeper::Application.create(name: "chushi", redirect_uri: nil)
+```
 
 TODO: 
 - State versions are created, but we need to support storing the actual file contents
