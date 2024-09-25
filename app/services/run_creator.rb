@@ -49,9 +49,12 @@ class RunCreator < ApplicationService
               status: "pending",
               # url: wstask.run_task.url,
               stage: stage,
+              task_id: wstask.run_task.external_id,
+              task_name: wstask.run_task.name,
+              task_url: wstask.run_task.url,
+              workspace_task_id: wstask.external_id,
+              workspace_task_enforcement_level: wstask.enforcement_level
             )
-            @result.workspace_task = wstask
-            @result.run_task = wstask.run_task
             @stage.task_results << @result
           }
           @stage.save

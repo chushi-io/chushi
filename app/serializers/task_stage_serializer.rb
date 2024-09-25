@@ -12,7 +12,7 @@ class TaskStageSerializer < ApplicationSerializer
     object.task_results
   end
 
-  # has_many :policy_evaluations, serializer: PolicyEvaluationsSerializer, id_method_name: :external_id do |object|
-  #   object.policy_evaluations
-  # end
+  has_many :policy_evaluations, serializer: PolicyEvaluationSerializer, id_method_name: :external_id do |object|
+    []
+  end
 end

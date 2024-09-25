@@ -13,6 +13,7 @@ class Api::V2::RunsController < Api::ApiController
       RunCreator.call(@run)
       render json: ::RunSerializer.new(@run, {}).serializable_hash
     rescue => exception
+      puts @run.errors.full_messages
       render status: :internal_server_error
     end
   end
@@ -69,6 +70,11 @@ class Api::V2::RunsController < Api::ApiController
     render json: {
       token: @id_token.as_jws_token
     }
+  end
+
+  def identity_token
+    authorize! @run, to: :token?
+
   end
 
   private

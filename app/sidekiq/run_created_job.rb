@@ -5,7 +5,12 @@ class RunCreatedJob
     @run = Run.find(args.first)
 
     if @run.configuration_version.status == "uploaded"
-      @run.update(status: "plan_queued")
+      if @run.task_stages.any?{|task_stage| task_stage.stage == "pre_plan" }
+        @run.update(status: "pre_plan_running")
+        RunStage::PrePlanRunningJob.perform_async(@run.id)
+      else
+        @run.update(status: "plan_queued")
+      end
     end
   end
 end

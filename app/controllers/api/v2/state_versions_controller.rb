@@ -66,7 +66,7 @@ class Api::V2::StateVersionsController < Api::ApiController
     @version = StateVersion.find_by(external_id: params[:id])
     request.body.rewind
     @version.state_file.attach(io: request.body, filename: "state")
-    @version.workspace.update(current_state_version_id: @version.id)
+    @version.workspace.update!(current_state_version_id: @version.id)
     ProcessStateVersionJob.perform_async(@version.id)
     render plain: nil, status: :created
   end

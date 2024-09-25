@@ -96,7 +96,7 @@ class Api::ApiController < ActionController::API
 
   def can_access_workspace(workspace)
     if current_agent
-      return workspace.agent_id == current_agent.id
+      return workspace.agent_pool_id == current_agent.id
     end
     ## TODO for now, we just verify access to the organization
     can_access_organization(workspace.organization_id)

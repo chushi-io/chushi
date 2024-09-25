@@ -30,8 +30,11 @@ class Api::V2::WorkspaceTasksController < Api::ApiController
   end
 
   def destroy
+    authorize! @workspace, to: :manage_tasks?
     @task = @workspace.tasks.find_by(external_id: params[:task_id])
+    TaskResult.delete_by(workspace_task_id: @task_id)
     @task.delete
+
     head :accepted
   end
 

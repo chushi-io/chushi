@@ -4,7 +4,7 @@ class RunPolicy < ApplicationPolicy
   end
 
   def create?
-    (agent.present? && agent.id == record.workspace.agent_id) ||
+    (agent.present? && agent.id == record.workspace.agent_pool_id) ||
       (user.present? && user.organizations.map{|org| org.id}.include?(record.workspace.organization_id))
   end
 
@@ -22,9 +22,10 @@ class RunPolicy < ApplicationPolicy
   end
 
   def token?
-    # (agent.present? && record.workspace.agent.id == agent.id) ||
+    (agent.present? && record.workspace.agent_pool.id == agent.id) ||
       (organization.present? && record.workspace.organization.id == organization.id)
   end
+
   private
   def can_access_run
     if run.present?
@@ -32,7 +33,7 @@ class RunPolicy < ApplicationPolicy
     end
 
     if agent.present?
-      return agent.id == record.workspace.agent_id
+      return agent.id == record.workspace.agent_pool_id
     end
 
     if organization.present?

@@ -52,7 +52,8 @@ group :test do
   gem "selenium-webdriver"
 end
 
-
 gem "doorkeeper", "~> 5.7"
-
 gem "seedbank", "~> 0.5.0"
+gem "httpparty", "~> 0.2.0"
+gem "ruby-terraform", "~> 1.8"
+gem 'rubyzip', require: 'zip'

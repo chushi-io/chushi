@@ -107,6 +107,6 @@ class GenerateConfigurationVersionJob
     end
 
     puts "Configuration version completed"
-    @run.update(status: "plan_queued")
+    @run.update(status: "fetching_completed")
   end
 end

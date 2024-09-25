@@ -5,7 +5,7 @@ class PlanPolicy < ApplicationPolicy
     end
 
     if agent.present?
-      return agent.id == record.run.workspace.agent_id
+      return agent.id == record.run.workspace.agent_pool_id
     end
 
     if organization.present?
@@ -25,7 +25,7 @@ class PlanPolicy < ApplicationPolicy
     end
 
     if agent.present?
-      return agent.id == record.run.workspace.agent_id
+      return agent.id == record.run.workspace.agent_pool_id
     end
 
     if organization.present?

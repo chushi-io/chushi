@@ -1,0 +1,10 @@
+class Api::V2::TaskStagesController < Api::ApiController
+  def show
+    @task_stage = TaskStage.find_by(external_id: params[:task_stage_id])
+    authorize! @task_stage
+
+    options = {}
+    options[:include] = params[:include].split(",") if params[:include]
+    render json: ::TaskStageSerializer.new(@task_stage, options).serializable_hash
+  end
+end

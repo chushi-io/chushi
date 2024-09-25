@@ -11,7 +11,9 @@ class Workspace < ApplicationRecord
   has_many :variables
 
   has_many :run_triggers
-  belongs_to :project
+  belongs_to :project, optional: true
+
+  belongs_to :agent_pool, :class_name => "Agent", optional: true
 
   before_create -> { generate_id("ws") }
 end

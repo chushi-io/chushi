@@ -11,8 +11,10 @@ class Run < ApplicationRecord
   has_many :task_stages
   has_many :state_versions
 
+  has_one :access_token, as: :token_authable
+
   scope :for_agent, ->(agent_id) {
-    left_joins(:workspace).where(workspaces: {agent_id: agent_id})
+    left_joins(:workspace).where(workspaces: {agent_pool_id: agent_id})
   }
 
   before_create -> { generate_id("run") }

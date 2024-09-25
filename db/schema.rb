@@ -497,8 +497,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
   create_table "task_results", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.uuid "task_stage_id"
-    t.uuid "workspace_task_id"
-    t.uuid "run_task_id"
+    t.string "task_id"
+    t.string "task_name"
+    t.string "task_url"
+    t.string "workspace_task_id"
+    t.string "workspace_task_enforcement_level"
     t.string "message"
     t.string "status"
     t.json "status_timestamps"
@@ -508,9 +511,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["external_id"], name: "index_task_results_on_external_id", unique: true
-    t.index ["run_task_id"], name: "index_task_results_on_run_task_id"
     t.index ["task_stage_id"], name: "index_task_results_on_task_stage_id"
-    t.index ["workspace_task_id"], name: "index_task_results_on_workspace_task_id"
   end
 
   create_table "task_stages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -723,7 +724,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
     t.datetime "updated_at", null: false
     t.uuid "vcs_connection_id"
     t.uuid "organization_id"
-    t.uuid "agent_id"
+    t.uuid "agent_pool_id"
     t.uuid "current_state_version_id"
     t.string "locked_by"
     t.datetime "locked_at", precision: nil
@@ -731,7 +732,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
     t.string "vcs_repo_branch"
     t.boolean "queue_all_runs"
     t.uuid "project_id"
-    t.index ["agent_id"], name: "index_workspaces_on_agent_id"
+    t.index ["agent_pool_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["external_id"], name: "index_workspaces_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true
@@ -779,9 +780,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
   add_foreign_key "state_versions", "runs"
   add_foreign_key "state_versions", "workspaces"
   add_foreign_key "taggings", "tags"
-  add_foreign_key "task_results", "run_tasks"
   add_foreign_key "task_results", "task_stages"
-  add_foreign_key "task_results", "workspace_tasks"
   add_foreign_key "task_stages", "runs"
   add_foreign_key "team_projects", "organizations"
   add_foreign_key "team_projects", "projects"
@@ -799,7 +798,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
   add_foreign_key "workspace_teams", "organizations"
   add_foreign_key "workspace_teams", "teams"
   add_foreign_key "workspace_teams", "workspaces"
-  add_foreign_key "workspaces", "agents"
+  add_foreign_key "workspaces", "agents", column: "agent_pool_id"
   add_foreign_key "workspaces", "organizations"
   add_foreign_key "workspaces", "projects"
   add_foreign_key "workspaces", "state_versions", column: "current_state_version_id"

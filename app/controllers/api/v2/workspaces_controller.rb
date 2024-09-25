@@ -34,29 +34,34 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def update
-    # JSONAPI::De
     authorize! @workspace
-
-    if @workspace.update(workspace_params)
+    update_params=Hash[workspace_params]
+    if update_params.key?("agent_pool_id")
+      @agent = Agent.find_by(external_id: update_params["agent_pool_id"])
+      authorize! @agent, to: :update?
+      update_params["agent_pool_id"] = @agent.id
+    end
+    puts update_params.to_json
+    if @workspace.update(update_params)
       render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
     else
+      puts @workspace.errors.full_messages
       render json: @workspace.errors.full_messages, status: :bad_request
     end
   end
 
   def unlock
     authorize! @workspace
-    unless @workspace.locked
-      head :bad_request
+    if @workspace.locked
+      @workspace.update(locked: false)
     end
-    @workspace.update(locked: false)
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
 
   def force_unlock
     authorize! @workspace
     unless @workspace.locked
-      head :bad_request and return
+      head :conflict and return
     end
     @workspace.update(locked: false)
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash

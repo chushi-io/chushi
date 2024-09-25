@@ -162,7 +162,8 @@ Rails.application.routes.draw do
           post "actions/apply", action: :apply, :controller => :runs
           get "configuration-version/download", action: :download, :controller => :configuration_versions, param: :run_id
           get "run-events", action: :events, :controller => :runs
-          get "token"
+          get "oidc-token", action: :token
+          post "authentication-token", action: :create_run_token, :controller => :authentication_tokens
         end
       end
       # resources :agents
@@ -173,6 +174,9 @@ Rails.application.routes.draw do
         end
       end
       resources :run_tasks, path: "tasks", :except => [:index, :create]
+      get "task-stages/:task_stage_id", action: :show, :controller => :task_stages
+      post "run-task/null", action: :null_stage, :controller => :task_results
+      patch "task-results/:task_result_id/callback", action: :callback, :controller => :task_results, as: :task_result_callback
       resources :projects, :except => [:index, :create]
       resources :teams, :except => [:index, :create] do
         member do

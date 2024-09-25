@@ -39,7 +39,10 @@ Doorkeeper::OpenidConnect.configure do
 
   subject do |resource_owner, application|
     organization = resource_owner.workspace.organization.name
-    project = resource_owner.workspace.project.external_id
+    project = "default"
+    unless resource_owner.workspace.project.nil?
+      project = resource_owner.workspace.project.external_id
+    end
     workspace = resource_owner.workspace.name
     operation = "plan"
     "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"

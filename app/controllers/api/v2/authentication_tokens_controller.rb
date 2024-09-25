@@ -147,6 +147,31 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     render json: ::AuthenticationTokenSerializer.new(@token, {}).serializable_hash
   end
 
+  def create_run_token
+    @run = Run.find_by(external_id: params[:id])
+    unless @run
+      skip_verify_authorized!
+      head :not_found and return
+    end
+
+    authorize! @run, to: :token?
+    @token = @run.access_token
+    if @token
+      @token.generate_access_token
+      # @token.expired_at = token_params["expired_at"]
+    else
+      @token = @run.create_access_token(description: "Token for run")
+    end
+
+    if @token.save
+      render json: ::AuthenticationTokenSerializer.new(@token, {
+        params: { show_token: true }
+      }).serializable_hash
+    else
+      render json: @token.errors.full_messages, status: :bad_request
+    end
+  end
+
   def destroy
     @token = AccessToken.find_by(external_id: params[:token_id])
     unless @token
