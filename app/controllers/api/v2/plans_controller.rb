@@ -17,11 +17,8 @@ class Api::V2::PlansController < Api::ApiController
       head :found and return
     end
 
-    # TODO: This should be handled differently?
-    # If in timber, run filtering
-    url = "localhost:8080"
-    logs = HTTParty.get(
-      "#{url}/files/#{@plan.run.id}_#{@plan.id}.log",
+    HTTParty.get(
+      "#{Chushi.timber_url}/files/#{@plan.run.id}_#{@plan.id}.log",
       { query: { limit: params[:limit], offset: params[:offset] } }
     ).body
 

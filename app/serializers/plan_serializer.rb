@@ -16,7 +16,7 @@ class PlanSerializer < ApplicationSerializer
   attribute :resource_imports
   attribute :status
   attribute :log_read_url do |object|
-    "http://localhost:8080/files/#{object.run.external_id}_plan.log"
+    "#{Chushi.timber_url}/files/#{object.run.external_id}_plan.log"
   end
 
 end
