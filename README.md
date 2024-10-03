@@ -60,3 +60,12 @@ puts @id_token.as_jws_token
 ```
 
 This token can then be stored in the filesystem, and used to authenticate to a CSP
+
+## TODO 
+
+### Organization creation 
+ - Auto create default project
+ - Auto create default agent? 
+
+### Agents 
+ - Support auto deployment of agents?

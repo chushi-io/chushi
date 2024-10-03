@@ -16,7 +16,7 @@ class PlanSerializer < ApplicationSerializer
   attribute :resource_imports
   attribute :status
   attribute :log_read_url do |object|
-    logs_api_v2_plan_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    "http://localhost:8080/files/#{object.run.external_id}_plan.log"
   end
 
 end

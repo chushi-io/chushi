@@ -10,7 +10,7 @@ class RunSerializer < ApplicationSerializer
   attribute :auto_apply
   attribute :allow_empty_apply do |o| true end
   attribute :allow_config_generation do |o| false end
-  attribute :is_destroy do |o| false end
+  attribute :is_destroy
   attribute :message
   attribute :plan_only
   attribute :source do |o| "tfe-api" end

@@ -87,6 +87,7 @@ class Api::V2::RunsController < Api::ApiController
                  "plan-only",
                  :message,
                  :workspace,
+                 "is-destroy",
                  "configuration-version"
                ])
   end

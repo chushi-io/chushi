@@ -135,7 +135,6 @@ Rails.application.routes.draw do
 
       resources :plans do
         member do
-          match "logs", via: [:get, :post], :controller => :plans
           get "logs", action: :logs, :controller => :plans
           post "upload"
           post "upload_json"
@@ -171,6 +170,7 @@ Rails.application.routes.draw do
         member do
           get "authentication-tokens", action: :get_agent_tokens, :controller => :authentication_tokens
           post "authentication-tokens", action: :create_agent_token, :controller => :authentication_tokens
+          get "jobs", action: :index, :controller => :jobs
         end
       end
       resources :run_tasks, path: "tasks", :except => [:index, :create]
@@ -223,6 +223,12 @@ Rails.application.routes.draw do
       resources :run_triggers, :except => [:create, :index, :update], path: "run-triggers"
       resources :ssh_keys, :except => [:create, :index], path: "ssh-keys"
       resources :workspace_teams, path: "team-workspaces"
+      resources :jobs, :except => [:create, :index] do
+        member do
+          post :lock
+          post :unlock
+        end
+      end
     end
   end
 
@@ -242,10 +248,3 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "workspaces#index"
 end
-
-#     puts resource_owner.to_json
-#     organization = resource_owner.workspace.organization.name
-#     project = resource_owner.workspace.project.external_id
-#     workspace = resource_owner.workspace.name
-#     operation = "plan"
-#     "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"

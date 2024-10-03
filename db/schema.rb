@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -107,6 +107,24 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
     t.index ["external_id"], name: "index_configuration_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_configuration_versions_on_organization_id"
     t.index ["workspace_id"], name: "index_configuration_versions_on_workspace_id"
+  end
+
+  create_table "jobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "organization_id"
+    t.uuid "agent_id"
+    t.uuid "workspace_id"
+    t.uuid "run_id"
+    t.string "locked_by"
+    t.string "status"
+    t.boolean "locked"
+    t.integer "priority"
+    t.string "operation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_id"], name: "index_jobs_on_agent_id"
+    t.index ["organization_id"], name: "index_jobs_on_organization_id"
+    t.index ["run_id"], name: "index_jobs_on_run_id"
+    t.index ["workspace_id"], name: "index_jobs_on_workspace_id"
   end
 
   create_table "notification_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -747,6 +765,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_21_022314) do
   add_foreign_key "applies", "organizations"
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
+  add_foreign_key "jobs", "agents"
+  add_foreign_key "jobs", "organizations"
+  add_foreign_key "jobs", "runs"
+  add_foreign_key "jobs", "workspaces"
   add_foreign_key "notification_configurations", "workspaces"
   add_foreign_key "notification_delivery_responses", "notification_configurations"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"

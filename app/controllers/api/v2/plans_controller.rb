@@ -8,7 +8,23 @@ class Api::V2::PlansController < Api::ApiController
   end
 
   def logs
-    head :no_content
+    @plan = Plan.find_by(external_id: params[:id])
+    authorize! @plan, to: :show?
+    # Otherwise, return no content
+    # Check if the file is attached. If it is, simply return it
+    if @plan.plan_log_file.attached?
+      # Redirect to URL and return
+      head :found and return
+    end
+
+    # TODO: This should be handled differently?
+    # If in timber, run filtering
+    url = "localhost:8080"
+    logs = HTTParty.get(
+      "#{url}/files/#{@plan.run.id}_#{@plan.id}.log",
+      { query: { limit: params[:limit], offset: params[:offset] } }
+    ).body
+
   end
 
   def upload
@@ -40,31 +56,6 @@ class Api::V2::PlansController < Api::ApiController
 
   def download
 
-  end
-
-  def logs
-    if request.post?
-      @run = Run.find_by(external_id: params[:id])
-      # authorize! @run.plan, to: :upload?
-
-      request.body.rewind
-      @run.plan.plan_log_file.attach(io: request.body, filename: "logs")
-      head :ok
-    else
-      @plan = Plan.first(external_id: params[:id])
-      # authorize! @plan, to: :show?
-      head :no_content and return unless @plan.plan_log_file.attached?
-
-      contents = @plan.plan_log_file.download.squeeze("\n")
-      offset = params[:offset] || 0
-      limit = params[:limit] || 65536
-      # What the fuck are we doing?
-      if offset.to_i > contents.length
-        head :no_content
-      else
-        render json: contents[offset.to_i..limit.to_i]
-      end
-    end
   end
 
   def json_output_redacted

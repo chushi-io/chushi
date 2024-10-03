@@ -41,6 +41,10 @@ class Api::V2::WorkspacesController < Api::ApiController
       authorize! @agent, to: :update?
       update_params["agent_pool_id"] = @agent.id
     end
+    if update_params.key?("terraform_version")
+      update_params["tofu_version"] = update_params["terraform_version"]
+      update_params.delete("terraform_version")
+    end
     puts update_params.to_json
     if @workspace.update(update_params)
       render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash

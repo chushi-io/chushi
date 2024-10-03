@@ -2,7 +2,6 @@ class TaskStage::TaskStagePassedJob
   include Sidekiq::Job
 
   def perform(*args)
-    puts "Looks like our task stage passed!!!"
     @task_stage = TaskStage.find(args.first)
     case @task_stage.stage
     when "pre_plan"

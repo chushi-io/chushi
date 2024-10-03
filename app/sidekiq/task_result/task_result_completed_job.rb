@@ -33,6 +33,7 @@ class TaskResult::TaskResultCompletedJob
     # ultimate result of our task_results
     if @status == "passed"
       # Execute our task_stage_completed job
+      @task_result.task_stage.update(status: "passed")
       TaskStage::TaskStagePassedJob.perform_async(@task_result.task_stage.id)
     else
       if @overrideable

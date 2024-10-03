@@ -88,7 +88,7 @@ class WorkspacePolicy < ApplicationPolicy
     end
 
     if agent.present?
-      return agent.id == record.agent_id
+      return agent.id == record.agent_pool.id
     end
 
     if organization.present?
