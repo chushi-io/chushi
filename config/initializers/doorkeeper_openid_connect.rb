@@ -5,7 +5,7 @@ Doorkeeper::OpenidConnect.configure do
     'https://caring-foxhound-whole.ngrok-free.app'
   end
 
-  signing_key ENV.fetch("OIDC_PRIVATE_KEY", File.read("oidc_key.pem"))
+  signing_key ENV.fetch("OIDC_PRIVATE_KEY")
 
   subject_types_supported [:public]
 
