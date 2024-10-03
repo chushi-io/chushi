@@ -4,7 +4,7 @@ ruby "3.2.2"
 
 # Rails
 gem "rails", "~> 7.1.3"
-gem "tailwindcss-rails", "~> 2.6"
+# gem "tailwindcss-rails", "~> 2.6"
 gem "sprockets-rails"
 gem "importmap-rails"
 gem "turbo-rails"
