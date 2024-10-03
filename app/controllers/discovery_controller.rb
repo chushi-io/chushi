@@ -25,7 +25,7 @@ class DiscoveryController < ApplicationController
 
   def openid_configuration
     config = OpenIDConnect::Discovery::Provider::Config::Response.new(
-      issuer: IdToken.config[:issuer],
+      issuer: Chushi.domain,
       authorization_endpoint: new_authorization_url,
       token_endpoint: access_tokens_url,
       userinfo_endpoint: user_info_url,

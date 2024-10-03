@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 Doorkeeper::OpenidConnect.configure do
-  issuer do |resource_owner, application|
-    Chushi.domain
-  end
+  issuer Chushi.domain
 
   signing_key do
     if ENV.has_key?("OIDC_PRIVATE_KEY")
