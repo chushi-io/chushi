@@ -2,7 +2,7 @@ class CreateRuns < ActiveRecord::Migration[7.1]
   def change
     create_table :runs, id: :uuid do |t|
       t.string :external_id, index: { unique: true }
-      t.references :agent_pool, foreign_key: true, type: :uuid
+      t.references :agent_pool, foreign_key: { to_table: :agents }, type: :uuid
 
       t.boolean :has_changes
       t.boolean :auto_apply
