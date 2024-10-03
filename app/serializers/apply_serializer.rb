@@ -10,7 +10,7 @@ class ApplySerializer < ApplicationSerializer
   end
 
   attribute :log_read_url do |object|
-    logs_api_v1_apply_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    logs_api_v1_apply_url(object, host: Chushi.domain, protocol: 'https')
   end
 
   attribute :status

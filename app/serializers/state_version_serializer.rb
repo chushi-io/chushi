@@ -6,19 +6,19 @@ class StateVersionSerializer < ApplicationSerializer
   attribute :created_at
   attribute :size
   attribute :hosted_state_download_url do |object|
-    api_v2_get_state_url(id: object.external_id, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    api_v2_get_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
   end
 
   attribute :hosted_state_upload_url do |object|
-    api_v2_upload_state_url(id: object.external_id, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    api_v2_upload_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
   end
 
   attribute :hosted_json_state_download_url do |object|
-    api_v2_get_state_json_url(id: object.external_id, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    api_v2_get_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
   end
 
   attribute :hosted_json_state_upload_url do |object|
-    api_v2_upload_state_json_url(id: object.external_id, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    api_v2_upload_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
   end
 
   attribute :status

@@ -2,10 +2,16 @@
 
 Doorkeeper::OpenidConnect.configure do
   issuer do |resource_owner, application|
-    'https://caring-foxhound-whole.ngrok-free.app'
+    Chushi.domain
   end
 
-  signing_key ENV.fetch("OIDC_PRIVATE_KEY")
+  signing_key do
+    if ENV.has_key?("OIDC_PRIVATE_KEY")
+      ENV.fetch("OIDC_PRIVATE_KEY")
+    else
+      File.read(ENV.fetch("OIDC_PRIVATE_KEY_FILE", "oidc_key.pem"))
+    end
+  end
 
   subject_types_supported [:public]
 

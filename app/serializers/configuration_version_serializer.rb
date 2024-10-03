@@ -10,7 +10,7 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   attribute :auto_queue_runs
 
   attribute :upload_url do |object|
-    upload_api_v2_configuration_version_url(object, host: 'caring-foxhound-whole.ngrok-free.app', protocol: 'https')
+    upload_api_v2_configuration_version_url(object, host: Chushi.domain, protocol: 'https')
   end
 
   # link :self, :url
