@@ -1,26 +1,84 @@
-  <table class="table">
-  <tr>
-    <th>Message</th>
-    <th>Has Changes</th>
-    <th>Plan Only</th>
-    <th>Status</th>
-    <th>Trigger Reason</th>
-    <th>Plan</th>
-    <th>Apply</th>
-    <th>Configuration Version</th>
-  </tr>
-  <% @runs.each do |run | %>
-  <tr>
-    <td><%= run.message %></td>
-    <td><%= run.has_changes %></td>
-    <td><%= run.plan_only %></td>
-    <td><%= run.status %></td>
-    <td><%= run.trigger_reason %></td>
-    <td><%= run.plan.id unless run.plan.nil? %></td>
-    <td><%= run.apply.id unless run.apply.nil? %></td>
-    <td><%= run.configuration_version.id unless run.configuration_version.nil? %></td>
-  </tr>
-  <% end %>
-</table>
+<!--<div class="text-sm breadcrumbs">-->
+<!--  <ul>-->
+<!--    <li></li>-->
+<!--    <li><a href="<%#= workspaces_path %>">Workspaces</a></li>-->
+<!--    <li><%#= @workspace.name %></li>-->
+<!--  </ul>-->
+<!--</div>-->
 
-<a class="btn btn-primary btn-sm" href="<%= new_workspace_run_path %>">Create Run</a>
+<!--<div class="hero bg-base-200">-->
+<!--  <div class="hero-content flex-col lg:flex-row-reverse">-->
+<!--    <div>-->
+<!--      <h2>Some stuff about our workspace</h2>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+<!--<h2><%#= @workspace.name %></h2>-->
+<!--<h3>ID: <%#= @workspace.id %></h3>-->
+
+<!--<h2>Current State</h2>-->
+<!--<a href="<%#= workspace_runs_path(@organization.name, @workspace.external_id) %>">View Runs</a>-->
+
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><%= @organization.name %></li>
+    <li class="breadcrumb-item"><a href="<%= workspaces_path(@organization.name) %>">Workspaces</a></li>
+    <li class="breadcrumb-item"><a href="<%= workspace_path(@organization.name, @workspace.external_id) %>"><%= @workspace.name %></a></li>
+    <li class="breadcrumb-item active">Runs</li>
+  </ol>
+</nav>
+
+<div class="row g-0">
+  <div class="col-12 col-xxl-12 px-0 bg-body">
+    <div class="px-4 px-lg-6 pt-6 pb-9">
+      <%= render "workspaces/partials/header" %>
+      <div class="row mb-4 gx-6 gy-3 align-items-center">
+        <div class="col-auto">
+          <h2 class="mb-0">Runs</h2>
+        </div>
+      </div>
+
+      <div class="table-responsive scrollbar">
+        <table class="table fs-9 mb-0 border-top border-translucent">
+          <thead>
+          <tr>
+            <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Message</th>
+            <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">ID</th>
+            <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Status</th>
+            <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Created At</th>
+          </tr>
+          </thead>
+          <tbody class="list" id="project-list-table-body">
+          <% @runs.each do |run| %>
+            <tr class="position-static">
+              <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+                <%= run.message %>
+              </td>
+              <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+                <%= run.external_id %>
+              </td>
+              <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+                <%= run.status %>
+              </td>
+              <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+                <%= run.created_at %>
+              </td>
+            </tr>
+          <% end %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="footer position-absolute">
+  <div class="row g-0 justify-content-between align-items-center h-100">
+    <div class="col-12 col-sm-auto text-center">
+      <p class="mb-0 mt-2 mt-sm-0 text-body">Thank you for creating with Phoenix<span class="d-none d-sm-inline-block"></span><span class="d-none d-sm-inline-block mx-1">|</span><br class="d-sm-none" />2024 &copy;<a class="mx-1" href="https://themewagon.com">Themewagon</a></p>
+    </div>
+    <div class="col-12 col-sm-auto text-center">
+      <p class="mb-0 text-body-tertiary text-opacity-85">v1.19.0</p>
+    </div>
+  </div>
+</footer>

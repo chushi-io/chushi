@@ -1,0 +1,19 @@
+<div class="mb-5">
+  <div class="d-flex justify-content-between">
+    <h2 class="text-body-emphasis fw-bolder mb-2"><%= @workspace.name %></h2>
+    <br />
+    <h4 class="text-body-tertiary mb-0"><%= @workspace.external_id %></h4>
+    <div class="btn-reveal-trigger">
+      <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
+      <div class="dropdown-menu dropdown-menu-end py-2">
+        <% if @workspace.locked %>
+          <a class="dropdown-item" href="#!">Unlock</a>
+        <% else %>
+          <a class="dropdown-item" href="#!">Lock</a>
+        <% end %>
+        <a class="dropdown-item text-danger" href="#!">Delete</a>
+        <a class="dropdown-item" href="#!">Download</a>
+        <a class="dropdown-item" href="#!">Report abuse</a></div>
+    </div>
+  </div><span class="badge badge-phoenix badge-phoenix-success">Applied<span class="ms-1 uil uil-stopwatch"></span></span>
+</div>

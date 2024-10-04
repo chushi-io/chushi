@@ -1,6 +1,8 @@
 class Organization < ApplicationRecord
   @id_prefix = "org"
+
   acts_as_taggable_on :tags
+  acts_as_taggable_tenant :id
 
   has_many :workspaces
 

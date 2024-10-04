@@ -1,20 +1,45 @@
-<table class="table">
-  <tr>
-    <th>Name</th>
-    <th>Provider</th>
-    <th>Type</th>
-  </tr>
-  <% @vcs_connections.each do |conn| %>
-  <tr>
-    <td><%= conn.name %></td>
-    <td><%= conn.provider %></td>
-    <td><%= conn.github_type %></td>
-  </tr>
-  <% end %>
-</table>
+<div class="mb-9">
+  <div data-list='{"valueNames":["projectName","assignees","start","deadline","task","projectprogress","status","action"],"page":6,"pagination":true}'>
+    <div class="row mb-4 gx-6 gy-3 align-items-center">
+      <div class="col-auto">
+        <h2 class="mb-0">VCS Connections</h2>
+      </div>
+      <div class="col-auto">
+        <%= link_to "New VCS Connection", new_vcs_connection_path(@organization.name), class: "btn btn-primary px-5" %>
+      </div>
+    </div>
 
-<div class="w-full max-w-xs">
-  <div class="grid grid-cols-1">
-    <a class="btn btn-primary btn-sm" href="<%= new_vcs_connection_path %>">Create VCS Connection</a>
+    <div class="table-responsive scrollbar">
+      <table class="table fs-9 mb-0 border-top border-translucent">
+        <thead>
+        <tr>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Name</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Provider</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Type</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Created</th>
+        </tr>
+        </thead>
+        <tbody class="list" id="project-list-table-body">
+        <% @vcs_connections.each do |vcs_connection| %>
+          <tr class="position-static">
+            <td class="align-middle time white-space-nowrap ps-0 projectName py-4"><a class="fw-bold fs-8" href="<%= vcs_connection_path(@organization.name, vcs_connection.external_id) %>"><%= vcs_connection.name %></a></td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= vcs_connection.name %>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= vcs_connection.provider %>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= vcs_connection.github_type %>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= vcs_connection.created_at %>
+            </td>
+          </tr>
+        <% end %>
+
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

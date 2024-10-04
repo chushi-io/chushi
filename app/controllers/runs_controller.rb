@@ -27,7 +27,7 @@ class RunsController < AuthenticatedController
 
   private
   def set_workspace
-    @workspace = @organization.workspaces.find(params[:workspace_id])
+    @workspace = @organization.workspaces.find_by(external_id: params[:workspace_id])
   end
 
   def run_params

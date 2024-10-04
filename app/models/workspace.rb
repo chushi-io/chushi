@@ -1,5 +1,7 @@
 class Workspace < ApplicationRecord
   acts_as_taggable_on :tags
+  acts_as_taggable_tenant :organization_id
+
   belongs_to :organization
   belongs_to :vcs_connection, optional: true
   has_many :runs

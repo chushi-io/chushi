@@ -1,0 +1,64 @@
+
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><%= @organization.name %></li>
+    <li class="breadcrumb-item"><a href="<%= workspaces_path(@organization.name) %>">Workspaces</a></li>
+    <li class="breadcrumb-item"><%= @workspace.name %></li>
+    <li class="breadcrumb-item">Runs</li>
+  </ol>
+</nav>
+
+<div class="mb-9">
+  <div data-list='{"valueNames":["projectName","assignees","start","deadline","task","projectprogress","status","action"],"page":6,"pagination":true}'>
+    <div class="row mb-4 gx-6 gy-3 align-items-center">
+      <div class="col-auto">
+        <h2 class="mb-0">Workspaces</h2>
+      </div>
+      <div class="col-auto">
+        <%= link_to "Create Workspace", new_workspace_path(@organization.name), class: "btn btn-primary px-5" %>
+      </div>
+    </div>
+
+    <div class="table-responsive scrollbar">
+      <table class="table fs-9 mb-0 border-top border-translucent">
+        <thead>
+        <tr>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Name</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Status</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Environment</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Execution Mode</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="id" style="width:10%;">Tofu Version</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="id" style="width:10%;">Auto Apply</th>
+        </tr>
+        </thead>
+        <tbody class="list" id="project-list-table-body">
+        <% @workspaces.each do |workspace| %>
+          <tr class="position-static">
+            <td class="align-middle time white-space-nowrap ps-0 projectName py-4">
+              <a class="fw-bold fs-8" href="<%= workspace_path(@organization.name, workspace.external_id) %>">
+                <%= workspace.name %>
+              </a>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              TBD
+            </td>
+            <td class="align-middle white-space-nowrap start ps-3 py-4">
+              <p class="mb-0 fs-9 text-body"><%= workspace.environment %></p>
+            </td>
+            <td class="align-middle white-space-nowrap deadline ps-3 py-4">
+              <p class="mb-0 fs-9 text-body"><%= workspace.execution_mode %></p>
+            </td>
+            <td class="align-middle white-space-nowrap task ps-3 py-4">
+              <p class="fw-bo text-body fs-9 mb-0"><%= workspace.tofu_version %></p>
+            </td>
+            <td class="align-middle white-space-nowrap task ps-3 py-4">
+              <p class="fw-bo text-body fs-9 mb-0"><%= workspace.auto_apply %></p>
+            </td>
+          </tr>
+        <% end %>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

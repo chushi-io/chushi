@@ -5,6 +5,7 @@ class WorkspacesController < AuthenticatedController
 
   def show
     @workspace = @organization.workspaces.find_by(external_id: params[:id])
+    @runs = @workspace.runs.order("created_at desc").limit(10)
   end
 
   def new

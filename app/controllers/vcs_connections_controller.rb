@@ -29,7 +29,7 @@ class VcsConnectionsController < AuthenticatedController
   def destroy
     @organization.vcs_connections.destroy(params[:id])
     flash.info = "VCS Connection removed"
-    redirect_to vcs_connections_path
+    redirect_to vcs_connections_path(@organization.name)
   end
 
   private

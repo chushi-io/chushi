@@ -1,12 +1,37 @@
-<div class="w-full max-w-xs">
-  <%= form_with model: @vcs_connection do |form| %>
-    <%= form.label :name %>
-    <%= form.text_field :name, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.label :provider %>
-    <%= form.select :provider, ["github", "gitlab", "bitbucket", "git"], {}, class: "select select-bordered w-full max-w-xs" %>
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="<%= vcs_connections_path(@organization.name) %>">VCS Connections</a></li>
+    <li class="breadcrumb-item active">New</li>
+  </ol>
+</nav>
 
-    <%= form.label "Token" %>
-    <%= form.password_field :github_personal_access_token, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.submit "Create VCS Connection", class: "btn btn-primary btn-sm"  %>
-  <% end %>
+<h2 class="mb-4">Create a VCS connection</h2>
+
+<div class="row">
+  <div class="col-xl-9">
+    <%= form_with model: @vcs_connection, class: "row g-3 mb-6" do |form| %>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :name, class: "form-control" %>
+          <label for="floatingInputGrid">Name</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.select :provider, ["github", "bitbucket", "azuredo"], {}, {class: "form-select"} %>
+          <label for="floatingSelectTask">Provider</label>
+        </div>
+      </div>
+      <div class="col-12 gy-6">
+        <div class="row g-3 justify-content-end">
+          <div class="col-auto">
+            <%= link_to "Cancel", vcs_connections_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
+          </div>
+          <div class="col-auto">
+            <%= form.submit "Create Connection", class: "btn btn-primary px-5 px-sm-15" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>
