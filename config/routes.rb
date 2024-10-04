@@ -17,17 +17,20 @@ Rails.application.routes.draw do
           resources :runs
         end
 
-        resources :state_versions
-        resources :applies
-        resources :plans
-        resources :runs
         resources :agents
+        resources :applies
         resources :configuration_versions
+        resources :plans
+        resources :policies
+        resources :policy_sets
+        resources :projects
+        resources :runs
+        resources :state_versions
+        resources :teams
+        resources :users
         resources :variables
         resources :variable_sets
         resources :vcs_connections
-        resources :policies
-        resources :policy_sets
       end
       end
 

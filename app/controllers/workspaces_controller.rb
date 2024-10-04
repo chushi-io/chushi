@@ -4,7 +4,7 @@ class WorkspacesController < AuthenticatedController
   end
 
   def show
-    @workspace = @organization.workspaces.find(params[:id])
+    @workspace = @organization.workspaces.find_by(external_id: params[:id])
   end
 
   def new
@@ -29,7 +29,7 @@ class WorkspacesController < AuthenticatedController
 
   def destroy
     if @organization.workspaces.destroy(params[:id])
-      redirect_to workspaces_path
+      redirect_to workspaces_path(@organization.name)
     else
       flash[:error] = "Failed deleting workspace"
     end

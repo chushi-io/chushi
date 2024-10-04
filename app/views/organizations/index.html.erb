@@ -22,7 +22,7 @@
         <tbody class="list" id="project-list-table-body">
         <% @organizations.each do |organization| %>
           <tr class="position-static">
-            <td class="align-middle time white-space-nowrap ps-0 projectName py-4"><a class="fw-bold fs-8" href="<%= organization_path(organization) %>"><%= organization.name %></a></td>
+            <td class="align-middle time white-space-nowrap ps-0 projectName py-4"><a class="fw-bold fs-8" href="<%= workspaces_path(organization.name) %>"><%= organization.name %></a></td>
             <td class="align-middle white-space-nowrap assignees ps-3 py-4">
               <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                 <div class="avatar avatar-s  rounded-circle">

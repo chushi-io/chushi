@@ -16,4 +16,4 @@
 <h3>ID: <%= @workspace.id %></h3>
 
 <h2>Current State</h2>
-<a href="<%= workspace_runs_path @workspace %>">View Runs</a>
+<a href="<%= workspace_runs_path(@organization.name, @workspace.external_id) %>">View Runs</a>

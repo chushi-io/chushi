@@ -18,6 +18,10 @@ class OrganizationsController < AuthenticatedController
     @organization.email = current_user.email
 
     if @organization.save
+      # TODO: Trigger a job to create
+      # - default project
+      # - default agent
+      # - default team(s)
       redirect_to @organization
     else
       render :action => "new"

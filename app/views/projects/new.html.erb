@@ -1,0 +1,44 @@
+<%#= form_with model: @organization do |form| %>
+<%#= form.text_field :name %>
+<%#= form.select :organization_type, ["personal", "business"] %>
+<%#= form.submit %>
+<%# end %>
+
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="<%= projects_path(@organization.name) %>">Projects</a></li>
+    <li class="breadcrumb-item active">New</li>
+  </ol>
+</nav>
+
+<h2 class="mb-4">Create a project</h2>
+
+<div class="row">
+  <div class="col-xl-9">
+    <%= form_with model: @project, class: "row g-3 mb-6" do |form| %>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :name, class: "form-control" %>
+          <label for="floatingInputGrid">Name</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :description, class: "form-control" %>
+          <label for="floatingInputGrid">Description</label>
+        </div>
+      </div>
+
+      <div class="col-12 gy-6">
+        <div class="row g-3 justify-content-end">
+          <div class="col-auto">
+            <%= link_to "Cancel", projects_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
+          </div>
+          <div class="col-auto">
+            <%= form.submit "Create Project", class: "btn btn-primary px-5 px-sm-15" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
