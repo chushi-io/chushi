@@ -11,8 +11,11 @@ class OrganizationsController < AuthenticatedController
 
   def create
     @organization = Organization.new(organization_params)
+    # TODO: We should manage the organization_membership directly,
+    # so we can set admin level access for the user
     @organization.users << current_user
-    @organization.email << current_user.email
+    # TODO: Use a better method for getting email, maybe form field
+    @organization.email = current_user.email
 
     if @organization.save
       redirect_to @organization
