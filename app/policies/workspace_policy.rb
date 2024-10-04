@@ -69,13 +69,13 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def create_run?
-    (agent.present? && agent.id == record.agent_id) ||
+    (agent.present? && agent.id == record.agent_pool_id) ||
       (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id)) ||
       (organization.present? && organization.id == record.organization_id)
   end
 
   def state_versions?
-    (agent.present? && agent.id == record.agent_id) ||
+    (agent.present? && agent.id == record.agent_pool_id) ||
       (user.present? && user.organizations.map{|org| org.id}.include?(record.organization_id)) ||
       (run.present? && run.workspace_id == record.id)
   end

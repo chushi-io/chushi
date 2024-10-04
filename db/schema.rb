@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_04_003112) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -58,7 +58,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "agents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "agent_pools", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.uuid "organization_id"
     t.string "status"
@@ -70,10 +70,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
     t.datetime "last_ping_at", precision: nil
     t.string "ip_address"
     t.boolean "organization_scoped", default: false
-    t.index ["api_key"], name: "index_agents_on_api_key", unique: true
+    t.index ["api_key"], name: "index_agent_pools_on_api_key", unique: true
+    t.index ["external_id"], name: "index_agent_pools_on_external_id", unique: true
+    t.index ["organization_id", "name"], name: "index_agent_pools_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_agent_pools_on_organization_id"
+  end
+
+  create_table "agents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "agent_pool_id"
+    t.string "status"
+    t.string "name"
+    t.string "ip_address"
+    t.datetime "last_ping_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_pool_id"], name: "index_agents_on_agent_pool_id"
     t.index ["external_id"], name: "index_agents_on_external_id", unique: true
-    t.index ["organization_id", "name"], name: "index_agents_on_organization_id_and_name", unique: true
-    t.index ["organization_id"], name: "index_agents_on_organization_id"
   end
 
   create_table "applies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -761,11 +774,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "agents", "organizations"
+  add_foreign_key "agent_pools", "organizations"
+  add_foreign_key "agents", "agent_pools"
   add_foreign_key "applies", "organizations"
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
-  add_foreign_key "jobs", "agents"
+  add_foreign_key "jobs", "agent_pools", column: "agent_id"
   add_foreign_key "jobs", "organizations"
   add_foreign_key "jobs", "runs"
   add_foreign_key "jobs", "workspaces"
@@ -778,7 +792,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
   add_foreign_key "organization_memberships", "users"
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
-  add_foreign_key "organizations", "agents"
+  add_foreign_key "organizations", "agent_pools", column: "agent_id"
   add_foreign_key "plans", "organizations"
   add_foreign_key "policies", "organizations"
   add_foreign_key "policies", "policy_sets"
@@ -789,7 +803,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
   add_foreign_key "run_tasks", "organizations"
   add_foreign_key "run_triggers", "workspaces"
   add_foreign_key "run_triggers", "workspaces", column: "sourceable_id"
-  add_foreign_key "runs", "agents"
+  add_foreign_key "runs", "agent_pools", column: "agent_id"
   add_foreign_key "runs", "applies"
   add_foreign_key "runs", "configuration_versions"
   add_foreign_key "runs", "organizations"
@@ -820,7 +834,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_25_150809) do
   add_foreign_key "workspace_teams", "organizations"
   add_foreign_key "workspace_teams", "teams"
   add_foreign_key "workspace_teams", "workspaces"
-  add_foreign_key "workspaces", "agents", column: "agent_pool_id"
+  add_foreign_key "workspaces", "agent_pools"
   add_foreign_key "workspaces", "organizations"
   add_foreign_key "workspaces", "projects"
   add_foreign_key "workspaces", "state_versions", column: "current_state_version_id"

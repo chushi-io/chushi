@@ -7,27 +7,34 @@ Rails.application.routes.draw do
   get '.well-known/terraform.json', :controller => :well_known, :action => :terraform
   get 'github/setup', :controller => :github, :action => :setup
 
-  # Application Routing
-  resources :workspaces do
-    resources :runs
-  end
+  scope 'app' do
+    resources :organizations
 
-  resources :state_versions
-  resources :applies
-  resources :plans
-  resources :runs
-  resources :agents
-  resources :configuration_versions
-  resources :variables
-  resources :variable_sets
-  resources :vcs_connections
-  resources :policies
-  resources :policy_sets
-  resources :organizations do
-    resources :access_tokens, :controller => "organization_tokens", as: :access_tokens
-  end
+    resources :organizations, only: [], path: '', param: :organization do
+      member do
+        # Application Routing
+        resources :workspaces do
+          resources :runs
+        end
 
-  resources :access_tokens, :controller => "user_tokens", as: :access_tokens
+        resources :state_versions
+        resources :applies
+        resources :plans
+        resources :runs
+        resources :agents
+        resources :configuration_versions
+        resources :variables
+        resources :variable_sets
+        resources :vcs_connections
+        resources :policies
+        resources :policy_sets
+      end
+      end
+
+
+    resources :access_tokens, :controller => "user_tokens", as: :access_tokens
+
+  end
 
   # Registry Routes
   namespace :registry, defaults: {format: :json} do
@@ -51,8 +58,6 @@ Rails.application.routes.draw do
       end
     end
   end
-
-  match "org_selector" => "organizations#selector", as: :organization_selector, via: [:get, :post]
 
   # API Routes
   namespace :api, defaults: {format: :json} do
@@ -246,5 +251,5 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
-  root "workspaces#index"
+  root "organizations#index"
 end

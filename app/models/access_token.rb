@@ -4,7 +4,7 @@ class AccessToken < ApplicationRecord
   before_create -> { generate_id("at") }
 
   # belongs_to :user, optional: true
-  # belongs_to :agent, optional: true
+  # belongs_to :agent_pool, optional: true
   # belongs_to :team, optional: true
   # belongs_to :organization, optional: true
 

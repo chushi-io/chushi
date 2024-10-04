@@ -1,3 +1,5 @@
 server: rails s
 sidekiq: bundle exec sidekiq -q default
 proxy: ngrok http --domain=$NGROK_DOMAIN --log=stdout 3000
+css: yarn watch:css
+js: yarn build --watch

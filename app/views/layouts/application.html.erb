@@ -5,24 +5,47 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%#= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/vendor/img/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/vendor/img/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/vendor/img/favicons/favicon-16x16.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/vendor/img/favicons/favicon.ico">
+    <link rel="manifest" href="/vendor/img/favicons/manifest.json">
+    <meta name="msapplication-TileImage" content="/vendor/img/favicons/mstile-150x150.png">
+    <meta name="theme-color" content="#ffffff">
+    <script src="/vendors/simplebar/simplebar.min.js"></script>
+    <script src="/vendor/js/config.js"></script>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.35.0/ace.min.js" integrity="sha512-GvzpUyByBrTHeLRBgrFrSnDcXdakzubmOAwoC7Jo2FNayYURzIeX1tRZKGyRxVCfz0Go2EIV69o7i/vvbyywgQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <!-- Phoenix CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+    <link href="/vendors/simplebar/simplebar.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
+    <link href="/vendor/css/theme-rtl.css" type="text/css" rel="stylesheet" id="style-rtl">
+    <link href="/vendor/css/theme.min.css" type="text/css" rel="stylesheet" id="style-default">
+    <link href="/vendor/css/user-rtl.min.css" type="text/css" rel="stylesheet" id="user-style-rtl">
+    <link href="/vendor/css/user.min.css" type="text/css" rel="stylesheet" id="user-style-default">
+    <link href="/vendors/leaflet/leaflet.css" rel="stylesheet">
+    <link href="/vendors/leaflet.markercluster/MarkerCluster.css" rel="stylesheet">
+    <link href="/vendors/leaflet.markercluster/MarkerCluster.Default.css" rel="stylesheet">
   </head>
 
   <body>
-    <% if current_user %>
-      <%= render "partials/navbar" %>
-      <%= render "partials/sidebar" %>
-    <% end %>
-    <% flash.each do |type, msg| %>
-      <div>
-        <%= msg %>
-      </div>
-    <% end %>
-    <%= yield %>
+    <main class="main" id="top">
+      <% if current_user %>
+        <%= render "partials/navbar" %>
+        <div class="content">
+          <%= yield %>
+        </div>
+      <% else %>
+        <%= yield %>
+      <% end %>
+      <%= render "partials/support_container" %>
+    </main>
   </body>
 </html>

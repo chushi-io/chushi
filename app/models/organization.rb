@@ -4,7 +4,7 @@ class Organization < ApplicationRecord
 
   has_many :workspaces
 
-  has_many :agents
+  has_many :agent_pools
   has_many :vcs_connections
   has_one :access_token, as: :token_authable
   has_many :plans

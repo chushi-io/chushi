@@ -58,3 +58,6 @@ gem "httpparty", "~> 0.2.0"
 gem "ruby-terraform", "~> 1.8"
 gem 'rubyzip', require: 'zip'
 gem 'config'
+gem "cssbundling-rails", "~> 1.4"
+
+gem "jsbundling-rails", "~> 1.3"
