@@ -30,7 +30,7 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
-/public/vendor
+#/public/vendor
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
