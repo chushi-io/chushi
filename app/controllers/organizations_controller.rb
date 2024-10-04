@@ -12,6 +12,7 @@ class OrganizationsController < AuthenticatedController
   def create
     @organization = Organization.new(organization_params)
     @organization.users << current_user
+    @organization.email << current_user.email
 
     if @organization.save
       redirect_to @organization
