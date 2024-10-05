@@ -5,7 +5,7 @@ class RunsController < AuthenticatedController
   end
 
   def show
-    @run = @workspace.runs.find(params[:id])
+    @run = @workspace.runs.find_by(external_id: params[:id])
   end
 
   def new

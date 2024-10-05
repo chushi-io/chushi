@@ -50,7 +50,7 @@
           </thead>
           <tbody class="list" id="project-list-table-body">
           <% @runs.each do |run| %>
-            <tr class="position-static">
+            <tr class="position-static" onclick="location.href = '<%= workspace_run_path(@organization.name, run.workspace.external_id, run.external_id) %>';">
               <td class="align-middle white-space-nowrap assignees ps-3 py-4">
                 <%= run.message %>
               </td>

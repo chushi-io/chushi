@@ -1,0 +1,17 @@
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><%= @organization.name %></li>
+    <li class="breadcrumb-item"><a href="<%= workspaces_path(@organization.name) %>">Workspaces</a></li>
+    <li class="breadcrumb-item"><a href="<%= workspace_path(@organization.name, @run.workspace.external_id) %>"><%= @workspace.name %></a></li>
+    <li class="breadcrumb-item"><a href="<%= workspace_runs_path(@organization.name, @run.workspace.external_id) %>">Runs</a></li>
+    <li class="breadcrumb-item"><%= @run.external_id %></li>
+  </ol>
+</nav>
+
+<div class="row g-0">
+  <div class="col-12 col-xxl-12 px-0 bg-body">
+    <div class="px-4 px-lg-6 pt-6 pb-9">
+      <%= render "workspaces/partials/header" %>
+    </div>
+  </div>
+</div>
