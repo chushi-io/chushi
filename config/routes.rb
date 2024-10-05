@@ -67,6 +67,8 @@ Rails.application.routes.draw do
     namespace :v2 do
       post :webhooks, action: :create, :controller => "webhooks"
       get :ping, action: :ping, :controller => "ping"
+      get "account/details", action: :show, :controller => :account_details
+
       scope "/organizations/:organization_id", as: :organization do
         get "", action: :show, :controller => "organizations"
         patch "", action: :update, :controller => "organizations"
