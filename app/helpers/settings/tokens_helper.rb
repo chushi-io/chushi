@@ -1,0 +1,2 @@
+module Settings::TokensHelper
+end

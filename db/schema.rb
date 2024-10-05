@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_04_003112) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -556,6 +556,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_003112) do
     t.index ["run_id"], name: "index_task_stages_on_run_id"
   end
 
+  create_table "team_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "organization_id"
+    t.uuid "team_id"
+    t.uuid "user_id"
+    t.string "external_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_team_memberships_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_team_memberships_on_organization_id"
+    t.index ["team_id", "user_id"], name: "index_team_memberships_on_team_id_and_user_id", unique: true
+    t.index ["team_id"], name: "index_team_memberships_on_team_id"
+    t.index ["user_id"], name: "index_team_memberships_on_user_id"
+  end
+
   create_table "team_projects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organization_id"
     t.uuid "project_id"
@@ -818,6 +832,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_003112) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "task_results", "task_stages"
   add_foreign_key "task_stages", "runs"
+  add_foreign_key "team_memberships", "organizations"
+  add_foreign_key "team_memberships", "teams"
+  add_foreign_key "team_memberships", "users"
   add_foreign_key "team_projects", "organizations"
   add_foreign_key "team_projects", "projects"
   add_foreign_key "team_projects", "teams"

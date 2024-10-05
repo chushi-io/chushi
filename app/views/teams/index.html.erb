@@ -2,10 +2,10 @@
   <div data-list='{"valueNames":["projectName","assignees","start","deadline","task","projectprogress","status","action"],"page":6,"pagination":true}'>
     <div class="row mb-4 gx-6 gy-3 align-items-center">
       <div class="col-auto">
-        <h2 class="mb-0">Policies</h2>
+        <h2 class="mb-0">Teams</h2>
       </div>
       <div class="col-auto">
-        <%= link_to "Create Policy", new_policy_path(@organization.name), class: "btn btn-primary px-5" %>
+        <%= link_to "Create Team", new_team_path(@organization.name), class: "btn btn-primary px-5" %>
       </div>
     </div>
 
@@ -14,31 +14,27 @@
         <thead>
         <tr>
           <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Name</th>
-          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Description</th>
-          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Type</th>
-          <th class="sort align-middle ps-3" scope="col" data-sort="id" style="width:10%;">Query</th>
-          <th class="sort align-middle ps-3" scope="col" data-sort="id" style="width:10%;">Enforcement</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">External ID</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Users</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="id" style="width:10%;">Visibility</th>
         </tr>
         </thead>
         <tbody class="list" id="project-list-table-body">
-        <% @policies.each do |policy| %>
+        <% @teams.each do |team| %>
           <tr class="position-static">
             <td class="align-middle time white-space-nowrap ps-0 projectName py-4">
-              <a class="fw-bold fs-8" href="<%= policy_path(@organization.name, policy.external_id) %>">
-                <%= policy.name %>
+              <a class="fw-bold fs-8" href="<%= team_path(@organization.name, team.external_id) %>">
+                <%= team.name %>
               </a>
             </td>
             <td class="align-middle white-space-nowrap assignees ps-3 py-4">
-              <%= policy.description %>
+              <%= team.external_id %>
             </td>
             <td class="align-middle white-space-nowrap assignees ps-3 py-4">
-              <%= policy.type %>
+              <%= team.users.length %>
             </td>
             <td class="align-middle white-space-nowrap assignees ps-3 py-4">
-              <%= policy.query %>
-            </td>
-            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
-              <%= policy.enforcement_level %>
+              <%= team.visibility %>
             </td>
           </tr>
         <% end %>

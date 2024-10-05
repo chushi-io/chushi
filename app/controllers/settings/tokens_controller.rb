@@ -1,4 +1,4 @@
-class UserTokensController < AuthenticatedController
+class Settings::TokensController < AuthenticatedController
   skip_before_action :set_organization!
 
   def index
@@ -18,7 +18,7 @@ class UserTokensController < AuthenticatedController
     @token.token_authable = current_user
     if @token.save
       flash[:info] = "Access token created: #{@token.token}"
-      redirect_to access_tokens_path
+      redirect_to settings_tokens_path
     else
       render "new"
     end
@@ -27,7 +27,7 @@ class UserTokensController < AuthenticatedController
   def destroy
     current_user.access_tokens.destroy(params[:id])
     flash[:info] = "Access token deleted"
-    redirect_to access_tokens_path
+    redirect_to settings_tokens_path
   end
 
   private

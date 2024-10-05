@@ -14,12 +14,12 @@ class ProjectsController < AuthenticatedController
     if @project.save
       redirect_to project_path(@organization.name, @project.external_id)
     else
-      render :action => "new"
+      render "new"
     end
   end
 
   def show
-    
+
   end
 
   def edit

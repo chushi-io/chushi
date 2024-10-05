@@ -1,0 +1,67 @@
+<!--<table class="table">-->
+<!--  <tr>-->
+<!--    <th>ID</th>-->
+<!--    <th>Name</th>-->
+<!--    <th>Status</th>-->
+<!--  </tr>-->
+  <%# @agents.each do |agent| %>
+<!--  <tr>-->
+<!--    <td><a href="<%#= agent_path agent %>"><%#= agent.id %></a></td>-->
+<!--    <td><%#= agent.name %></td>-->
+<!--    <td><%#= agent.status %></td>-->
+<!--  </tr>-->
+  <%# end %>
+<!--</table>-->
+
+<!--<div class="w-full max-w-xs">-->
+<!--  <div class="grid grid-cols-1">-->
+<!--    <a class="btn btn-primary btn-sm" href="<%#= new_agent_path %>">Create Agent</a>-->
+<!--  </div>-->
+<!--</div>-->
+
+<div class="mb-9">
+  <div data-list='{"valueNames":["projectName","assignees","start","deadline","task","projectprogress","status","action"],"page":6,"pagination":true}'>
+    <div class="row mb-4 gx-6 gy-3 align-items-center">
+      <div class="col-auto">
+        <h2 class="mb-0">Agent Pools</h2>
+      </div>
+      <div class="col-auto">
+        <%= link_to "Create Agent Pool", new_agent_pool_path(@organization.name), class: "btn btn-primary px-5" %>
+      </div>
+    </div>
+
+    <div class="table-responsive scrollbar">
+      <table class="table fs-9 mb-0 border-top border-translucent">
+        <thead>
+        <tr>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Name</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Organization Scoped</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Agent Count</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="id" style="width:10%;">Created At</th>
+        </tr>
+        </thead>
+        <tbody class="list" id="project-list-table-body">
+        <% @agent_pools.each do |agent_pool| %>
+          <tr class="position-static">
+            <td class="align-middle time white-space-nowrap ps-0 projectName py-4">
+              <a class="fw-bold fs-8" href="<%= agent_pool_path(@organization.name, agent_pool.external_id) %>">
+                <%= agent_pool.name %>
+              </a>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= agent_pool.organization_scoped %>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              0
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= agent_pool.created_at %>
+            </td>
+          </tr>
+        <% end %>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

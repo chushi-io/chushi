@@ -1,6 +1,6 @@
 <nav class="mb-3" aria-label="breadcrumb">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="<%= policies_path(@organization.name) %>">Policies</a></li>
+    <li class="breadcrumb-item"><a href="<%= teams_path(@organization.name) %>">Teams</a></li>
     <li class="breadcrumb-item active">New</li>
   </ol>
 </nav>
@@ -9,41 +9,34 @@
 
 <div class="row">
   <div class="col-xl-9">
-    <%= form_with model: @policy, class: "row g-3 mb-6" do |form| %>
+    <%= form_with model: @team, class: "row g-3 mb-6" do |form| %>
       <div class="col-sm-6 col-md-8">
         <div class="form-floating">
           <%= form.text_field :name, class: "form-control" %>
           <label for="floatingInputGrid">Name</label>
         </div>
       </div>
-      <div class="col-sm-6 col-md-8">
-        <div class="form-floating">
-          <%= form.text_field :description, class: "form-control" %>
-          <label for="floatingInputGrid">Description</label>
-        </div>
-      </div>
-
       <div class="col-sm-6 col-md-4">
         <div class="form-floating">
-          <%= form.select :enforcement_level, ["advisory", "mandatory"], {}, {class: "form-select"} %>
-          <label for="floatingSelectTask">Type</label>
+          <%= form.select :visibility, ["secret", "organization"], {}, {class: "form-select"} %>
+          <label for="floatingSelectTask">Visibility</label>
         </div>
       </div>
 
       <div class="col-sm-6 col-md-8">
         <div class="form-floating">
-          <%= form.text_field :query, class: "form-control" %>
-          <label for="floatingInputGrid">Query</label>
+          <%= form.text_field :sso_team_id, class: "form-control" %>
+          <label for="floatingInputGrid">SSO Team ID</label>
         </div>
       </div>
 
       <div class="col-12 gy-6">
         <div class="row g-3 justify-content-end">
           <div class="col-auto">
-            <%= link_to "Cancel", policies_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
+            <%= link_to "Cancel", teams_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
           </div>
           <div class="col-auto">
-            <%= form.submit "Create Policy", class: "btn btn-primary px-5 px-sm-15" %>
+            <%= form.submit "Create Team", class: "btn btn-primary px-5 px-sm-15" %>
           </div>
         </div>
       </div>

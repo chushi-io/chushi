@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   get 'github/setup', :controller => :github, :action => :setup
 
   scope 'app' do
+    namespace :settings do
+      resources :tokens
+    end
     resources :organizations
 
     resources :organizations, only: [], path: '', param: :organization do
@@ -17,7 +20,7 @@ Rails.application.routes.draw do
           resources :runs
         end
 
-        resources :agents
+        resources :agent_pools
         resources :applies
         resources :configuration_versions
         resources :plans
@@ -25,6 +28,7 @@ Rails.application.routes.draw do
         resources :policy_sets
         resources :projects
         resources :runs
+        resources :run_tasks
         resources :state_versions
         resources :teams
         resources :users
@@ -32,11 +36,7 @@ Rails.application.routes.draw do
         resources :variable_sets
         resources :vcs_connections
       end
-      end
-
-
-    resources :access_tokens, :controller => "user_tokens", as: :access_tokens
-
+    end
   end
 
   # Registry Routes

@@ -1,0 +1,38 @@
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="<%= agent_pools_path(@organization.name) %>">Agent Pools</a></li>
+    <li class="breadcrumb-item active">New</li>
+  </ol>
+</nav>
+
+<h2 class="mb-4">Create an Agent Pool</h2>
+
+<div class="row">
+  <div class="col-xl-9">
+    <%= form_with model: @agent_pool, class: "row g-3 mb-6" do |form| %>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :name, class: "form-control" %>
+          <label for="floatingInputGrid">Name</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-check mb-0">
+          <%= form.check_box :organization_scoped, class: "form-check-input" %>
+          <%= form.label :organization_scoped, class: "form-check-label mb-0" %>
+        </div>
+      </div>
+
+      <div class="col-12 gy-6">
+        <div class="row g-3 justify-content-end">
+          <div class="col-auto">
+            <%= link_to "Cancel", agent_pools_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
+          </div>
+          <div class="col-auto">
+            <%= form.submit "Create Agent Pool", class: "btn btn-primary px-5 px-sm-15" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
