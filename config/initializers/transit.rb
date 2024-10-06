@@ -6,6 +6,7 @@ Vault::Rails.configure do |vault|
 
   # Set up approle configuration
   if Rails.env.production?
+    vault.namespace = ENV.fetch("VAULT_NAMESPACE", "admin")
     vault.auth.approle(ENV.fetch("VAULT_ROLE_ID", ""), ENV.fetch("VAULT_SECRET_ID", ""))
   end
 end
