@@ -18,7 +18,7 @@ class Api::V2::JobsController < Api::ApiController
     end
     @jobs = Job.
       select('DISTINCT ON (workspace_id) *').
-      where(agent_id: params[:id]).
+      where(agent_pool_id: params[:id]).
       where(locked: false).
       order(workspace_id: :asc, created_at: :desc).
       limit(10)

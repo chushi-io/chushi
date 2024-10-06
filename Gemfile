@@ -63,3 +63,4 @@ gem "cssbundling-rails", "~> 1.4"
 gem "jsbundling-rails", "~> 1.3"
 
 gem "scout_apm", "~> 5.4"
+gem "vault-rails", require: false

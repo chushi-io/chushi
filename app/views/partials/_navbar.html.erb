@@ -22,17 +22,17 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">
+                  <a class="nav-link" href="<%= vcs_connections_path(@organization.name) %>">
                     <div class="d-flex align-items-center">
-                      <span class="nav-link-text">Registry</span>
+                      <span class="nav-link-text">VCS Connections</span>
                     </div>
                   </a>
                   <!-- more inner pages-->
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="<%= vcs_connections_path(@organization.name) %>">
+                  <a class="nav-link" href="<%= variable_sets_path(@organization.name) %>">
                     <div class="d-flex align-items-center">
-                      <span class="nav-link-text">VCS Connections</span>
+                      <span class="nav-link-text">Variable Sets</span>
                     </div>
                   </a>
                   <!-- more inner pages-->
@@ -103,6 +103,25 @@
           } %>
           <%= render partial: "partials/navbar_link", locals: {
             label: "Tokens",
+            path: "#"
+          } %>
+        </li>
+        <li class="nav-item">
+          <!-- label-->
+          <p class="navbar-vertical-label">Registry
+          </p>
+          <hr class="navbar-vertical-line" />
+          <!-- parent pages-->
+          <%= render partial: "partials/navbar_link", locals: {
+            label: "Providers",
+            path: "#"
+          } %>
+          <%= render partial: "partials/navbar_link", locals: {
+            label: "Modules",
+            path: "#"
+          } %>
+          <%= render partial: "partials/navbar_link", locals: {
+            label: "GPG Keys",
             path: "#"
           } %>
         </li>

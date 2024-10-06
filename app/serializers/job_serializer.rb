@@ -19,7 +19,7 @@ class JobSerializer
   end
 
   belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id do |object|
-    object.agent
+    object.agent_pool
   end
 
   belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name do |object|

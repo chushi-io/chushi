@@ -37,7 +37,7 @@ class Api::V2::WorkspacesController < Api::ApiController
     authorize! @workspace
     update_params=Hash[workspace_params]
     if update_params.key?("agent_pool_id")
-      @agent = Agent.find_by(external_id: update_params["agent_pool_id"])
+      @agent = AgentPool.find_by(external_id: update_params["agent_pool_id"])
       authorize! @agent, to: :update?
       update_params["agent_pool_id"] = @agent.id
     end

@@ -6,7 +6,7 @@ class RunStage::QueuingJob
     @job = Job.new
     @job.run = @run
     @job.workspace = @run.workspace
-    @job.agent = @run.workspace.agent_pool
+    @job.agent_pool = @run.workspace.agent_pool
     @job.organization = @run.workspace.organization
     @job.locked = false
     @job.status = 'pending'

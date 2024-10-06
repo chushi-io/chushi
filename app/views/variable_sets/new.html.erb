@@ -1,0 +1,52 @@
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="<%= variable_sets_path(@organization.name) %>">Variable Sets</a></li>
+    <li class="breadcrumb-item active">New</li>
+  </ol>
+</nav>
+
+<h2 class="mb-4">Create a variable set</h2>
+
+<div class="row">
+  <div class="col-xl-9">
+    <%= form_with model: @variable_set, class: "row g-3 mb-6" do |form| %>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :name, class: "form-control" %>
+          <label for="floatingInputGrid">Name</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :description, class: "form-control" %>
+          <label for="floatingInputGrid">Description</label>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-8">
+        <div class="form-check mb-0">
+          <%= form.check_box :auto_attach, class: "form-check-input" %>
+          <%= form.label :auto_attach, class: "form-check-label mb-0" %>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-8">
+        <div class="form-check mb-0">
+          <%= form.check_box :priority, class: "form-check-input" %>
+          <%= form.label :priority, class: "form-check-label mb-0" %>
+        </div>
+      </div>
+
+      <div class="col-12 gy-6">
+        <div class="row g-3 justify-content-end">
+          <div class="col-auto">
+            <%= link_to "Cancel", variable_sets_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
+          </div>
+          <div class="col-auto">
+            <%= form.submit "Create Variable Set", class: "btn btn-primary px-5 px-sm-15" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

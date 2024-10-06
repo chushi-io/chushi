@@ -74,7 +74,7 @@ class Api::ApiController < ActionController::API
 
   def current_agent
     if is_agent
-      Agent.find(@access_token.token_authable_id)
+      AgentPool.find(@access_token.token_authable_id)
     end
   end
 

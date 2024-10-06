@@ -25,6 +25,6 @@ class JobPolicy < ApplicationPolicy
 
   private
   def can_manage_job?
-    agent.present? && agent.id == record.agent_id
+    agent.present? && agent.id == record.agent_pool_id
   end
 end

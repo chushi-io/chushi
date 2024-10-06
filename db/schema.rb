@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_06_003127) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -134,7 +134,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.string "operation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "agent_pool_id"
     t.index ["agent_id"], name: "index_jobs_on_agent_id"
+    t.index ["agent_pool_id"], name: "index_jobs_on_agent_pool_id"
     t.index ["organization_id"], name: "index_jobs_on_organization_id"
     t.index ["run_id"], name: "index_jobs_on_run_id"
     t.index ["workspace_id"], name: "index_jobs_on_workspace_id"
@@ -151,6 +153,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.string "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "token_encrypted"
     t.index ["external_id"], name: "index_notification_configurations_on_external_id", unique: true
     t.index ["workspace_id", "name"], name: "index_notification_configurations_on_workspace_id_and_name", unique: true
     t.index ["workspace_id", "url"], name: "index_notification_configurations_on_workspace_id_and_url", unique: true
@@ -392,6 +395,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "hmac_key_encrypted"
     t.index ["external_id"], name: "index_run_tasks_on_external_id", unique: true
     t.index ["organization_id"], name: "index_run_tasks_on_organization_id"
   end
@@ -445,6 +449,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.text "private_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "private_key_encrypted"
     t.index ["external_id"], name: "index_ssh_keys_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_ssh_keys_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_ssh_keys_on_organization_id"
@@ -488,6 +493,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "value_encrypted"
     t.index ["external_id"], name: "index_state_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_state_versions_on_organization_id"
     t.index ["run_id"], name: "index_state_versions_on_run_id"
@@ -663,6 +669,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.uuid "variable_set_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "value_encrypted"
     t.index ["external_id"], name: "index_variables_on_external_id", unique: true
     t.index ["organization_id"], name: "index_variables_on_organization_id"
     t.index ["variable_set_id"], name: "index_variables_on_variable_set_id"
@@ -685,6 +692,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "github_installation_id"
+    t.string "github_personal_access_token_encrypted"
+    t.string "github_application_secret_encrypted"
+    t.string "github_oauth_application_secret_encrypted"
+    t.string "webhook_secret_encrypted"
     t.index ["external_id"], name: "index_vcs_connections_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_vcs_connections_on_organization_id_and_name"
     t.index ["organization_id"], name: "index_vcs_connections_on_organization_id"
@@ -793,6 +804,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_05_005907) do
   add_foreign_key "applies", "organizations"
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
+  add_foreign_key "jobs", "agent_pools"
   add_foreign_key "jobs", "agent_pools", column: "agent_id"
   add_foreign_key "jobs", "organizations"
   add_foreign_key "jobs", "runs"

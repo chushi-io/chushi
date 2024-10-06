@@ -1,4 +1,8 @@
 class VariablesController < AuthenticatedController
+  def index
+    @variables = @organization.variables
+  end
+
   def new
     if params[:type] == "workspace"
       @workspace = Workspace.find(params[:workspace])
