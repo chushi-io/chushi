@@ -15,6 +15,8 @@ class PlanSerializer < ApplicationSerializer
   attribute :resource_destructions
   attribute :resource_imports
   attribute :status
+
+  # This URL should be treated as a secret
   attribute :log_read_url do |object|
     "#{Chushi.timber_url}/files/#{object.run.external_id}_plan.log"
   end
