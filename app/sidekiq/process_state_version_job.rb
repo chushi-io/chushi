@@ -78,7 +78,7 @@ class ProcessStateVersionJob
         # TODO: This is probably wildly inefficient
         found = false
         @resources.each do |obj|
-          if obj["name"] == resource_name && obj["type"] == resource_type && obj["module"] == path && obj["provider"] == provider_key
+          if obj[:name] == resource_name && obj[:type] == resource_type && obj[:module] == path && obj[:provider] == provider_key
             obj.count += 1
             found = true
             break
