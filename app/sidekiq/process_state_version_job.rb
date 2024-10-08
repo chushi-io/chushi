@@ -5,7 +5,7 @@ class ProcessStateVersionJob
     @version = StateVersion.find(args.first)
     unless @version.json_state_file.attached?
       puts "State version has not been uploaded"
-      return
+      raise ActiveRecord::RecordNotFound
     end
     if @version.resources_processed
       puts "State version already processed"
