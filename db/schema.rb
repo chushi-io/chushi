@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_06_003127) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -26,6 +26,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_06_003127) do
     t.datetime "updated_at", null: false
     t.string "description", limit: 255
     t.datetime "last_used_at", precision: nil
+    t.string "token_encrypted"
     t.index ["token"], name: "index_access_tokens_on_token", unique: true
     t.index ["token_authable_type", "token_authable_id"], name: "index_access_tokens_on_token_authable"
   end
