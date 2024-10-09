@@ -3,7 +3,7 @@ class ConfigurationVersion < ApplicationRecord
     external_id
   end
 
-  has_one_attached :archive
+  mount_uploader :archive, ConfigurationVersionUploader
 
   belongs_to :workspace
   belongs_to :organization

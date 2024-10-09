@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_09_015052) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -116,6 +116,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "auto_queue_runs", default: false
+    t.string "archive"
     t.index ["external_id"], name: "index_configuration_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_configuration_versions_on_organization_id"
     t.index ["workspace_id"], name: "index_configuration_versions_on_workspace_id"
@@ -279,6 +280,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "plan_file"
+    t.string "plan_json_file"
+    t.string "plan_structured_file"
     t.index ["external_id"], name: "index_plans_on_external_id", unique: true
     t.index ["organization_id"], name: "index_plans_on_organization_id"
   end
@@ -343,6 +347,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
     t.uuid "provider_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "archive"
     t.index ["provider_id", "version"], name: "index_provider_versions_on_provider_id_and_version", unique: true
     t.index ["provider_id"], name: "index_provider_versions_on_provider_id"
   end
@@ -368,6 +373,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
     t.uuid "registry_module_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "archive"
     t.index ["registry_module_id", "version"], name: "idx_on_registry_module_id_version_b4b67eee77", unique: true
     t.index ["registry_module_id"], name: "index_registry_module_versions_on_registry_module_id"
   end
@@ -493,6 +499,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "value_encrypted"
+    t.string "state_file"
+    t.string "state_json_file"
     t.index ["external_id"], name: "index_state_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_state_versions_on_organization_id"
     t.index ["run_id"], name: "index_state_versions_on_run_id"

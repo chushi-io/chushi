@@ -22,7 +22,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   def upload
     @version = ConfigurationVersion.find_by(external_id: params[:id])
 
-    head :bad_request and return if @version.archive.attached?
+    head :bad_request and return if @version.archive.file.nil?
 
     request.body.rewind
     @version.archive.attach(io: request.body, filename: "archive")
