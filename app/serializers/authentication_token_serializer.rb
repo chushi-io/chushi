@@ -7,7 +7,9 @@ class AuthenticationTokenSerializer < ApplicationSerializer
 
   attribute :token, if: Proc.new { |record, params|
     params[:show_token]
-  }
+  } do |object|
+    "#{object.external_id.delete_prefix("at-")}.#{object.token}"
+  end
 
   attribute :expired_at
 

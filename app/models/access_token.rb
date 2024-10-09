@@ -1,4 +1,8 @@
 class AccessToken < ApplicationRecord
+  include Vault::EncryptedModel
+  vault_lazy_decrypt!
+
+  vault_attribute :token
   belongs_to :token_authable, polymorphic: true
   before_create :generate_access_token
   before_create -> { generate_id("at") }
