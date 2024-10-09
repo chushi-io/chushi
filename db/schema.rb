@@ -17,7 +17,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
   create_table "access_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "external_id"
-    t.string "token"
     t.string "token_authable_type", null: false
     t.uuid "token_authable_id", null: false
     t.string "scopes"
@@ -27,7 +26,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_021403) do
     t.string "description", limit: 255
     t.datetime "last_used_at", precision: nil
     t.string "token_encrypted"
-    t.index ["token"], name: "index_access_tokens_on_token", unique: true
     t.index ["token_authable_type", "token_authable_id"], name: "index_access_tokens_on_token_authable"
   end
 
