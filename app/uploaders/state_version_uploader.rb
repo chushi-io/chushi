@@ -8,6 +8,10 @@ class StateVersionUploader < CarrierWave::Uploader::Base
   end
 
   def store_dir
-    "#{model.id}/tfstate"
+    model.id
+  end
+
+  def filename
+    "state"
   end
 end

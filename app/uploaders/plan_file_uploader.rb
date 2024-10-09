@@ -8,6 +8,10 @@ class PlanFileUploader < CarrierWave::Uploader::Base
   end
 
   def store_dir
-    "#{model.id}/tfplan"
+    model.id
+  end
+
+  def filename
+    "tfplan"
   end
 end

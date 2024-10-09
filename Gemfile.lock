@@ -430,6 +430,7 @@ DEPENDENCIES
   doorkeeper-openid_connect (~> 1.8)
   dotenv
   fog-aws (~> 3.27)
+  fog-core (~> 2.4)
   git (~> 1.19)
   httpparty (~> 0.2.0)
   importmap-rails

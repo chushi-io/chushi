@@ -8,6 +8,10 @@ class PlanStructuredFileUploader < CarrierWave::Uploader::Base
   end
 
   def store_dir
-    "#{model.id}/structured"
+    model.id
+  end
+
+  def filename
+    "structured.json"
   end
 end

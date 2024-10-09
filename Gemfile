@@ -67,3 +67,5 @@ gem "vault-rails", require: false
 gem "carrierwave", "~> 3.0"
 
 gem "fog-aws", "~> 3.27"
+
+gem "fog-core", "~> 2.4"

@@ -53,19 +53,19 @@ class Api::V2::StateVersionsController < Api::ApiController
   def state
     @version = StateVersion.find_by(external_id: params[:id])
     head :no_content and return unless @version.state_file.attached?
-    render plain: @version.state_file.download, layout: false, content_type: 'text/plain'
+    redirect_to @version.state_file.url, allow_other_host: true
   end
 
   def state_json
     @version = StateVersion.find_by(external_id: params[:id])
     head :no_content and return unless @version.json_state_file.attached?
-    render plain: @version.json_state_file.download, layout: false, content_type: 'text/plain'
+    redirect_to @version.json_state_file.url, allow_other_host: true
   end
 
   def upload_state
     @version = StateVersion.find_by(external_id: params[:id])
-    request.body.rewind
-    @version.state_file.attach(io: request.body, filename: "state")
+    @version.state_file = get_uploaded_file("#{@version.id}/state")
+    @version.save!
     @version.workspace.update!(current_state_version_id: @version.id)
     ProcessStateVersionJob.perform_async(@version.id)
     render plain: nil, status: :created
@@ -73,8 +73,8 @@ class Api::V2::StateVersionsController < Api::ApiController
 
   def upload_state_json
     @version = StateVersion.find_by(external_id: params[:id])
-    request.body.rewind
-    @version.json_state_file.attach(io: request.body, filename: "json_state")
+    @version.json_state_file = get_uploaded_file("#{@version.id}/json")
+    @version.save!
     head :ok
   end
 

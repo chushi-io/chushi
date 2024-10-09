@@ -19,7 +19,7 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   end
 
   link :download do |object|
-    download_api_v2_configuration_version_path(object)
+    object.archive.url
   end
 end
 

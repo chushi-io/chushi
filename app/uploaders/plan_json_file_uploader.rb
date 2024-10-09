@@ -8,7 +8,11 @@ class PlanJsonFileUploader < CarrierWave::Uploader::Base
   end
 
   def store_dir
-    "#{model.id}/tfplan.json"
+    model.id
+  end
+
+  def filename
+    "tfplan.json"
   end
 end
 

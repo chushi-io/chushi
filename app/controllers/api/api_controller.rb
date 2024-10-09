@@ -133,4 +133,14 @@ class Api::ApiController < ActionController::API
   def map_params(attributes)
     jsonapi_deserialize(params, only: attributes).transform_keys{ |key| key.gsub("-", "_")}
   end
+
+  def get_uploaded_file(path)
+    request.body.rewind
+    tempfile = Tempfile.new(path)
+    tempfile.binmode
+    tempfile << request.body.read
+    tempfile.rewind
+
+    tempfile
+  end
 end
