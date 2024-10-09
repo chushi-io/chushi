@@ -4,9 +4,9 @@ timber_url: https://timber.chushi.io
 storage:
   provider: AWS
   buckets:
-    configuration_versions: ""
-    policies: ""
-    modules: ""
-    providers: ""
-    plans: ""
-    state_versions: ""
+    configuration_versions: chushi-prod-configuration-versions-eiuiuaiq
+    modules: chushi-prod-modules-kwsfiktk
+    plans: chushi-prod-plans-cpddaiaq
+    policies: chushi-prod-policies-iwniwacq
+    providers: chushi-prod-providers-pvndellc
+    state_versions: chushi-prod-state-versions-jlppyecr
