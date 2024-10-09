@@ -22,12 +22,10 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   def upload
     @version = ConfigurationVersion.find_by(external_id: params[:id])
 
-    head :bad_request and return if @version.archive.attached?
+    head :bad_request and return unless @version.archive.file.nil?
 
-    request.body.rewind
-    @version.archive.attach(io: request.body, filename: "archive")
-
-    render json: @version.errors.full_messages unless @version.save
+    @version.archive = get_uploaded_file(@version.id)
+    render json: @version.errors.full_messages unless @version.save!
 
     if @version.auto_queue_runs
       # TODO: Trigger a job for queueing the runs after upload
@@ -36,8 +34,6 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
     @version.status = "uploaded"
     @version.save
 
-    # Update the run(s)
-    # @version.runs.update(status: "fetching_completed")
     ConfigurationVersionUploadedJob.perform_async(@version.id)
     render json: @version
   end
@@ -45,8 +41,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   def download
     @version = ConfigurationVersion.find_by(external_id: params[:id])
     authorize! @version
-    # Generate the URL, and return a redirect
-    redirect_to @version.archive.url
+    redirect_to @version.archive.url, allow_other_host: true
   end
 
   def show

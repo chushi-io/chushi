@@ -1,8 +1,8 @@
 class Plan < ApplicationRecord
-  has_one_attached :plan_file
-  has_one_attached :plan_json_file
-  has_one_attached :plan_structured_file
-  has_one_attached :plan_log_file
+
+  mount_uploader :plan_file, PlanFileUploader
+  mount_uploader :plan_json_file, PlanJsonFileUploader
+  mount_uploader :plan_structured_file, PlanStructuredFileUploader
 
   has_many :state_versions, :through => :run
   has_one :run

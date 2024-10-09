@@ -15,7 +15,7 @@ class AccessTokenPolicy < ApplicationPolicy
     when "Organization"
       return (organization.present? && organization.id == record.token_authable_id)
     when "Agent"
-      @agent = Agent.find(record.token_authable_id)
+      @agent = AgentPool.find(record.token_authable_id)
       return (organization.present? && organization.id == @agent.organization_id)
     when "Team"
       @team = Team.find(record.token_authable_id)

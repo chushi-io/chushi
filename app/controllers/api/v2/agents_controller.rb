@@ -24,13 +24,13 @@ class Api::V2::AgentsController < Api::ApiController
   end
 
   def show
-    @agent = Agent.find_by(external_id: params[:id])
+    @agent = AgentPool.find_by(external_id: params[:id])
     authorize! @agent
     render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
   end
 
   def update
-    @agent = Agent.find_by(external_id: params[:id])
+    @agent = AgentPool.find_by(external_id: params[:id])
     authorize! @agent
     if @agent.update(agent_params)
       render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash

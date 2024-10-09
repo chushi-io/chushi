@@ -6,19 +6,27 @@ class StateVersionSerializer < ApplicationSerializer
   attribute :created_at
   attribute :size
   attribute :hosted_state_download_url do |object|
-    api_v2_get_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+    object.state_file.url
   end
 
   attribute :hosted_state_upload_url do |object|
-    api_v2_upload_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+    if object.state_file.nil?
+      api_v2_upload_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+    else
+      nil
+    end
   end
 
   attribute :hosted_json_state_download_url do |object|
-    api_v2_get_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+    object.json_state_file.url
   end
 
   attribute :hosted_json_state_upload_url do |object|
-    api_v2_upload_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+    if object.state_file.nil?
+      api_v2_upload_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+    else
+      nil
+    end
   end
 
   attribute :status
