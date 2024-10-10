@@ -69,6 +69,8 @@ Rails.application.routes.draw do
       get :ping, action: :ping, :controller => "ping"
       get "account/details", action: :show, :controller => :account_details
 
+      get "object/:key", action: :show, :controller => :storage, as: :get_storage
+      put "object/:key", action: :update, :controller => :storage, as: :upload_storage
       scope "/organizations/:organization_id", as: :organization do
         get "", action: :show, :controller => "organizations"
         patch "", action: :update, :controller => "organizations"
@@ -108,10 +110,6 @@ Rails.application.routes.draw do
       get "authentication-tokens/:token_id", action: :show, :controller => :authentication_tokens
       delete "authentication-tokens/:token_id", action: :destroy, :controller => :authentication_tokens
       get "state-versions/:id", action: :show, :controller => :state_versions
-      get "state-versions/:id/state", action: :state, :controller => :state_versions, as: :get_state
-      put "state-versions/:id/state", action: :upload_state, :controller => :state_versions, as: :upload_state
-      get "state-versions/:id/state-json", action: :state_json, :controller => :state_versions, as: :get_state_json
-      put "state-versions/:id/state-json", action: :upload_state_json, :controller => :state_versions, as: :upload_state_json
       get "state-version-outputs/:id", action: :show, :controller => :state_version_outputs
 
       resources :workspaces, :except => [:index, :create] do
@@ -219,7 +217,7 @@ Rails.application.routes.draw do
 
       resources :configuration_versions, :except => [:create], path: "configuration-versions" do
         member do
-          put "upload", action: :upload, :controller => :configuration_versions
+          # put "upload", action: :upload, :controller => :configuration_versions
           get "download", action: :download, :controller => :configuration_versions
         end
       end

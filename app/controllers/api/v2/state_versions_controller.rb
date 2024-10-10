@@ -1,7 +1,5 @@
 class Api::V2::StateVersionsController < Api::ApiController
-  before_action :load_workspace, :except => [:show, :state, :state_json, :upload_state, :upload_state_json]
-  skip_verify_authorized :only => [:upload_state, :upload_state_json, :state, :state_json]
-  skip_before_action :verify_access_token, :only => [:upload_state, :upload_state_json]
+  before_action :load_workspace, :except => [:show]
 
   def index
     authorize! @workspace, to: :show?
@@ -48,34 +46,6 @@ class Api::V2::StateVersionsController < Api::ApiController
     authorize! @version.workspace, to: :show?
 
     render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
-  end
-
-  def state
-    @version = StateVersion.find_by(external_id: params[:id])
-    head :no_content and return unless @version.state_file.attached?
-    redirect_to @version.state_file.url, allow_other_host: true
-  end
-
-  def state_json
-    @version = StateVersion.find_by(external_id: params[:id])
-    head :no_content and return unless @version.json_state_file.attached?
-    redirect_to @version.json_state_file.url, allow_other_host: true
-  end
-
-  def upload_state
-    @version = StateVersion.find_by(external_id: params[:id])
-    @version.state_file = get_uploaded_file("#{@version.id}/state")
-    @version.save!
-    @version.workspace.update!(current_state_version_id: @version.id)
-    ProcessStateVersionJob.perform_async(@version.id)
-    render plain: nil, status: :created
-  end
-
-  def upload_state_json
-    @version = StateVersion.find_by(external_id: params[:id])
-    @version.state_json_file = get_uploaded_file("#{@version.id}/json")
-    @version.save!
-    head :ok
   end
 
   private

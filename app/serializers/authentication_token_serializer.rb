@@ -12,5 +12,4 @@ class AuthenticationTokenSerializer < ApplicationSerializer
   end
 
   attribute :expired_at
-
 end

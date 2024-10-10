@@ -14,4 +14,8 @@ class StateVersionJsonUploader < CarrierWave::Uploader::Base
   def filename
     "state.json"
   end
+
+  def self.generate_url(model)
+    return ""
+  end
 end

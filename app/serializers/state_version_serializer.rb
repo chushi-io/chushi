@@ -6,26 +6,26 @@ class StateVersionSerializer < ApplicationSerializer
   attribute :created_at
   attribute :size
   attribute :hosted_state_download_url do |object|
-    object.state_file.url
+    encrypt_storage_url({id: object.id, class: object.class.name, file: "state"})
   end
 
   attribute :hosted_state_upload_url do |object|
     if object.state_file.present?
       nil
     else
-      api_v2_upload_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+      encrypt_upload_url({id: object.id, class: object.class.name, file: "state"})
     end
   end
 
   attribute :hosted_json_state_download_url do |object|
-    object.state_json_file.url
+    encrypt_storage_url({id: object.id, class: object.class.name, file: "state.json"})
   end
 
   attribute :hosted_json_state_upload_url do |object|
-    if object.state_file.present?
+    if object.state_json_file.present?
       nil
     else
-      api_v2_upload_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
+      encrypt_upload_url({id: object.id, class: object.class.name, file: "state.json"})
     end
   end
 

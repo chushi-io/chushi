@@ -13,44 +13,20 @@ class ConfigurationVersionSerializer < ApplicationSerializer
     upload_api_v2_configuration_version_url(object, host: Chushi.domain, protocol: 'https')
   end
 
+  attribute :upload_url, unless: Proc.new { |record, params|
+    record.archive.present?
+  } do |object|
+    encrypt_upload_url({id: object.id, class: object.class.name})
+  end
+
   # link :self, :url
   link :self do |object|
     api_v2_configuration_version_path(object)
   end
 
   link :download do |object|
-    object.archive.url
+    if object.archive.present?
+      download_api_v2_configuration_version_path(object)
+    end
   end
 end
-
-# {
-#   "data": {
-#     "id": "cv-ntv3HbhJqvFzamy7",
-#     "type": "configuration-versions",
-#     "attributes": {
-#       "error": null,
-#       "error-message": null,
-#       "source": "gitlab",
-#       "speculative":false,
-#       "status": "uploaded",
-#       "status-timestamps": {},
-#       "provisional": false
-#     },
-#     "relationships": {
-#       "ingress-attributes": {
-#         "data": {
-#           "id": "ia-i4MrTxmQXYxH2nYD",
-#           "type": "ingress-attributes"
-#         },
-#         "links": {
-#           "related":
-#             "/api/v2/configuration-versions/cv-ntv3HbhJqvFzamy7/ingress-attributes"
-#         }
-#       }
-#     },
-#     "links": {
-#       "self": "/api/v2/configuration-versions/cv-ntv3HbhJqvFzamy7",
-#       "download": "/api/v2/configuration-versions/cv-ntv3HbhJqvFzamy7/download"
-#     }
-#   }
-# }

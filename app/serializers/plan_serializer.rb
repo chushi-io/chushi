@@ -18,7 +18,6 @@ class PlanSerializer < ApplicationSerializer
 
   # This URL should be treated as a secret
   attribute :log_read_url do |object|
-    "#{Chushi.timber_url}/files/#{object.run.external_id}_plan.log"
+    encrypt_upload_url({id: object.id, class: object.class.name, file: "logs"})
   end
-
 end

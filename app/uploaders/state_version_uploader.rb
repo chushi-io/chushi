@@ -14,4 +14,8 @@ class StateVersionUploader < CarrierWave::Uploader::Base
   def filename
     "state"
   end
+
+  def self.generate_url(model)
+    return ""
+  end
 end

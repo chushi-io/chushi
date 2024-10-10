@@ -1,4 +1,4 @@
-class PlanJsonFileUploader < CarrierWave::Uploader::Base
+class PlanLogUploader < CarrierWave::Uploader::Base
   storage :fog
 
   def initialize(*)
@@ -12,6 +12,6 @@ class PlanJsonFileUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "tfplan.json"
+    "logs"
   end
 end
