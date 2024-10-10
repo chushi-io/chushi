@@ -2,7 +2,7 @@ domain: cloud.chushi.io
 timber_url: https://timber.chushi.io
 
 storage:
-  provider: AWS
+  provider: aws
   buckets:
     configuration_versions: chushi-prod-configuration-versions-eiuiuaiq
     modules: chushi-prod-modules-kwsfiktk
