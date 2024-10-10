@@ -34,4 +34,5 @@
 /node_modules/
 /app/assets/builds/*
 !/app/assets/builds/.keep
-/public/_vendor
+/public/vendor
+!/public/_vendor
