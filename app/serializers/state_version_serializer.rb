@@ -18,7 +18,7 @@ class StateVersionSerializer < ApplicationSerializer
   end
 
   attribute :hosted_json_state_download_url do |object|
-    object.json_state_file.url
+    object.state_json_file.url
   end
 
   attribute :hosted_json_state_upload_url do |object|
