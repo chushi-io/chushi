@@ -73,7 +73,7 @@ class Api::V2::StateVersionsController < Api::ApiController
 
   def upload_state_json
     @version = StateVersion.find_by(external_id: params[:id])
-    @version.json_state_file = get_uploaded_file("#{@version.id}/json")
+    @version.state_json_file = get_uploaded_file("#{@version.id}/json")
     @version.save!
     head :ok
   end
