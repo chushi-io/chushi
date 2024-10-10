@@ -1,6 +1,4 @@
 class StateVersion < ApplicationRecord
-  has_one_attached :state_file
-  has_one_attached :json_state_file
 
   mount_uploader :state_file, StateVersionUploader
   mount_uploader :json_state_file, StateVersionJsonUploader
