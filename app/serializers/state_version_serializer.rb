@@ -10,10 +10,10 @@ class StateVersionSerializer < ApplicationSerializer
   end
 
   attribute :hosted_state_upload_url do |object|
-    if object.state_file.nil?
-      api_v2_upload_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
-    else
+    if object.state_file.present?
       nil
+    else
+      api_v2_upload_state_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
     end
   end
 
@@ -22,10 +22,10 @@ class StateVersionSerializer < ApplicationSerializer
   end
 
   attribute :hosted_json_state_upload_url do |object|
-    if object.state_file.nil?
-      api_v2_upload_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
-    else
+    if object.state_file.present?
       nil
+    else
+      api_v2_upload_state_json_url(id: object.external_id, host: Chushi.domain, protocol: 'https')
     end
   end
 
