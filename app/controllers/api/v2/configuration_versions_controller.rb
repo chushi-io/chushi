@@ -1,5 +1,4 @@
 class Api::V2::ConfigurationVersionsController < Api::ApiController
-  include ActiveStorage::SetCurrent
 
   def create
     @workspace = Workspace.find_by(external_id: params[:id])
@@ -20,7 +19,13 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
   def download
     @version = ConfigurationVersion.find_by(external_id: params[:id])
     authorize! @version
-    redirect_to @version.archive.url, allow_other_host: true
+
+    contents = @version.archive.read
+    if contents.start_with?("vault:")
+      contents = Vault::Rails.decrypt("transit", "chushi_storage_contents", obj.read)
+    end
+
+    render body: contents, layout: false
   end
 
   def show

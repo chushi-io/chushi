@@ -39,10 +39,10 @@ class Api::V2::StorageController < Api::ApiController
     @version = StateVersion.find(@object["id"])
     if @object["file"] == "state"
       head :not_found and return unless @version.state_file.present?
-      redirect_to @version.state_file.url, allow_other_host: true
+      decrypt(@version.state_file)
     else
       head :not_found and return unless @version.state_json_file.present?
-      redirect_to @version.state_json_file.url, allow_other_host: true
+      decrypt(@version.state_json_file)
     end
   end
 
@@ -90,7 +90,7 @@ class Api::V2::StorageController < Api::ApiController
       @plan.plan_structured_file = file
     when "tfplan"
       @plan.plan_file = file
-    when "lobs"
+    when "logs"
       @plan.logs = file
     else
       head :bad_request
@@ -117,21 +117,39 @@ class Api::V2::StorageController < Api::ApiController
 
   def read_tfplan_json
     head :not_found and return unless @plan.plan_json_file.present?
-    redirect_to @plan.plan_json_file.url, allow_other_host: true
+    decrypt(@plan.plan_json_file)
   end
 
   def read_structured_json
     head :not_found and return unless @plan.plan_structured_file.present?
-    redirect_to @plan.plan_structured_file.url, allow_other_host: true
+    decrypt(@plan.plan_structured_file)
   end
 
   def read_tfplan
     head :not_found and return unless @plan.plan_file.present?
-    redirect_to @plan.plan_file.url, allow_other_host: true
+    decrypt(@plan.plan_file)
   end
 
   def read_logs
     head :not_found and return unless @plan.logs.present?
-    redirect_to @plan.logs.url, allow_other_host: true
+    decrypt(@plan.logs.url)
+  end
+
+  def get_uploaded_file(path)
+    request.body.rewind
+    tempfile = Tempfile.new(path)
+    tempfile.binmode
+    tempfile << Vault::Rails.encrypt("transit", "chushi_storage_contents", request.body.read)
+    tempfile.rewind
+
+    tempfile
+  end
+
+  def decrypt(obj)
+    contents = obj.read
+    if contents.start_with?("vault:")
+      contents = Vault::Rails.decrypt("transit", "chushi_storage_contents", obj.read)
+    end
+    render body: contents, layout: false
   end
 end
