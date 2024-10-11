@@ -15,6 +15,9 @@ class Workspace < ApplicationRecord
   has_many :run_triggers
   belongs_to :project, optional: true
 
+  has_many :workspace_policy_sets
+  has_many :policy_sets, through: :workspace_policy_sets
+
   belongs_to :agent_pool, optional: true
 
   before_create -> { generate_id("ws") }

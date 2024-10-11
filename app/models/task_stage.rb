@@ -3,6 +3,7 @@ class TaskStage < ApplicationRecord
   belongs_to :run
 
   has_many :task_results
+  has_many :policy_evaluations
   before_create -> { generate_id("ts") }
 end
 
