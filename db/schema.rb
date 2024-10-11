@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_09_015052) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_11_003027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -298,10 +298,41 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_09_015052) do
     t.uuid "policy_set_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "policy"
     t.index ["external_id"], name: "index_policies_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_policies_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_policies_on_organization_id"
     t.index ["policy_set_id"], name: "index_policies_on_policy_set_id"
+  end
+
+  create_table "policy_evaluations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.string "policy_kind"
+    t.string "policy_tool_version"
+    t.json "result_count"
+    t.json "status_timestamps"
+    t.string "policy_set_id"
+    t.uuid "task_stage_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_policy_evaluations_on_external_id", unique: true
+    t.index ["task_stage_id"], name: "index_policy_evaluations_on_task_stage_id"
+  end
+
+  create_table "policy_set_outcomes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.json "outcomes"
+    t.string "error"
+    t.boolean "overrideable"
+    t.string "policy_set_name"
+    t.string "policy_set_description"
+    t.json "result_count"
+    t.string "policy_tool_version"
+    t.uuid "policy_evaluation_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_policy_set_outcomes_on_external_id", unique: true
+    t.index ["policy_evaluation_id"], name: "index_policy_set_outcomes_on_policy_evaluation_id"
   end
 
   create_table "policy_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -708,6 +739,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_09_015052) do
     t.index ["organization_id"], name: "index_vcs_connections_on_organization_id"
   end
 
+  create_table "workspace_policy_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "workspace_id"
+    t.uuid "policy_set_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["policy_set_id"], name: "index_workspace_policy_sets_on_policy_set_id"
+    t.index ["workspace_id", "policy_set_id"], name: "index_workspace_policy_sets_on_workspace_id_and_policy_set_id", unique: true
+    t.index ["workspace_id"], name: "index_workspace_policy_sets_on_workspace_id"
+  end
+
   create_table "workspace_resources", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "address"
     t.string "name"
@@ -829,6 +870,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_09_015052) do
   add_foreign_key "plans", "organizations"
   add_foreign_key "policies", "organizations"
   add_foreign_key "policies", "policy_sets"
+  add_foreign_key "policy_evaluations", "task_stages"
+  add_foreign_key "policy_set_outcomes", "policy_evaluations"
   add_foreign_key "policy_sets", "organizations"
   add_foreign_key "projects", "organizations"
   add_foreign_key "provider_versions", "providers"
@@ -863,6 +906,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_09_015052) do
   add_foreign_key "variables", "variable_sets"
   add_foreign_key "variables", "workspaces"
   add_foreign_key "vcs_connections", "organizations"
+  add_foreign_key "workspace_policy_sets", "policy_sets"
+  add_foreign_key "workspace_policy_sets", "workspaces"
   add_foreign_key "workspace_resources", "organizations"
   add_foreign_key "workspace_resources", "state_versions"
   add_foreign_key "workspace_tasks", "run_tasks"

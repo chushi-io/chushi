@@ -38,28 +38,40 @@ class RunCreator < ApplicationService
       }
 
       task_stages.each do |stage, wstasks|
-        unless wstasks.empty?
+
+        if wstasks.any? || (stage == "post_plan" && run.workspace.policy_sets.any?)
           @stage = TaskStage.new(
             stage: stage,
             status: "pending",
           )
 
-          wstasks.each { |wstask|
-            @result = TaskResult.new(
-              status: "pending",
-              # url: wstask.run_task.url,
-              stage: stage,
-              task_id: wstask.run_task.external_id,
-              task_name: wstask.run_task.name,
-              task_url: wstask.run_task.url,
-              workspace_task_id: wstask.external_id,
-              workspace_task_enforcement_level: wstask.enforcement_level
-            )
-            @stage.task_results << @result
-          }
-          @stage.save
-          @run.task_stages << @stage
+          unless wstasks.empty?
+            wstasks.each { |wstask|
+              @result = TaskResult.new(
+                status: "pending",
+                # url: wstask.run_task.url,
+                stage: stage,
+                task_id: wstask.run_task.external_id,
+                task_name: wstask.run_task.name,
+                task_url: wstask.run_task.url,
+                workspace_task_id: wstask.external_id,
+                workspace_task_enforcement_level: wstask.enforcement_level
+              )
+              @stage.task_results << @result
+            }
+          end
+
+          unless @run.workspace.policy_sets.empty?
+            @run.workspace.policy_sets.each do |policy_set|
+              @stage.policy_evaluations << PolicyEvaluation.new(
+                policy_kind: "opa",
+                policy_set_id: policy_set.external_id
+              )
+            end
+          end
         end
+        @stage.save
+        @run.task_stages << @stage
       end
 
       @run.status = "pending"
