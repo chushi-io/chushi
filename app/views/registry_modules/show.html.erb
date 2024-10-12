@@ -1,0 +1,50 @@
+
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item">Registry</li>
+    <li class="breadcrumb-item">Modules</li>
+    <li class="breadcrumb-item active"><%= @module.namespace %>/<%= @module.name %>/<%= @module.provider %></li>
+  </ol>
+</nav>
+
+<div class="mb-9">
+  <div data-list='{"valueNames":["projectName","assignees","start","deadline","task","projectprogress","status","action"],"page":6,"pagination":true}'>
+    <div class="row mb-4 gx-6 gy-3 align-items-center">
+      <div class="col-auto">
+        <h2 class="mb-0">Versions</h2>
+      </div>
+    </div>
+
+    <div class="table-responsive scrollbar">
+      <table class="table fs-9 mb-0 border-top border-translucent">
+        <thead>
+        <tr>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Version</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Status</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Source</th>
+          <th class="sort align-middle ps-3" scope="col" data-sort="type" style="width:10%;">Created At</th>
+        </tr>
+        </thead>
+        <tbody class="list" id="project-list-table-body">
+        <% @module.registry_module_versions.each do |version| %>
+          <tr class="position-static">
+            <td class="align-middle time white-space-nowrap ps-0 projectName py-4">
+              <%= version.version %>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= version.status %>
+            </td>
+            <td class="align-middle white-space-nowrap start ps-3 py-4">
+              <%= version.source %>
+            </td>
+            <td class="align-middle white-space-nowrap deadline ps-3 py-4">
+              <%= version.created_at %>
+            </td>
+          </tr>
+        <% end %>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

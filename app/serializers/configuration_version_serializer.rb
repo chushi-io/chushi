@@ -9,10 +9,6 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   attribute :provisional
   attribute :auto_queue_runs
 
-  attribute :upload_url do |object|
-    upload_api_v2_configuration_version_url(object, host: Chushi.domain, protocol: 'https')
-  end
-
   attribute :upload_url, unless: Proc.new { |record, params|
     record.archive.present?
   } do |object|

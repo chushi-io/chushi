@@ -118,7 +118,7 @@
           } %>
           <%= render partial: "partials/navbar_link", locals: {
             label: "Modules",
-            path: "#"
+            path: registry_modules_path(@organization.name)
           } %>
           <%= render partial: "partials/navbar_link", locals: {
             label: "GPG Keys",
