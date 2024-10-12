@@ -1,7 +1,7 @@
 class Api::V2::RegistryModulesController < Api::ApiController
-  skip_verify_authorized
   def index
     @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :show?
     @registry_modules = @org.registry_modules
 
     render json: ::RegistryModuleSerializer.new(@registry_modules, {}).serializable_hash
@@ -9,6 +9,7 @@ class Api::V2::RegistryModulesController < Api::ApiController
 
   def show
     @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :show?
     @module = @org.registry_modules.where(
       # registry: "private",
       namespace: params[:namespace],
@@ -25,6 +26,7 @@ class Api::V2::RegistryModulesController < Api::ApiController
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :manage_modules?
     @registry_module = @org.registry_modules.new(module_params)
     @registry_module.namespace = @org.name
     @registry_module.status = "pending"

@@ -1,7 +1,7 @@
 class Api::V2::RegistryModuleVersionsController < Api::ApiController
-  skip_verify_authorized
   def create
     @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :manage_modules?
     @module = @org.registry_modules.where(
       # registry: "private",
       namespace: params[:namespace],
