@@ -19,34 +19,42 @@ class Registry::V1::ModulesController < Registry::RegistryController
   end
 
   def versions
-    @modules = RegistryModule.where(
+    @module = RegistryModule.where(
       namespace: params[:namespace],
       name: params[:name],
       provider: params[:provider]
-    )
-    render json: @module.versions
+    ).first
+    render json: {
+      modules: [
+        {
+          source: "#{@module.namespace}/#{@module.name}/#{@module.provider}",
+          versions: @module.registry_module_versions.map{|module_version|
+            {
+              version: module_version.version,
+              submodules: []
+            }
+          }
+        }
+      ]
+    }
   end
 
   def download
+    @registry_module = RegistryModule.where(
+      namespace: params[:namespace],
+      name: params[:name],
+      provider: params[:provider],
+      ).first
     if params[:version]
       # Redirect to the archive path
-      registry_module = RegistryModule.where(
-        namespace: params[:namespace],
-        name: params[:name],
-        provider: params[:provider],
-        version: params[:version]
-      ).first
+      @version = @registry_module.registry_module_versions.find_by(version: params[:version])
     else
       # Download latest
-      registry_module = RegistryModule.where(
-        namespace: params[:namespace],
-        name: params[:name],
-        provider: params[:provider]
-      ).order(version: :desc).first
+      @version = @registry_module.registry_module_versions.order(version: :desc).first
     end
 
-    if registry_module
-      response.headers['X-Terraform-Get'] = registry_module.archive.url
+    if @version.archive.present?
+      response.headers['X-Terraform-Get'] = "#{encrypt_storage_url({id: @version.id, class: @version.class.name })}?archive=tar.gz"
       head :no_content
     else
       head :not_found

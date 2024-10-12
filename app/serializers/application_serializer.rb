@@ -1,4 +1,5 @@
 class ApplicationSerializer
+  singleton_class.include Rails.application.routes.url_helpers
   include JSONAPI::Serializer
 
   set_key_transform :dash

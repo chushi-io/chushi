@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_11_003027) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_11_193020) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -405,6 +405,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_11_003027) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "archive"
+    t.string "status"
+    t.string "external_id"
+    t.index ["external_id"], name: "index_registry_module_versions_on_external_id", unique: true
     t.index ["registry_module_id", "version"], name: "idx_on_registry_module_id_version_b4b67eee77", unique: true
     t.index ["registry_module_id"], name: "index_registry_module_versions_on_registry_module_id"
   end
@@ -417,7 +420,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_11_003027) do
     t.string "source"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "external_id"
+    t.string "status"
+    t.uuid "organization_id"
+    t.index ["external_id"], name: "index_registry_modules_on_external_id", unique: true
     t.index ["namespace", "name", "provider"], name: "index_registry_modules_on_namespace_and_name_and_provider", unique: true
+    t.index ["organization_id"], name: "index_registry_modules_on_organization_id"
   end
 
   create_table "run_tasks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -876,6 +884,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_11_003027) do
   add_foreign_key "projects", "organizations"
   add_foreign_key "provider_versions", "providers"
   add_foreign_key "registry_module_versions", "registry_modules"
+  add_foreign_key "registry_modules", "organizations"
   add_foreign_key "run_tasks", "organizations"
   add_foreign_key "run_triggers", "workspaces"
   add_foreign_key "run_triggers", "workspaces", column: "sourceable_id"

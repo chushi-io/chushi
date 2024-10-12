@@ -27,6 +27,7 @@ Rails.application.routes.draw do
         resources :policies
         resources :policy_sets
         resources :projects
+        resources :registry_modules, path: 'modules'
         resources :runs
         resources :run_tasks
         resources :state_versions
@@ -106,6 +107,16 @@ Rails.application.routes.draw do
         get "team-tokens", action: :list_team_tokens, :controller => :authentication_tokens
         post "authentication-token", action: :create_organization_token, :controller => :authentication_tokens
         get "authentication-token", action: :get_organization_token, :controller => :authentication_tokens
+
+        get "registry-modules", action: :index, :controller => :registry_modules
+        post "registry-modules", action: :create, :controller => :registry_modules
+        get "registry-modules/:registry/:namespace/:name/:provider", action: :show, :controller => :registry_modules
+        patch "registry-modules/private/:namespace/:name/:provider", action: :update, :controller => :registry_modules
+        post "registry-modules/:registry/:namespace/:name/:provider/versions", action: :create, :controller =>  :registry_module_versions
+        delete "registry-modules/:registry/:namespace/:name", action: :destroy, :controller =>  :registry_modules
+        delete "registry-modules/:registry/:namespace/:name/:provider", action: :destroy, :controller =>  :registry_modules
+        delete "registry-modules/:registry/:namespace/:name/:provider/:version", action: :destroy, :controller =>  :registry_module_versions
+
       end
       get "authentication-tokens/:token_id", action: :show, :controller => :authentication_tokens
       delete "authentication-tokens/:token_id", action: :destroy, :controller => :authentication_tokens

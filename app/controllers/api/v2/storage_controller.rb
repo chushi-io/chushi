@@ -9,6 +9,8 @@ class Api::V2::StorageController < Api::ApiController
       read_state_version
     when "Plan"
       read_plan_file
+    when "RegistryModuleVersion"
+      read_module_version
     else
       head :bad_request
     end
@@ -23,6 +25,8 @@ class Api::V2::StorageController < Api::ApiController
       upload_state_version
     when "Plan"
       upload_plan_files
+    when "RegistryModuleVersion"
+      upload_module_version
     else
       head :bad_request
     end
@@ -44,6 +48,13 @@ class Api::V2::StorageController < Api::ApiController
       head :not_found and return unless @version.state_json_file.present?
       decrypt(@version.state_json_file)
     end
+  end
+
+  def read_module_version
+    @version = RegistryModuleVersion.find(@object["id"])
+    response.headers['Content-Disposition'] = "attachment; filename=\"archive.tar.gz\""
+    response.headers['Content-Type'] = 'application/gzip'
+    decrypt(@version.archive)
   end
 
   def upload_configuration_version
@@ -77,6 +88,13 @@ class Api::V2::StorageController < Api::ApiController
     else
       head :bad_request
     end
+  end
+
+  def upload_module_version
+    @version = RegistryModuleVersion.find(@object["id"])
+    @version.archive = get_uploaded_file(@object["id"])
+    @version.save!
+    head :created
   end
 
   # Handle structured json, binary plan, json plan, and logs
