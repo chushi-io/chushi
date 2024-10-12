@@ -1,0 +1,2 @@
+class GpgKey < ApplicationRecord
+end

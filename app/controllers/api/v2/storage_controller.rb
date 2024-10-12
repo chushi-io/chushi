@@ -11,6 +11,8 @@ class Api::V2::StorageController < Api::ApiController
       read_plan_file
     when "RegistryModuleVersion"
       read_module_version
+    when "ProviderVersionPlatform"
+      read_provider_version
     else
       head :bad_request
     end
@@ -27,6 +29,8 @@ class Api::V2::StorageController < Api::ApiController
       upload_plan_files
     when "RegistryModuleVersion"
       upload_module_version
+    when "ProviderVersionPlatform"
+      upload_provider_version
     else
       head :bad_request
     end
@@ -55,6 +59,13 @@ class Api::V2::StorageController < Api::ApiController
     response.headers['Content-Disposition'] = "attachment; filename=\"archive.tar.gz\""
     response.headers['Content-Type'] = 'application/gzip'
     decrypt(@version.archive)
+  end
+
+  def read_provider_version
+    @version = ProviderVersionPlatform.find(@object["id"])
+    response.headers['Content-Disposition'] = "attachment; filename=\"#{@version.filename}\""
+    response.headers['Content-Type'] = 'application/gzip'
+    decrypt(@version.binary)
   end
 
   def upload_configuration_version
@@ -93,6 +104,13 @@ class Api::V2::StorageController < Api::ApiController
   def upload_module_version
     @version = RegistryModuleVersion.find(@object["id"])
     @version.archive = get_uploaded_file(@object["id"])
+    @version.save!
+    head :created
+  end
+
+  def upload_provider_version
+    @version = ProviderVersionPlatform.find(@object["id"])
+    @version.binary = get_uploaded_file(@object["id"])
     @version.save!
     head :created
   end

@@ -114,7 +114,7 @@
           <!-- parent pages-->
           <%= render partial: "partials/navbar_link", locals: {
             label: "Providers",
-            path: "#"
+            path: providers_path(@organization.name)
           } %>
           <%= render partial: "partials/navbar_link", locals: {
             label: "Modules",

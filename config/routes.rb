@@ -28,6 +28,7 @@ Rails.application.routes.draw do
         resources :policy_sets
         resources :projects
         resources :registry_modules, path: 'modules'
+        resources :providers
         resources :runs
         resources :run_tasks
         resources :state_versions
@@ -108,14 +109,29 @@ Rails.application.routes.draw do
         post "authentication-token", action: :create_organization_token, :controller => :authentication_tokens
         get "authentication-token", action: :get_organization_token, :controller => :authentication_tokens
 
+        # Routes for registry modules
         get "registry-modules", action: :index, :controller => :registry_modules
         post "registry-modules", action: :create, :controller => :registry_modules
-        get "registry-modules/:registry/:namespace/:name/:provider", action: :show, :controller => :registry_modules
+        get "registry-modules/private/:namespace/:name/:provider", action: :show, :controller => :registry_modules
         patch "registry-modules/private/:namespace/:name/:provider", action: :update, :controller => :registry_modules
-        post "registry-modules/:registry/:namespace/:name/:provider/versions", action: :create, :controller =>  :registry_module_versions
-        delete "registry-modules/:registry/:namespace/:name", action: :destroy, :controller =>  :registry_modules
-        delete "registry-modules/:registry/:namespace/:name/:provider", action: :destroy, :controller =>  :registry_modules
-        delete "registry-modules/:registry/:namespace/:name/:provider/:version", action: :destroy, :controller =>  :registry_module_versions
+        post "registry-modules/private/:namespace/:name/:provider/versions", action: :create, :controller =>  :registry_module_versions
+        delete "registry-modules/private/:namespace/:name", action: :destroy, :controller =>  :registry_modules
+        delete "registry-modules/private/:namespace/:name/:provider", action: :destroy, :controller =>  :registry_modules
+        delete "registry-modules/private/:namespace/:name/:provider/:version", action: :destroy, :controller =>  :registry_module_versions
+
+        # Routes for registry providers
+        get "registry-providers", action: :index, :controller => :registry_providers
+        post "registry-providers", action: :create, :controller => :registry_providers
+        get "registry-providers/private/:namespace/:name", action: :show, :controller => :registry_providers
+        delete  "registry-providers/:registry_name/:namespace/:name", action: :destroy, :controller => :registry_providers
+        get "registry-providers/private/:namespace/:name/versions/", action: :index, :controller => :registry_provider_versions
+        post "registry-providers/private/:namespace/:name/versions", action: :create, :controller => :registry_provider_versions
+        get "registry-providers/private/:namespace/:name/versions/:version", action: :show, :controller => :registry_provider_versions
+        delete "registry-providers/private/:namespace/:name/versions/:provider_version", action: :destroy, :controller => :registry_provider_versions
+        post "registry-providers/private/:namespace/:name/versions/:version/platforms", action: :create, :controller => :registry_provider_version_platforms, constraints: { version: /[^\/]+/ }
+        get "registry-providers/private/:namespace/:name/versions/:version/platforms", action: :index, :controller => :registry_provider_version_platforms, constraints: { version: /[^\/]+/ }
+        get "registry-providers/private/:namespace/:name/versions/:version/platforms/:os/:arch", action: :show, :controller => :registry_provider_version_platforms, constraints: { version: /[^\/]+/ }
+        delete "registry-providers/private/:namespace/:name/versions/:version/platforms/:os/:arch", action: :destroy, :controller => :registry_provider_version_platforms, constraints: { version: /[^\/]+/ }
 
       end
       get "authentication-tokens/:token_id", action: :show, :controller => :authentication_tokens
