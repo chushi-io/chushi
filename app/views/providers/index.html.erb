@@ -1,0 +1,53 @@
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item">Registry</li>
+    <li class="breadcrumb-item">Providers</li>
+  </ol>
+</nav>
+
+<div class="mb-9">
+  <div data-list='{"valueNames":["projectName","assignees","start","deadline","task","projectprogress","status","action"],"page":6,"pagination":true}'>
+    <div class="row mb-4 gx-6 gy-3 align-items-center">
+      <div class="col-auto">
+        <h2 class="mb-0">Providers</h2>
+      </div>
+      <div class="col-auto">
+        <%= link_to "Create Provider", new_provider_path(@organization.name), class: "btn btn-primary px-5" %>
+      </div>
+    </div>
+
+    <div class="table-responsive scrollbar">
+      <table class="table fs-9 mb-0 border-top border-translucent">
+        <thead>
+        <tr>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Namespace</th>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Name</th>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Registry</th>
+          <th class="sort white-space-nowrap align-middle ps-0" scope="col" data-sort="projectName" style="width:30%;">Created At</th>
+        </tr>
+        </thead>
+        <tbody class="list" id="project-list-table-body">
+        <% @providers.each do |provider| %>
+          <tr class="position-static">
+            <td class="align-middle time white-space-nowrap ps-0 projectName py-4">
+              <a class="fw-bold fs-8" href="<%= provider_path(@organization.name, provider.external_id) %>">
+                <%= provider.namespace %>
+              </a>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= provider.name %>
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              private
+            </td>
+            <td class="align-middle white-space-nowrap assignees ps-3 py-4">
+              <%= provider.created_at %>
+            </td>
+          </tr>
+        <% end %>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
