@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_11_193020) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_12_005924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -120,6 +120,19 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_11_193020) do
     t.index ["external_id"], name: "index_configuration_versions_on_external_id", unique: true
     t.index ["organization_id"], name: "index_configuration_versions_on_organization_id"
     t.index ["workspace_id"], name: "index_configuration_versions_on_workspace_id"
+  end
+
+  create_table "gpg_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.text "ascii_armor"
+    t.string "namespace"
+    t.string "key_id"
+    t.string "source"
+    t.string "source_url"
+    t.string "trust_signature"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_gpg_keys_on_external_id", unique: true
   end
 
   create_table "jobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -369,26 +382,45 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_11_193020) do
     t.index ["organization_id"], name: "index_projects_on_organization_id"
   end
 
+  create_table "provider_version_platforms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.string "os"
+    t.string "arch"
+    t.string "shasum"
+    t.string "filename"
+    t.uuid "provider_version_id"
+    t.text "binary"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_provider_version_platforms_on_external_id", unique: true
+    t.index ["provider_version_id"], name: "index_provider_version_platforms_on_provider_version_id"
+  end
+
   create_table "provider_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "version"
     t.json "protocols"
-    t.json "platforms"
-    t.json "gpg_public_keys"
-    t.datetime "published_at", precision: nil
     t.uuid "provider_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "archive"
+    t.string "key_id"
+    t.boolean "shasums_uploaded"
+    t.boolean "shasums_sig_uploaded"
+    t.string "external_id"
+    t.index ["external_id"], name: "index_provider_versions_on_external_id", unique: true
     t.index ["provider_id", "version"], name: "index_provider_versions_on_provider_id_and_version", unique: true
     t.index ["provider_id"], name: "index_provider_versions_on_provider_id"
   end
 
   create_table "providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "namespace"
-    t.string "provider_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["namespace", "provider_type"], name: "index_providers_on_namespace_and_provider_type", unique: true
+    t.string "external_id"
+    t.string "name"
+    t.string "registry"
+    t.uuid "organization_id"
+    t.index ["external_id"], name: "index_providers_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_providers_on_organization_id"
   end
 
   create_table "registry_module_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -882,7 +914,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_11_193020) do
   add_foreign_key "policy_set_outcomes", "policy_evaluations"
   add_foreign_key "policy_sets", "organizations"
   add_foreign_key "projects", "organizations"
+  add_foreign_key "provider_version_platforms", "provider_versions"
   add_foreign_key "provider_versions", "providers"
+  add_foreign_key "providers", "organizations"
   add_foreign_key "registry_module_versions", "registry_modules"
   add_foreign_key "registry_modules", "organizations"
   add_foreign_key "run_tasks", "organizations"

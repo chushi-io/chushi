@@ -8,14 +8,14 @@ class ApplicationSerializer
   def self.encrypt_storage_url(object)
     object[:method] = "get"
     token = Vault::Rails.encrypt("transit", "chushi_storage_url", object.to_json)
-    enc = Base64.encode64(token)
+    enc = Base64.strict_encode64(token)
     api_v2_get_storage_url(enc, host: Chushi.domain, protocol: 'https')
   end
 
   def self.encrypt_upload_url(object)
     object[:method] = "upload"
     token = Vault::Rails.encrypt("transit", "chushi_storage_url", object.to_json)
-    enc = Base64.encode64(token)
+    enc = Base64.strict_encode64(token)
     api_v2_upload_storage_url(enc, host: Chushi.domain, protocol: 'https')
   end
 end
