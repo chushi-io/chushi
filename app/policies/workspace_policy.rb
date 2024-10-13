@@ -82,11 +82,11 @@ class WorkspacePolicy < ApplicationPolicy
 
   # Named policies
   def is_admin?
-
+    true
   end
 
   def can_access?
-
+    true
   end
 
   def can_update?

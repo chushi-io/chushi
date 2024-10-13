@@ -17,7 +17,7 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def lock
-    authorize! @workspace
+    authorize! @workspace, to: :can_lock?
     head :conflict and return if @workspace.locked
     @workspace.update(locked: true)
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
@@ -25,7 +25,7 @@ class Api::V2::WorkspacesController < Api::ApiController
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :create_workspaces?
+    authorize! @org, to: :can_create_workspace?
 
     @workspace = @org.workspaces.new(workspace_params)
     if @workspace.save
@@ -36,11 +36,10 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def update
-    authorize! @workspace
+    authorize! @workspace, to: :is_admin?
     update_params=Hash[workspace_params]
     if update_params.key?("agent_pool_id")
-      @agent = AgentPool.find_by(external_id: update_params["agent_pool_id"])
-      authorize! @agent, to: :update?
+      @agent = @workspace.organization.agent_pools.find_by(external_id: update_params["agent_pool_id"])
       update_params["agent_pool_id"] = @agent.id
     end
     if update_params.key?("terraform_version")
@@ -55,7 +54,7 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def unlock
-    authorize! @workspace
+    authorize! @workspace, to: :can_unlock?
     if @workspace.locked
       @workspace.update(locked: false)
     end
@@ -63,7 +62,7 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def force_unlock
-    authorize! @workspace
+    authorize! @workspace, to: :can_force_unlock?
     unless @workspace.locked
       head :conflict and return
     end
@@ -72,7 +71,7 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def show
-    authorize! @workspace
+    authorize! @workspace, to: :access?
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
 
@@ -81,7 +80,7 @@ class Api::V2::WorkspacesController < Api::ApiController
   end
 
   def tags
-    authorize! @workspace
+    authorize! @workspace, to: :read?
     params.permit!
 
     if request.get?
@@ -133,6 +132,6 @@ class Api::V2::WorkspacesController < Api::ApiController
       "trigger-patterns",
       "trigger-prefixes",
       "working-directory",
-               ])
+     ])
   end
 end

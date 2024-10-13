@@ -3,7 +3,9 @@ class Api::V2::VariablesController < Api::ApiController
 
   def index
     if params[:workspace_id]
-      @variables = Workspace.find(params[:workspace_id]).variables
+      @workspace = Workspace.find_by(external_id: params[:workspace_id])
+      authorize! @workspace, to: :can_read_variable
+      @variables = @workspace.variables
     else
       @variables = []
     end
