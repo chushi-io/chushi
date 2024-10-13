@@ -21,4 +21,10 @@ class Workspace < ApplicationRecord
   belongs_to :agent_pool, optional: true
 
   before_create -> { generate_id("ws") }
+
+  def permissions
+    {
+      "can-update" => true,
+    }
+  end
 end

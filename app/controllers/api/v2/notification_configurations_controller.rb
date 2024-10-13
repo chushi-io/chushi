@@ -1,7 +1,7 @@
 class Api::V2::NotificationConfigurationsController < Api::ApiController
   def index
     @workspace = Workspace.find_by(external_id: params[:id])
-    authorize! @workspace, to: :list_notification_configurations?
+    authorize! @workspace, to: :can_access?
 
     render json: ::NotificationConfigurationSerializer.new(
       @workspace.notification_configurations,
@@ -16,7 +16,7 @@ class Api::V2::NotificationConfigurationsController < Api::ApiController
       head :not_found and return
     end
 
-    authorize! @notification_configuration
+    authorize! @workspace, to: :can_access?
     render json: ::NotificationConfigurationSerializer.new(
       @notification_configuration,
       {}
@@ -25,7 +25,7 @@ class Api::V2::NotificationConfigurationsController < Api::ApiController
 
   def create
     @workspace = Workspace.find_by(external_id: params[:id])
-    authorize! @workspace, to: :create_notification_configurations?
+    authorize! @workspace, to: :is_admin?
 
     @config = @workspace.notification_configurations.new(
       notification_configuration_params
@@ -47,7 +47,7 @@ class Api::V2::NotificationConfigurationsController < Api::ApiController
       head :not_found and return
     end
 
-    authorize! @config
+    authorize! @config.workspace, to: :is_admin?
     if @config.update(notification_configuration_params)
       render json: ::NotificationConfigurationSerializer.new(
         @config,
@@ -69,7 +69,7 @@ class Api::V2::NotificationConfigurationsController < Api::ApiController
       head :not_found and return
     end
 
-    authorize! @config
+    authorize! @config.workspace, to: :is_admin?
     if @config.delete
       head :accepted
     else

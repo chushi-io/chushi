@@ -11,7 +11,7 @@ class Api::V2::WorkspaceTasksController < Api::ApiController
   end
 
   def create
-    puts task_params.class
+    authorize! @workspace, to: :can_manage_run_tasks
     @run_task = RunTask.find_by(external_id: task_params["task_id"])
 
     @task = @workspace.tasks.new(task_params.except("task_id"))
@@ -24,13 +24,14 @@ class Api::V2::WorkspaceTasksController < Api::ApiController
   end
 
   def update
+    authorize! @workspace, to: :can_manage_run_tasks
     @task = @workspace.tasks.find_by(external_id: params[:task_id])
     @task.update(task_params)
     render json: ::WorkspaceTaskSerializer.new(@task, {}).serializable_hash
   end
 
   def destroy
-    authorize! @workspace, to: :manage_tasks?
+    authorize! @workspace, to: :can_manage_run_tasks
     @task = @workspace.tasks.find_by(external_id: params[:task_id])
     TaskResult.delete_by(workspace_task_id: @task_id)
     @task.delete
@@ -42,7 +43,7 @@ class Api::V2::WorkspaceTasksController < Api::ApiController
   def load_workspace
     @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
     raise ActiveRecord::RecordNotFound unless @workspace
-    authorize! @workspace, to: :manage_tasks?
+    authorize! @workspace, to: :can_manage_run_tasks
   end
 
   def task_params

@@ -2,7 +2,7 @@ class Api::V2::VariableSetsController < Api::ApiController
   before_action :load_varset, except: [:index, :create]
   def index
     @org = Organization.find_by(external_id: params[:organization_id])
-    authorize! @org, to: :list_variable_sets?
+    authorize! @org, to: :can_read_varsets?
 
     @varsets = @org.variable_sets
     render ::VariableSetSerializer.new(@varsets, {}).serializable_hash
@@ -10,7 +10,7 @@ class Api::V2::VariableSetsController < Api::ApiController
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :create_variable_sets?
+    authorize! @org, to: :can_manage_varsets?
 
     @varset = @org.variable_sets.new(varset_params)
     if @varset.save
@@ -25,12 +25,12 @@ class Api::V2::VariableSetsController < Api::ApiController
       skip_verify_authorized!
       head :not_found and return
     end
-    authorize! @varset
+    authorize! @varset.organization, to: :can_manage_varsets?
     render json: ::VariableSetSerializer.new(@varset, {}).serializable_hash
   end
 
   def update
-    authorize! @varset
+    authorize! @varset.organization, to: :can_manage_varsets?
     if @varset.update(varset_params)
       render json: ::VariableSetSerializer.new(@varset, {}).serializable_hash
     else
@@ -39,7 +39,7 @@ class Api::V2::VariableSetsController < Api::ApiController
   end
 
   def destroy
-    authorize! @varset
+    authorize! @varset.organization, to: :can_manage_varsets?
     if @varset.delete
       render status: :no_content
     else

@@ -2,13 +2,18 @@ class Api::V2::RunsController < Api::ApiController
   before_action :load_run, :except => [:create]
   def create
     @workspace = Workspace.find_by(external_id: run_params["workspace_id"])
-    authorize! @workspace, to: :create_run?
+    if run_params["plan_only"]
+      authorize! @workspace, to: :can_queue_run?
+    else
+      authorize! @workspace, to: :can_queue_apply?
+    end
 
     @run = @workspace.organization.runs.new(run_params)
     if run_params["configuration_version_id"]
       @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params["configuration_version_id"])
     end
     @run.workspace = @workspace
+
     begin
       RunCreator.call(@run)
       render json: ::RunSerializer.new(@run, {}).serializable_hash
@@ -18,7 +23,7 @@ class Api::V2::RunsController < Api::ApiController
   end
 
   def show
-    authorize! @run
+    authorize! @run.workspace, to: :can_queue_run?
 
     options = {}
     options[:include] = params[:include].split(",") if params[:include]
@@ -26,34 +31,34 @@ class Api::V2::RunsController < Api::ApiController
   end
 
   def discard
-    authorize! @run
+    authorize! @run.workspace, to: :can_queue_run?
   end
 
   def cancel
-    authorize! @run
+    authorize! @run.workspace, to: :can_cancel?
   end
 
   def force_cancel
-    authorize! @run
+    authorize! @run.workspace, to: :can_force_cancel?
   end
 
   def force_execute
-    authorize! @run
+    authorize! @run.workspace, to: :can_force_execute?
   end
 
   def events
-    authorize! @run
+    authorize! @run.workspace, to: :can_queue_run?
     render json: {}
   end
 
   def update
-    authorize! @run
+    authorize! @run.workspace, to: :can_queue_run?
 
     render json: ::RunSerializer.new(@run, {}).serializable_hash
   end
 
   def apply
-    authorize! @run
+    authorize! @run, to: :can_apply
     @run.update(status: "apply_queued")
     render json: ::RunSerializer.new(@run, {}).serializable_hash
   end

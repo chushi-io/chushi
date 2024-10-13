@@ -5,11 +5,11 @@ class WorkspaceSerializer < ApplicationSerializer
     workspace.organization
   end
 
-  attribute :permissions do |o|
+  attribute :permissions do |record|
     {
       "can-queue-run": true,
       "can-queue-apply": true,
-      "can-queue-destroy": true,
+      "can-queue-destroy": true
     }
   end
 

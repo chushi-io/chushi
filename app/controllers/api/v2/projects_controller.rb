@@ -1,7 +1,7 @@
 class Api::V2::ProjectsController < Api::ApiController
   def index
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :list_projects?
+    authorize! @org, to: :access?
 
     @projects = @org.projects
     render json: ::ProjectSerializer.new(@projects, {}).serializable_hash
@@ -9,7 +9,7 @@ class Api::V2::ProjectsController < Api::ApiController
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :create_projects?
+    authorize! @org, to: :can_create_project?
 
     @project = @org.projects.new(project_params)
     if @project.save
@@ -25,13 +25,13 @@ class Api::V2::ProjectsController < Api::ApiController
       skip_verify_authorized!
       head :not_found and return
     end
-    authorize! @project
+    authorize! @org, to: :read?
     render json: ::ProjectSerializer.new(@project, {}).serializable_hash
   end
 
   def update
     @project = Project.find_by(external_id: params[:id])
-    authorize! @project
+    authorize! @project, to: :can_update?
     if @project.update(project_params)
       render json: ::ProjectSerializer.new(@project, {}).serializable_hash
     else
@@ -41,7 +41,7 @@ class Api::V2::ProjectsController < Api::ApiController
 
   def destroy
     @project = Project.find_by(external_id: params[:id])
-    authorize! @project
+    authorize! @project, to: :can_update?
     if @project.delete
       render status: :no_content
     else

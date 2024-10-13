@@ -1,10 +1,10 @@
-# TODO: Due to using 'current_organization', this endpoint is
-# only support for organization entities. User / Team tokens will
-# be unable to manage these. Eventually, we'll want to find
-# the list of teams / projects based on the access of the
-# authenticated entity
 class Api::V2::TeamProjectsController < Api::ApiController
+  # To view projects
+  # - If a non-admin user, show projects they have access to
+  # - If admin user, show all projects in the organization
+  # TODO: Permission checks on this controller still need to be updated
   def index
+    skip_verify_authorized!
     authorize! current_organization, to: :list_team_projects?
     @team_projects = current_organization.team_projects
 

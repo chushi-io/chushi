@@ -1,7 +1,7 @@
 class Api::V2::RunTasksController < Api::ApiController
   def index
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :list_run_tasks?
+    authorize! @org, to: :can_read_run_tasks?
 
     @tasks = @org.run_tasks
     render ::RunTaskSerializer.new(@tasks, {}).serializable_hash
@@ -9,13 +9,13 @@ class Api::V2::RunTasksController < Api::ApiController
 
   def show
     @task = RunTask.find_by(external_id: params[:id])
-    authorize! @task
+    authorize! @org, to: :can_read_run_tasks?
     render json: ::RunTaskSerializer.new(@task, {}).serializable_hash
   end
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :create_run_tasks?
+    authorize! @org, to: :can_manage_run_tasks?
 
     @task = @org.run_tasks.new(task_params)
     if @task.save
@@ -27,7 +27,7 @@ class Api::V2::RunTasksController < Api::ApiController
 
   def update
     @task = RunTask.find_by(external_id: params[:id])
-    authorize! @task
+    authorize! @task.organization, to: :can_manage_run_tasks?
     if @task.update(task_params)
       render json: ::RunTaskSerializer.new(@task, {}).serializable_hash
     else
@@ -37,7 +37,7 @@ class Api::V2::RunTasksController < Api::ApiController
 
   def destroy
     @task = RunTask.find_by(external_id: params[:id])
-    authorize! @task
+    authorize! @task.organization, to: :can_manage_run_tasks?
     if @task.delete
       render status: :no_content
     else

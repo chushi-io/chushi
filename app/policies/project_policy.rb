@@ -1,13 +1,14 @@
 class ProjectPolicy < ApplicationPolicy
-  def show?
+  # Mapped permissions
+  def can_update?
     (organization.present? && organization.id == record.organization_id)
   end
 
-  def update?
-    (organization.present? && organization.id == record.organization_id)
+  def can_destroy?
+    true
   end
 
-  def destroy?
-    (organization.present? && organization.id == record.organization_id)
+  def can_create_workspace?
+
   end
 end

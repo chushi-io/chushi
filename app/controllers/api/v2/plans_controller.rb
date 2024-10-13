@@ -3,13 +3,13 @@ class Api::V2::PlansController < Api::ApiController
   skip_verify_authorized only: :logs
   def show
     @plan = Plan.find_by(external_id: params[:id])
-    authorize! @plan, to: :show?
+    authorize! @workspace, to: :can_access?
     render json: ::PlanSerializer.new(@plan, {}).serializable_hash
   end
 
   def logs
     @plan = Plan.find_by(external_id: params[:id])
-    authorize! @plan, to: :show?
+    authorize! @workspace, to: :can_access?
     # Otherwise, return no content
     # Check if the file is attached. If it is, simply return it
     if @plan.plan_log_file.attached?
@@ -21,9 +21,20 @@ class Api::V2::PlansController < Api::ApiController
       "#{Chushi.timber_url}/files/#{@plan.run.id}_#{@plan.id}.log",
       { query: { limit: params[:limit], offset: params[:offset] } }
     ).body
-
   end
 
+  def json_output_redacted
+    @plan = Plan.find_by(external_id: params[:id])
+    authorize! @workspace, to: :can_access?
+
+    if @plan.plan_json_file.attached?
+      render json: @plan.plan_json_file.download
+    else
+      render json: {}
+    end
+  end
+
+  # Agent-only API routes
   def upload
     @run = Run.find_by(external_id: params[:id])
     authorize! @run.plan
@@ -55,20 +66,8 @@ class Api::V2::PlansController < Api::ApiController
 
   end
 
-  def json_output_redacted
-    @plan = Plan.find_by(external_id: params[:id])
-    authorize! @plan, to: :show?
-
-    if @plan.plan_json_file.attached?
-      render json: @plan.plan_json_file.download
-    else
-      render json: {}
-    end
-  end
-
   def update
     @plan = Plan.find_by(external_id: params[:id])
-    authorize! @plan
 
     @plan.has_changes = params[:has_changes]
     @plan.resource_additions = params[:resource_additions]
