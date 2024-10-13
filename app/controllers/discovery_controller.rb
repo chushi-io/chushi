@@ -15,9 +15,9 @@ class DiscoveryController < ApplicationController
   def webfinger_discovery
     jrd = {
       links: [{
-                rel: OpenIDConnect::Discovery::Provider::Issuer::REL_VALUE,
-                href: IdToken.config[:issuer]
-              }]
+        rel: OpenIDConnect::Discovery::Provider::Issuer::REL_VALUE,
+        href: IdToken.config[:issuer]
+      }]
     }
     jrd[:subject] = params[:resource] if params[:resource].present?
     render json: jrd, content_type: Mime::JRD
@@ -34,11 +34,11 @@ class DiscoveryController < ApplicationController
       scopes_supported: Scope.all.collect(&:name),
       response_types_supported: Client.available_response_types,
       grant_types_supported: Client.available_grant_types,
-      request_object_signing_alg_values_supported: [:HS256, :HS384, :HS512],
-      subject_types_supported: ['public', 'pairwise'],
+      request_object_signing_alg_values_supported: %i[HS256 HS384 HS512],
+      subject_types_supported: %w[public pairwise],
       id_token_signing_alg_values_supported: [:RS256],
-      token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post'],
-      claims_supported: ['sub', 'iss', 'name', 'email', 'address', 'phone_number']
+      token_endpoint_auth_methods_supported: %w[client_secret_basic client_secret_post],
+      claims_supported: %w[sub iss name email address phone_number]
     )
     render json: config
   end

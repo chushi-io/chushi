@@ -3,6 +3,5 @@ class PolicyEvaluation::PolicyEvaluationPassedJob
 
   def perform(*args)
     @policy_evaluation = PolicyEvaluation.find(args.first)
-
   end
 end

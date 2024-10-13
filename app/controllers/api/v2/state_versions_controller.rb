@@ -1,5 +1,5 @@
 class Api::V2::StateVersionsController < Api::ApiController
-  before_action :load_workspace, :except => [:show]
+  before_action :load_workspace, except: [:show]
 
   def index
     authorize! @workspace, to: :can_read_state_versions?
@@ -10,13 +10,13 @@ class Api::V2::StateVersionsController < Api::ApiController
   def create
     authorize! @workspace, to: :can_create_state_versions?
     version_params = jsonapi_deserialize(params, only: [
-      # :force,
-      # "json_state_outputs",
-      # :lineage,
-      # :md5,
-      :serial,
-      :run
-    ])
+                                           # :force,
+                                           # "json_state_outputs",
+                                           # :lineage,
+                                           # :md5,
+                                           :serial,
+                                           :run
+                                         ])
     @version = @workspace.state_versions.create!(version_params)
     if @version
       render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
@@ -49,6 +49,7 @@ class Api::V2::StateVersionsController < Api::ApiController
   end
 
   private
+
   def load_workspace
     @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
     raise ActiveRecord::RecordNotFound unless @workspace

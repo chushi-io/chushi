@@ -1,5 +1,5 @@
 class TaskResultSerializer < ApplicationSerializer
-  set_type "task-results"
+  set_type 'task-results'
 
   attribute :message
   attribute :status

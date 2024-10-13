@@ -5,5 +5,5 @@ class StateVersionOutput < ApplicationRecord
 
   vault_attribute :value
 
-  before_create -> { generate_id("wsout") }
+  before_create -> { generate_id('wsout') }
 end

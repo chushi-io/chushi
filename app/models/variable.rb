@@ -3,5 +3,5 @@ class Variable < ApplicationRecord
   vault_lazy_decrypt!
 
   vault_attribute :value
-  before_create -> { generate_id("var") }
+  before_create -> { generate_id('var') }
 end

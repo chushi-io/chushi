@@ -35,7 +35,6 @@ class CreateWorkspaces < ActiveRecord::Migration[7.1]
 
       t.references :vcs_connection, foreign_key: true, type: :uuid
       t.references :organization, foreign_key: true, type: :uuid
-
     end
   end
 end

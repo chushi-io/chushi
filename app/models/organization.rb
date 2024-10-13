@@ -1,5 +1,5 @@
 class Organization < ApplicationRecord
-  @id_prefix = "org"
+  @id_prefix = 'org'
 
   acts_as_taggable_on :tags
   acts_as_taggable_tenant :id
@@ -27,5 +27,5 @@ class Organization < ApplicationRecord
   has_many :organization_memberships
   has_many :users, through: :organization_memberships
 
-  before_create -> { generate_id("org") }
+  before_create -> { generate_id('org') }
 end

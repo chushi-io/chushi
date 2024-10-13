@@ -3,7 +3,7 @@ class JobSerializer
 
   set_key_transform :dash
   set_id :id
-  set_type "jobs"
+  set_type 'jobs'
 
   attribute :locked_by
   attribute :status

@@ -1,5 +1,5 @@
 class AgentPoolSerializer < ApplicationSerializer
-  set_type "agent-pools"
+  set_type 'agent-pools'
 
   attribute :name
   attribute :created_at

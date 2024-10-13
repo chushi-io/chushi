@@ -9,7 +9,7 @@ class Workspace < ApplicationRecord
   has_many :state_versions
   has_many :notification_configurations
 
-  has_many :tasks, :class_name => "WorkspaceTask"
+  has_many :tasks, class_name: 'WorkspaceTask'
   has_many :variables
 
   has_many :run_triggers
@@ -20,11 +20,11 @@ class Workspace < ApplicationRecord
 
   belongs_to :agent_pool, optional: true
 
-  before_create -> { generate_id("ws") }
+  before_create -> { generate_id('ws') }
 
   def permissions
     {
-      "can-update" => true,
+      'can-update' => true
     }
   end
 end

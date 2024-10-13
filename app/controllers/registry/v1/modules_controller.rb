@@ -2,19 +2,17 @@ class Registry::V1::ModulesController < Registry::RegistryController
   include ActiveStorage::SetCurrent
   def index
     @modules = RegistryModule.where(params.permit(
-      :namespace,
-      :name,
-      :provider
-    ))
+                                      :namespace,
+                                      :name,
+                                      :provider
+                                    ))
     render json: @modules
   end
 
   def search
-    unless params[:q]
-      head :bad_request
-    end
+    head :bad_request unless params[:q]
 
-    @modules = RegistryModule.where()
+    @modules = RegistryModule.where
     render json: @modules
   end
 
@@ -28,12 +26,12 @@ class Registry::V1::ModulesController < Registry::RegistryController
       modules: [
         {
           source: "#{@module.namespace}/#{@module.name}/#{@module.provider}",
-          versions: @module.registry_module_versions.map{|module_version|
+          versions: @module.registry_module_versions.map do |module_version|
             {
               version: module_version.version,
               submodules: []
             }
-          }
+          end
         }
       ]
     }
@@ -43,18 +41,19 @@ class Registry::V1::ModulesController < Registry::RegistryController
     @registry_module = RegistryModule.where(
       namespace: params[:namespace],
       name: params[:name],
-      provider: params[:provider],
-      ).first
-    if params[:version]
-      # Redirect to the archive path
-      @version = @registry_module.registry_module_versions.find_by(version: params[:version])
-    else
-      # Download latest
-      @version = @registry_module.registry_module_versions.order(version: :desc).first
-    end
+      provider: params[:provider]
+    ).first
+    @version = if params[:version]
+                 # Redirect to the archive path
+                 @registry_module.registry_module_versions.find_by(version: params[:version])
+               else
+                 # Download latest
+                 @registry_module.registry_module_versions.order(version: :desc).first
+               end
 
     if @version.archive.present?
-      response.headers['X-Terraform-Get'] = "#{encrypt_storage_url({id: @version.id, class: @version.class.name })}?archive=tar.gz"
+      response.headers['X-Terraform-Get'] =
+        "#{encrypt_storage_url({ id: @version.id, class: @version.class.name })}?archive=tar.gz"
       head :no_content
     else
       head :not_found
@@ -82,9 +81,7 @@ class Registry::V1::ModulesController < Registry::RegistryController
     render json: @modules
   end
 
-  def show
-
-  end
+  def show; end
 
   def create
     @module = RegistryModule.new(
@@ -96,11 +93,13 @@ class Registry::V1::ModulesController < Registry::RegistryController
     @module.published_at = Time.now
     @module.save!
     request.body.rewind
-    @module.archive.attach(io: request.body, filename: "#{params[:namespace]}-#{params[:name]}-#{params[:provider]}-#{params[:version]}.tar.gz")
+    @module.archive.attach(io: request.body,
+                           filename: "#{params[:namespace]}-#{params[:name]}-#{params[:provider]}-#{params[:version]}.tar.gz")
     render json: @module
   end
 
   private
+
   def module_params
     params.permit(:namespace, :name, :provider, :version)
   end

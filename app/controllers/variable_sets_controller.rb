@@ -1,27 +1,25 @@
 class VariableSetsController < AuthenticatedController
-  before_action :load_variable_set, only: [:show, :edit, :update, :destroy]
-  before_action -> {
+  before_action :load_variable_set, only: %i[show edit update destroy]
+  before_action lambda {
     authorize! @organization, to: :can_read_varsets?
-  }, only: [:index, :show]
+  }, only: %i[index show]
 
-  before_action -> {
+  before_action lambda {
     authorize! @organization, to: :can_manage_varsets?
-  }, only: [:new, :create, :edit, :update, :destroy]
+  }, only: %i[new create edit update destroy]
 
   def index
     @variable_sets = @organization.variable_sets
   end
 
-  def show
-
-  end
+  def show; end
 
   def create
     @variable_set = @organization.variable_sets.new(variable_set_params)
     if @variable_set.save
       redirect_to variable_set_path(@organization.name, @variable_set.external_id)
     else
-      render "new"
+      render 'new'
     end
   end
 
@@ -29,13 +27,9 @@ class VariableSetsController < AuthenticatedController
     @variable_set = @organization.variable_sets.new
   end
 
-  def edit
+  def edit; end
 
-  end
-
-  def update
-
-  end
+  def update; end
 
   def destroy
     if @variable_set.destroy
@@ -46,6 +40,7 @@ class VariableSetsController < AuthenticatedController
   end
 
   private
+
   def load_variable_set
     @variable_set = @organization.variable_sets.find_by(external_id: params[:id])
   end

@@ -5,8 +5,8 @@ class Api::V2::WorkspaceTeamsController < Api::ApiController
   end
 
   def create
-    @workspace = Workspace.find_by(external_id: workspace_team_params["workspace_id"])
-    @team = Team.find_by(external_id: workspace_team_params["team_id"])
+    @workspace = Workspace.find_by(external_id: workspace_team_params['workspace_id'])
+    @team = Team.find_by(external_id: workspace_team_params['team_id'])
     unless @workspace && @team
       skip_verify_authorized!
       head :not_found and return
@@ -66,16 +66,17 @@ class Api::V2::WorkspaceTeamsController < Api::ApiController
   end
 
   private
+
   def workspace_team_params
     map_params([
-      :workspace,
-      :team,
-      :access,
-      :runs,
-      :variables,
-      "state-versions",
-      "workspace-locking",
-      "run-tasks"
+                 :workspace,
+                 :team,
+                 :access,
+                 :runs,
+                 :variables,
+                 'state-versions',
+                 'workspace-locking',
+                 'run-tasks'
                ])
   end
 end

@@ -1,31 +1,25 @@
 class StateVersionOutputSerializer < ApplicationSerializer
-  set_type "state-version-outputs"
+  set_type 'state-version-outputs'
 
   attribute :name
   attribute :sensitive
-  attribute :type, if: Proc.new { |record|
+  attribute :type, if: proc { |record|
     record.output_type.present?
   } do |o|
-    begin
-      JSON.parse(o.output_type)[0]
-    rescue
-      o.output_type
-    end
+    JSON.parse(o.output_type)[0]
+  rescue StandardError
+    o.output_type
   end
-  attribute :value, if: Proc.new{ |record|
+  attribute :value, if: proc { |record|
     record.value.present?
   } do |o|
-    begin
-      JSON.parse(o.value)
-    rescue
-      o.value
-    end
+    JSON.parse(o.value)
+  rescue StandardError
+    o.value
   end
   attribute :detailed_type do |object|
-    begin
-      JSON.parse(object.output_type)
-    rescue
-      object.output_type
-    end
+    JSON.parse(object.output_type)
+  rescue StandardError
+    object.output_type
   end
 end

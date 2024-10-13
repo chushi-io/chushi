@@ -46,15 +46,16 @@ class Api::V2::RunTasksController < Api::ApiController
   end
 
   private
+
   def task_params
     map_params([
                  :url,
                  :name,
                  :enabled,
-                 "hmac-key",
+                 'hmac-key',
                  :description,
-                 :category,
-               # TODO: We won't currently support global-configuration
+                 :category
+                 # TODO: We won't currently support global-configuration
                  # "global-configuration"
                ])
   end

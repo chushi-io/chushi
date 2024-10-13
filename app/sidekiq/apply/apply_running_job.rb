@@ -1,7 +1,5 @@
 class Apply::ApplyRunningJob
   include Sidekiq::Job
 
-  def perform(*args)
-
-  end
+  def perform(*args); end
 end

@@ -1,5 +1,5 @@
 class Api::V2::AppliesController < Api::ApiController
-  skip_before_action :verify_access_token, :only => [:logs]
+  skip_before_action :verify_access_token, only: [:logs]
   skip_verify_authorized only: :logs
 
   def show
@@ -14,11 +14,7 @@ class Api::V2::AppliesController < Api::ApiController
   end
 
   ### Agent-only routes
-  def update
+  def update; end
 
-  end
-
-  def upload_logs
-
-  end
+  def upload_logs; end
 end

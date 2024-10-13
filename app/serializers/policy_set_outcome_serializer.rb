@@ -1,5 +1,5 @@
 class PolicySetOutcomeSerializer < ApplicationSerializer
-  set_type "policy-set-outcomes"
+  set_type 'policy-set-outcomes'
 
   attribute :outcomes
   attribute :error

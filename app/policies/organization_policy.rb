@@ -5,7 +5,7 @@ class OrganizationPolicy < ApplicationPolicy
   # - Projects (that aren't "secret")
   def read_organization?
     (agent.present? && agent.organization_id == record.id) ||
-      (user.present? && user.organizations.map{|org| org.id}.include?(record.id)) ||
+      (user.present? && user.organizations.map { |org| org.id }.include?(record.id)) ||
       (organization.present? && organization.id == record.id)
   end
 
@@ -14,7 +14,7 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   def write_organization?
-    (organization.present? && organization.id == record.id)
+    organization.present? && organization.id == record.id
   end
 
   # Mapped permissions
@@ -117,7 +117,7 @@ class OrganizationPolicy < ApplicationPolicy
     true
   end
 
-  # Note: Organization membership management is restricted to
+  # NOTE: Organization membership management is restricted to
   # - members of the owners team
   # - the owners team API token
   # - the organization API token

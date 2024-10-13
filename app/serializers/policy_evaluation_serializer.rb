@@ -1,5 +1,5 @@
 class PolicyEvaluationSerializer < ApplicationSerializer
-  set_type "policy-evaluations"
+  set_type 'policy-evaluations'
 
   attribute :status
   attribute :policy_kind

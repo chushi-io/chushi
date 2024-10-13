@@ -1,5 +1,5 @@
 class RunTriggerSerializer < ApplicationSerializer
-  set_type "run_triggers"
+  set_type 'run_triggers'
 
   attribute :workspace_name do |object|
     object.workspace.name

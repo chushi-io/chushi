@@ -1,5 +1,5 @@
 class Api::V2::PlansController < Api::ApiController
-  skip_before_action :verify_access_token, :only => [:logs]
+  skip_before_action :verify_access_token, only: [:logs]
   skip_verify_authorized only: :logs
   def show
     @plan = Plan.find_by(external_id: params[:id])
@@ -40,7 +40,7 @@ class Api::V2::PlansController < Api::ApiController
     authorize! @run.plan
 
     request.body.rewind
-    @run.plan.plan_file.attach(io: request.body, filename: "plan")
+    @run.plan.plan_file.attach(io: request.body, filename: 'plan')
     head :ok
   end
 
@@ -49,7 +49,7 @@ class Api::V2::PlansController < Api::ApiController
     authorize! @run.plan, to: :upload?
 
     request.body.rewind
-    @run.plan.plan_json_file.attach(io: request.body, filename: "plan")
+    @run.plan.plan_json_file.attach(io: request.body, filename: 'plan')
     head :ok
   end
 
@@ -58,13 +58,11 @@ class Api::V2::PlansController < Api::ApiController
     authorize! @run.plan, to: :upload?
 
     request.body.rewind
-    @run.plan.plan_structured_file.attach(io: request.body, filename: "plan")
+    @run.plan.plan_structured_file.attach(io: request.body, filename: 'plan')
     head :ok
   end
 
-  def download
-
-  end
+  def download; end
 
   def update
     @plan = Plan.find_by(external_id: params[:id])
@@ -75,15 +73,11 @@ class Api::V2::PlansController < Api::ApiController
     @plan.resource_destructions = params[:resource_destructions]
     @plan.resource_imports = params[:resource_imports]
 
-    if @plan.has_changes
-      @plan.run.update(has_changes: true)
-    end
+    @plan.run.update(has_changes: true) if @plan.has_changes
     @plan.save
 
     render json: ::PlanSerializer.new(@plan, {}).serializable_hash
   end
 
-  def upload_logs
-
-  end
+  def upload_logs; end
 end

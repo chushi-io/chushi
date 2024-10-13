@@ -12,6 +12,6 @@ class PlanJsonFileUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "tfplan.json"
+    'tfplan.json'
   end
 end

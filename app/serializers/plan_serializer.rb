@@ -18,6 +18,6 @@ class PlanSerializer < ApplicationSerializer
 
   # This URL should be treated as a secret
   attribute :log_read_url do |object|
-    encrypt_upload_url({id: object.id, class: object.class.name, file: "logs"})
+    encrypt_upload_url({ id: object.id, class: object.class.name, file: 'logs' })
   end
 end

@@ -10,5 +10,5 @@ class User < ApplicationRecord
 
   has_many :team_memberships
   has_many :teams, through: :team_memberships
-  before_create -> { generate_id("user") }
+  before_create -> { generate_id('user') }
 end

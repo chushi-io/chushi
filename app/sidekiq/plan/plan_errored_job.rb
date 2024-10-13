@@ -1,7 +1,5 @@
 class Plan::PlanErroredJob
   include Sidekiq::Job
 
-  def perform(*args)
-    
-  end
+  def perform(*args); end
 end

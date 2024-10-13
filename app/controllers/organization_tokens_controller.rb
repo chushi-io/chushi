@@ -20,17 +20,18 @@ class OrganizationTokensController < AuthenticatedController
       flash[:info] = "Access token created: #{@token.token}"
       redirect_to organization_access_token_path
     else
-      render "new"
+      render 'new'
     end
   end
 
   def destroy
     @organization.access_tokens.destroy
-    flash[:info] = "Access tokend deleted"
+    flash[:info] = 'Access tokend deleted'
     redirect_to access_tokens_path
   end
 
   private
+
   def token_params
     params.require(:access_token).permit(:name, :scopes, :expires_at)
   end

@@ -7,14 +7,15 @@ class Api::V2::WorkspaceTasksController < Api::ApiController
   def show
     @task = @workspace.tasks.find_by(external_id: params[:task_id])
     raise ActiveRecord::RecordNotFound unless @task
+
     render json: ::WorkspaceTaskSerializer.new(@task, {}).serializable_hash
   end
 
   def create
     authorize! @workspace, to: :can_manage_run_tasks
-    @run_task = RunTask.find_by(external_id: task_params["task_id"])
+    @run_task = RunTask.find_by(external_id: task_params['task_id'])
 
-    @task = @workspace.tasks.new(task_params.except("task_id"))
+    @task = @workspace.tasks.new(task_params.except('task_id'))
     @task.run_task = @run_task
     if @task.save
       render json: ::WorkspaceTaskSerializer.new(@task, {}).serializable_hash
@@ -40,13 +41,15 @@ class Api::V2::WorkspaceTasksController < Api::ApiController
   end
 
   private
+
   def load_workspace
     @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
     raise ActiveRecord::RecordNotFound unless @workspace
+
     authorize! @workspace, to: :can_manage_run_tasks
   end
 
   def task_params
-    map_params([:task, :stage, :stages, "enforcement-level"])
+    map_params([:task, :stage, :stages, 'enforcement-level'])
   end
 end

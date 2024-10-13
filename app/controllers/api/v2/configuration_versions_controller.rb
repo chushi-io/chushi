@@ -1,12 +1,11 @@
 class Api::V2::ConfigurationVersionsController < Api::ApiController
-
   def create
     @workspace = Workspace.find_by(external_id: params[:id])
     authorize! @workspace, to: :can_queue_runs?
 
     version = @workspace.configuration_versions.new(
       auto_queue_runs: params[:auto_queue_runs],
-      status: "pending"
+      status: 'pending'
     )
     version.organization = @workspace.organization
     if version.save
@@ -21,9 +20,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
     authorize! @version.workspace, to: :can_queue_runs?
 
     contents = @version.archive.read
-    if contents.start_with?("vault:")
-      contents = Vault::Rails.decrypt("transit", "chushi_storage_contents", obj.read)
-    end
+    contents = Vault::Rails.decrypt('transit', 'chushi_storage_contents', obj.read) if contents.start_with?('vault:')
 
     render body: contents, layout: false
   end

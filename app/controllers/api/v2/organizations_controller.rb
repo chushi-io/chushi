@@ -4,7 +4,7 @@ class Api::V2::OrganizationsController < Api::ApiController
     render json: {
       "data": {
         "id": params[:organization_id],
-        "type": "entitlement-sets",
+        "type": 'entitlement-sets',
         "attributes": {
           "agents": true,
           "audit-logging": false,
@@ -39,21 +39,20 @@ class Api::V2::OrganizationsController < Api::ApiController
         }
       }
     }
-
   end
 
   def show
-    @organization = Organization.
-      where(name: params[:organization_id]).
-      first!
+    @organization = Organization
+                    .where(name: params[:organization_id])
+                    .first!
     authorize! @organization, to: :read?
     render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
   end
 
   def update
-    @organization = Organization.
-      where(name: params[:organization_id]).
-      first!
+    @organization = Organization
+                    .where(name: params[:organization_id])
+                    .first!
     authorize! @organization, to: :is_admin?
     @organization.update!(org_params)
     render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
@@ -70,10 +69,10 @@ class Api::V2::OrganizationsController < Api::ApiController
     if request.get?
       # Simply get the organization tags
     else
-      tag_params=jsonapi_deserialize(params, only: [
-        :id,
-        :type,
-      ])
+      jsonapi_deserialize(params, only: %i[
+                            id
+                            type
+                          ])
       if request.post?
 
       elsif request.delete?
@@ -84,8 +83,8 @@ class Api::V2::OrganizationsController < Api::ApiController
 
   def org_params
     map_params([
-      :name,
-      "default-execution-mode"
-    ])
+                 :name,
+                 'default-execution-mode'
+               ])
   end
 end

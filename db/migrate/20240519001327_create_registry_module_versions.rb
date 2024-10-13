@@ -15,7 +15,7 @@ class CreateRegistryModuleVersions < ActiveRecord::Migration[7.1]
 
       t.references :registry_module, foreign_key: true, type: :uuid
 
-      t.index [:registry_module_id, :version], unique: true
+      t.index %i[registry_module_id version], unique: true
       t.timestamps
     end
   end

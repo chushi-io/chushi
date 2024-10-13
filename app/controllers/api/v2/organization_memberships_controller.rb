@@ -1,5 +1,4 @@
 class Api::V2::OrganizationMembershipsController < Api::ApiController
-
   def index
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_manage_memberships?
@@ -13,8 +12,8 @@ class Api::V2::OrganizationMembershipsController < Api::ApiController
     authorize! @org, to: :can_manage_memberships?
 
     @membership = @org.organization_memberships.new
-    @user = User.find_by(email: membership_params["email"])
-    @membership.email = membership_params["email"]
+    @user = User.find_by(email: membership_params['email'])
+    @membership.email = membership_params['email']
     if @user
       # We'll attribute the user object directly as well
       @membership.user = @user
@@ -36,8 +35,8 @@ class Api::V2::OrganizationMembershipsController < Api::ApiController
 
     authorize! @membership.organization, to: :can_manage_memberships?
     render json: ::OrganizationMembershipSerializer.new(@membership, {
-      :include => [:user],
-    }).serializable_hash
+                                                          include: [:user]
+                                                        }).serializable_hash
   end
 
   def update
@@ -65,7 +64,8 @@ class Api::V2::OrganizationMembershipsController < Api::ApiController
   end
 
   private
+
   def membership_params
-    map_params([:email, :teams])
+    map_params(%i[email teams])
   end
 end

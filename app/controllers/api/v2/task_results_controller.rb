@@ -15,29 +15,29 @@ class Api::V2::TaskResultsController < Api::ApiController
 
   def null_stage
     @response = ::HTTParty.patch(params[:task_result_callback_url], body: {
-      "data": {
-        "type": "task-results",
-        "attributes": {
-          "status": "passed",
-          "message": "4 passed, 0 skipped, 0 failed",
-          "url": "https://some-non-existent-url.com"
-        }
-      }
-    }, headers: {
-      'Authorization': "Bearer #{params[:access_token]}"
-    })
+                                   "data": {
+                                     "type": 'task-results',
+                                     "attributes": {
+                                       "status": 'passed',
+                                       "message": '4 passed, 0 skipped, 0 failed',
+                                       "url": 'https://some-non-existent-url.com'
+                                     }
+                                   }
+                                 }, headers: {
+                                   'Authorization': "Bearer #{params[:access_token]}"
+                                 })
     puts @response.to_json
     head :ok
   end
 
   private
-  def task_result_params
-    map_params([
-      :status,
-      :message,
-      :url
-    ])
 
+  def task_result_params
+    map_params(%i[
+                 status
+                 message
+                 url
+               ])
   end
 end
 
@@ -45,7 +45,7 @@ class NullResultSerializer
   include JSONAPI::Serializer
 
   set_key_transform :dash
-  set_type "task-results"
+  set_type 'task-results'
   set_id { |object| object.id }
 
   attribute :status

@@ -5,7 +5,7 @@ class WorkspacesController < AuthenticatedController
 
   def show
     @workspace = @organization.workspaces.find_by(external_id: params[:id])
-    @runs = @workspace.runs.order("created_at desc").limit(10)
+    @runs = @workspace.runs.order('created_at desc').limit(10)
   end
 
   def new
@@ -20,28 +20,26 @@ class WorkspacesController < AuthenticatedController
     end
     @workspace = @organization.workspaces.new(workspace_params)
     if @workspace.save
-      flash[:info] = "Workspace created"
+      flash[:info] = 'Workspace created'
       redirect_to @workspace
     else
-      flash[:error] = "Failed creating workspace"
-      render "new"
+      flash[:error] = 'Failed creating workspace'
+      render 'new'
     end
   end
 
-  def update
-
-  end
+  def update; end
 
   def destroy
     if @organization.workspaces.destroy(params[:id])
       redirect_to workspaces_path(@organization.name)
     else
-      flash[:error] = "Failed deleting workspace"
+      flash[:error] = 'Failed deleting workspace'
     end
-
   end
 
   private
+
   def workspace_params
     params.require(:workspace).permit(
       :name,

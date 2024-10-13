@@ -1,7 +1,7 @@
 class ConfigurationVersionSerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
-  set_type "configuration-versions"
+  set_type 'configuration-versions'
 
   attribute :source
   attribute :speculative
@@ -9,10 +9,10 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   attribute :provisional
   attribute :auto_queue_runs
 
-  attribute :upload_url, unless: Proc.new { |record, params|
+  attribute :upload_url, unless: proc { |record, _params|
     record.archive.present?
   } do |object|
-    encrypt_upload_url({id: object.id, class: object.class.name})
+    encrypt_upload_url({ id: object.id, class: object.class.name })
   end
 
   # link :self, :url
@@ -21,8 +21,6 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   end
 
   link :download do |object|
-    if object.archive.present?
-      download_api_v2_configuration_version_path(object)
-    end
+    download_api_v2_configuration_version_path(object) if object.archive.present?
   end
 end

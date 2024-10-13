@@ -1,5 +1,5 @@
 class Api::V2::VariableSetsController < Api::ApiController
-  before_action :load_varset, except: [:index, :create]
+  before_action :load_varset, except: %i[index create]
   def index
     @org = Organization.find_by(external_id: params[:organization_id])
     authorize! @org, to: :can_read_varsets?
@@ -47,45 +47,30 @@ class Api::V2::VariableSetsController < Api::ApiController
     end
   end
 
-  def list_variables
+  def list_variables; end
 
-  end
+  def add_variable; end
 
-  def add_variable
+  def update_variable; end
 
-  end
+  def delete_variable; end
 
-  def update_variable
+  def add_workspaces; end
 
-  end
+  def delete_workspaces; end
 
-  def delete_variable
+  def add_projects; end
 
-  end
-
-  def add_workspaces
-
-  end
-
-  def delete_workspaces
-
-  end
-
-  def add_projects
-
-  end
-
-  def delete_projects
-
-  end
+  def delete_projects; end
 
   private
+
   def varset_params
-    map_params([
-      :name,
-      :description,
-      :global,
-      :priority
+    map_params(%i[
+                 name
+                 description
+                 global
+                 priority
                ])
   end
 

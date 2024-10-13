@@ -34,22 +34,15 @@ class RunPolicy < ApplicationPolicy
   end
 
   private
+
   def can_access_run
-    if run.present?
-      return run.id == record.id
-    end
+    return run.id == record.id if run.present?
 
-    if agent.present?
-      return agent.id == record.workspace.agent_pool_id
-    end
+    return agent.id == record.workspace.agent_pool_id if agent.present?
 
-    if organization.present?
-      return organization.id == record.workspace.organization_id
-    end
+    return organization.id == record.workspace.organization_id if organization.present?
 
-    if user.present?
-      return user.organizations.map{|org| org.id}.include? record.workspace.organization_id
-    end
+    return user.organizations.map { |org| org.id }.include? record.workspace.organization_id if user.present?
 
     false
   end

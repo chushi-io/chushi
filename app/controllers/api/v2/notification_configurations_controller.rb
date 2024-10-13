@@ -78,15 +78,16 @@ class Api::V2::NotificationConfigurationsController < Api::ApiController
   end
 
   private
+
   def notification_configuration_params
     map_params([
-      :workspace,
-      "destination-type",
-      :enabled,
-      :name,
-      :token,
-      :triggers,
-      :url
+                 :workspace,
+                 'destination-type',
+                 :enabled,
+                 :name,
+                 :token,
+                 :triggers,
+                 :url
                ])
   end
 end

@@ -1,7 +1,5 @@
 class Registry::V1::ProvidersController < Registry::RegistryController
-  def index
-
-  end
+  def index; end
 
   def create
     @provider = Provider.new(
@@ -12,7 +10,8 @@ class Registry::V1::ProvidersController < Registry::RegistryController
     @provider.published_at = Time.now
     @provider.save!
     request.body.rewind
-    @provider.archive.attach(io: request.body, filename: "#{params[:namespace]}-#{params[:name]}-#{params[:provider]}-#{params[:version]}.tar.gz")
+    @provider.archive.attach(io: request.body,
+                             filename: "#{params[:namespace]}-#{params[:name]}-#{params[:provider]}-#{params[:version]}.tar.gz")
     render json: @provider
   end
 end

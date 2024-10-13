@@ -24,78 +24,74 @@ class Api::ApiController < ActionController::API
   def authenticated
     token = request.headers['Authorization'].to_s.split(' ').last
     @access_token = AccessToken.find_by_token(token)
-    not access_token.nil?
+    !access_token.nil?
   end
 
   def verify_access_token
     token = request.headers['Authorization'].to_s.split(' ').last
-    token_chunks = token.split(".")
+    token_chunks = token.split('.')
 
     @access_token = AccessToken.find_by(external_id: "at-#{token_chunks[0]}")
 
-    if @access_token.nil?
-      render json: nil,  status: :forbidden and return
-    end
+    render json: nil, status: :forbidden and return if @access_token.nil?
 
-    if @access_token.token != token_chunks[1]
-      render json: nil, status: :forbidden and return
-    end
+    render json: nil, status: :forbidden and return if @access_token.token != token_chunks[1]
 
-    if @access_token.expired_at.present? && @access_token.expired_at.after?(Time.now)
-      render json: nil, status: :forbidden
-    end
+    return unless @access_token.expired_at.present? && @access_token.expired_at.after?(Time.now)
+
+    render json: nil, status: :forbidden
   end
 
   def is_organization
-    @access_token.token_authable_type == "Organization"
+    @access_token.token_authable_type == 'Organization'
   end
 
   def current_organization
-    if is_organization
-      Organization.find(@access_token.token_authable_id)
-    end
+    return unless is_organization
+
+    Organization.find(@access_token.token_authable_id)
   end
 
   def is_user
-    @access_token.token_authable_type == "User"
+    @access_token.token_authable_type == 'User'
   end
 
   def current_user
-    if is_user
-      User.find(@access_token.token_authable_id)
-    end
+    return unless is_user
+
+    User.find(@access_token.token_authable_id)
   end
 
   def current_team
-    if @access_token.token_authable_type == "Team"
-      Team.find(@access_token.token_authable_id)
-    end
+    return unless @access_token.token_authable_type == 'Team'
+
+    Team.find(@access_token.token_authable_id)
   end
 
   def current_task
-    if @access_token.token_authable_type == "RunTask"
-      RunTask.find(@access_token.token_authable_id)
-    end
+    return unless @access_token.token_authable_type == 'RunTask'
+
+    RunTask.find(@access_token.token_authable_id)
   end
 
   def is_run
-    @access_token.token_authable_type == "Run"
+    @access_token.token_authable_type == 'Run'
   end
 
   def current_run
-    if is_run
-      Run.find(@access_token.token_authable_id)
-    end
+    return unless is_run
+
+    Run.find(@access_token.token_authable_id)
   end
 
   def is_agent
-    @access_token.token_authable_type == "Agent"
+    @access_token.token_authable_type == 'Agent'
   end
 
   def current_agent
-    if is_agent
-      AgentPool.find(@access_token.token_authable_id)
-    end
+    return unless is_agent
+
+    AgentPool.find(@access_token.token_authable_id)
   end
 
   def verify_organization_access
@@ -115,9 +111,8 @@ class Api::ApiController < ActionController::API
   end
 
   def can_access_workspace(workspace)
-    if current_agent
-      return workspace.agent_pool_id == current_agent.id
-    end
+    return workspace.agent_pool_id == current_agent.id if current_agent
+
     ## TODO for now, we just verify access to the organization
     can_access_organization(workspace.organization_id)
   end
@@ -128,6 +123,7 @@ class Api::ApiController < ActionController::API
     elsif current_run
       return current_run.id == run.id
     end
+
     can_access_organization(run.organization_id)
   end
 
@@ -137,14 +133,12 @@ class Api::ApiController < ActionController::API
     elsif current_agent
       return current_agent.organization.id == organization_id
     else
-      unless current_user.organizations.find(organization_id)
-        return false
-      end
+      return false unless current_user.organizations.find(organization_id)
     end
     true
   end
 
   def map_params(attributes)
-    jsonapi_deserialize(params, only: attributes).transform_keys{ |key| key.gsub("-", "_")}
+    jsonapi_deserialize(params, only: attributes).transform_keys { |key| key.gsub('-', '_') }
   end
 end

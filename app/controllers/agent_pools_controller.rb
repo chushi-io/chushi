@@ -1,7 +1,7 @@
 class AgentPoolsController < AuthenticatedController
-  before_action -> {
+  before_action lambda {
     authorize! @organization, to: :can_update_agent_pools?
-  }, only: [:new, :create]
+  }, only: %i[new create]
 
   def index
     @agent_pools = @organization.agent_pools
@@ -22,15 +22,16 @@ class AgentPoolsController < AuthenticatedController
       @token = AccessToken.new
       @token.token_authable = @agent_pool
       @token.save!
-      flash[:info] = "Agent successfully created"
+      flash[:info] = 'Agent successfully created'
       redirect_to agent_pool_path(@organization.name, @agent_pool.external_id)
     else
-      flash.error = "Failed creating agent"
-      render "new"
+      flash.error = 'Failed creating agent'
+      render 'new'
     end
   end
 
   private
+
   def agent_pool_params
     params.require(:agent_pool).permit(:name, :organization_scoped)
   end

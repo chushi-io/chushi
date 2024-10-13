@@ -10,8 +10,8 @@ class Api::V2::RegistryModuleVersionsController < Api::ApiController
     ).first!
 
     @version = @module.registry_module_versions.new(version_params)
-    @version.status = "pending"
-    @version.source = "tfe-api"
+    @version.status = 'pending'
+    @version.source = 'tfe-api'
     @version.save
 
     render json: ::RegistryModuleVersionSerializer.new(@version, {}).serializable_hash
@@ -23,7 +23,8 @@ class Api::V2::RegistryModuleVersionsController < Api::ApiController
   end
 
   private
+
   def version_params
-    map_params([:version, :commit_sha])
+    map_params(%i[version commit_sha])
   end
 end

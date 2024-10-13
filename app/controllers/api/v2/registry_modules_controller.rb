@@ -29,7 +29,7 @@ class Api::V2::RegistryModulesController < Api::ApiController
     authorize! @org, to: :manage_modules?
     @registry_module = @org.registry_modules.new(module_params)
     @registry_module.namespace = @org.name
-    @registry_module.status = "pending"
+    @registry_module.status = 'pending'
     @registry_module.save!
 
     render json: ::RegistryModuleSerializer.new(@registry_module, {}).serializable_hash
@@ -46,10 +46,11 @@ class Api::V2::RegistryModulesController < Api::ApiController
   end
 
   private
+
   def module_params
-    map_params([
-      :name,
-      :provider
-    ])
+    map_params(%i[
+                 name
+                 provider
+               ])
   end
 end

@@ -3,7 +3,7 @@ class RunStage::PrePlanCompletedJob
 
   def perform(*args)
     @run = Run.find(args.first)
-    @run.update(status: "queuing")
+    @run.update(status: 'queuing')
     RunStage::QueuingJob.perform_async(@run.id)
   end
 end

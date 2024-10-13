@@ -12,6 +12,6 @@ class PlanFileUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "tfplan"
+    'tfplan'
   end
 end

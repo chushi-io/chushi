@@ -1,5 +1,5 @@
 class OrganizationMembershipSerializer < ApplicationSerializer
-  set_type "organization-memberships"
+  set_type 'organization-memberships'
 
   attribute :status
   attribute :email

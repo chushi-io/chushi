@@ -10,7 +10,7 @@ class CreateRegistryModules < ActiveRecord::Migration[7.1]
 
       t.timestamps
 
-      t.index [:namespace, :name, :provider], unique: true
+      t.index %i[namespace name provider], unique: true
     end
   end
 end

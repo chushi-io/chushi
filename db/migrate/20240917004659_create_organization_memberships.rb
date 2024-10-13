@@ -7,8 +7,8 @@ class CreateOrganizationMemberships < ActiveRecord::Migration[7.1]
       t.string :external_id, index: { unique: true }
       t.string :status
 
-      t.index [:organization_id, :user_id], unique: true
-      t.index [:organization_id, :email], unique: true
+      t.index %i[organization_id user_id], unique: true
+      t.index %i[organization_id email], unique: true
       t.timestamps
     end
   end

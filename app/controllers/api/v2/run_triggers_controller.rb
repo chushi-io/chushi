@@ -20,7 +20,7 @@ class Api::V2::RunTriggersController < Api::ApiController
     end
     authorize! @workspace, to: :can_manage_run_triggers?
     @trigger = @workspace.run_triggers.new
-    @sourceable = Workspace.find_by(external_id: run_trigger_params["sourceable_id"])
+    @sourceable = Workspace.find_by(external_id: run_trigger_params['sourceable_id'])
     authorize! @sourceable, to: :can_read_run?
 
     @trigger.sourceable = @sourceable
@@ -48,6 +48,7 @@ class Api::V2::RunTriggersController < Api::ApiController
   end
 
   private
+
   def run_trigger_params
     map_params([:sourceable])
   end

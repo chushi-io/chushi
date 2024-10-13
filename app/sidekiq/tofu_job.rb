@@ -7,9 +7,7 @@ class TofuJob
 
     # Install terraform
     @tofu_version = @run.workspace.tofu_version
-    if @tofu_version.nil? || @tofu_version.empty?
-      @tofu_version = "1.8.2"
-    end
+    @tofu_version = '1.8.2' if @tofu_version.nil? || @tofu_version.empty?
 
     url = "https://github.com/opentofu/opentofu/releases/download/v#{@tofu_version}/tofu_#{@tofu_version}_darwin_arm64.zip"
     input = HTTParty.get(url).body

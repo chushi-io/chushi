@@ -1,4 +1,4 @@
-require "test_helper"
+require 'test_helper'
 
 class Api::V2::NotificationConfigurationsControllerTest < ActionDispatch::IntegrationTest
   # test "the truth" do

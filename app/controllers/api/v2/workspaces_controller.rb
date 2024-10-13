@@ -1,24 +1,23 @@
 class Api::V2::WorkspacesController < Api::ApiController
-  before_action :load_workspace, except: [:index, :create]
+  before_action :load_workspace, except: %i[index create]
 
   def index
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :list_workspaces?
 
     @workspaces = @org.workspaces
-    if params[:search]
-      if params[:search][:tags]
-        @workspaces = @workspaces.tagged_with(params[:search][:tags].split(","), :match_all => true)
+    if params[:search] && params[:search][:tags](:tags])
+        @workspaces = @workspaces.tagged_with(params[:search][:tags].split(','), match_all: true)
       end
-    end
     render json: ::WorkspaceSerializer.new(@workspaces, {
-      params: { policy: policy_for(@workspaces) },
-    }).serializable_hash
+                                             params: { policy: policy_for(@workspaces) }
+                                           }).serializable_hash
   end
 
   def lock
     authorize! @workspace, to: :can_lock?
     head :conflict and return if @workspace.locked
+
     @workspace.update(locked: true)
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
@@ -31,7 +30,7 @@ class Api::V2::WorkspacesController < Api::ApiController
       @project = Project.find_by(external_id: workspace_params[:project_id])
       authorize! @project, to: :can_create_workspace?
     end
-    
+
     @workspace = @org.workspaces.new(workspace_params)
     if @workspace.save
       render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
@@ -42,14 +41,14 @@ class Api::V2::WorkspacesController < Api::ApiController
 
   def update
     authorize! @workspace, to: :is_admin?
-    update_params=Hash[workspace_params]
-    if update_params.key?("agent_pool_id")
-      @agent = @workspace.organization.agent_pools.find_by(external_id: update_params["agent_pool_id"])
-      update_params["agent_pool_id"] = @agent.id
+    update_params = Hash[workspace_params]
+    if update_params.key?('agent_pool_id')
+      @agent = @workspace.organization.agent_pools.find_by(external_id: update_params['agent_pool_id'])
+      update_params['agent_pool_id'] = @agent.id
     end
-    if update_params.key?("terraform_version")
-      update_params["tofu_version"] = update_params["terraform_version"]
-      update_params.delete("terraform_version")
+    if update_params.key?('terraform_version')
+      update_params['tofu_version'] = update_params['terraform_version']
+      update_params.delete('terraform_version')
     end
     if @workspace.update(update_params)
       render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
@@ -60,17 +59,14 @@ class Api::V2::WorkspacesController < Api::ApiController
 
   def unlock
     authorize! @workspace, to: :can_unlock?
-    if @workspace.locked
-      @workspace.update(locked: false)
-    end
+    @workspace.update(locked: false) if @workspace.locked
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
 
   def force_unlock
     authorize! @workspace, to: :can_force_unlock?
-    unless @workspace.locked
-      head :conflict and return
-    end
+    head :conflict and return unless @workspace.locked
+
     @workspace.update(locked: false)
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
@@ -80,9 +76,7 @@ class Api::V2::WorkspacesController < Api::ApiController
     render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
   end
 
-  def runs
-
-  end
+  def runs; end
 
   def tags
     authorize! @workspace, to: :read?
@@ -90,27 +84,26 @@ class Api::V2::WorkspacesController < Api::ApiController
 
     if request.get?
       # Simply get the workspace tags
-    else
-      if request.post?
+    elsif request.post?
 
-      elsif request.delete?
+    elsif request.delete?
 
-      end
     end
   end
 
   private
+
   def tag_params
     params.permit(
       [
         :type,
-        attributes: [ :name ]
+        { attributes: [:name] }
       ],
       :id
     )
   end
 
-  private
+
   def load_workspace
     @workspace = Workspace.where(external_id: params[:id]).or(Workspace.where(name: params[:id])).first
     raise ActiveRecord::RecordNotFound unless @workspace
@@ -118,25 +111,25 @@ class Api::V2::WorkspacesController < Api::ApiController
 
   def workspace_params
     map_params([
-      :name,
-      "agent-pool-id",
-      "allow-destroy-plan",
-      "auto-apply",
-      "auto-apply-run-trigger",
-      "auto-destroy-at",
-      "auto-destroy-at-activity-duration",
-      "description",
-      "execution-mode",
-      "file-triggers-enabled",
-      "global-remote-state",
-      "queue-all-runs",
-      "source-name",
-      "source-url",
-      "speculative-enabled",
-      "terraform-version",
-      "trigger-patterns",
-      "trigger-prefixes",
-      "working-directory",
-     ])
+                 :name,
+                 'agent-pool-id',
+                 'allow-destroy-plan',
+                 'auto-apply',
+                 'auto-apply-run-trigger',
+                 'auto-destroy-at',
+                 'auto-destroy-at-activity-duration',
+                 'description',
+                 'execution-mode',
+                 'file-triggers-enabled',
+                 'global-remote-state',
+                 'queue-all-runs',
+                 'source-name',
+                 'source-url',
+                 'speculative-enabled',
+                 'terraform-version',
+                 'trigger-patterns',
+                 'trigger-prefixes',
+                 'working-directory'
+               ])
   end
 end

@@ -13,15 +13,14 @@ class Api::V2::JobsController < Api::ApiController
     skip_verify_authorized!
     puts current_agent.id
     puts params[:id]
-    unless current_agent && current_agent.id == params[:id]
-      head :forbidden and return
-    end
-    @jobs = Job.
-      select('DISTINCT ON (workspace_id) *').
-      where(agent_pool_id: params[:id]).
-      where(locked: false).
-      order(workspace_id: :asc, created_at: :desc).
-      limit(10)
+    head :forbidden and return unless current_agent && current_agent.id == params[:id]
+
+    @jobs = Job
+            .select('DISTINCT ON (workspace_id) *')
+            .where(agent_pool_id: params[:id])
+            .where(locked: false)
+            .order(workspace_id: :asc, created_at: :desc)
+            .limit(10)
     render json: ::JobSerializer.new(@jobs, {}).serializable_hash
   end
 
@@ -32,21 +31,17 @@ class Api::V2::JobsController < Api::ApiController
 
   def lock
     authorize! @job
-    if @job.locked
-      head :conflict and return
-    end
-    @job.update(locked_by: params["locked_by"], locked: true)
+    head :conflict and return if @job.locked
+
+    @job.update(locked_by: params['locked_by'], locked: true)
     render json: ::JobSerializer.new(@job, {}).serializable_hash
   end
 
   def unlock
     authorize! @job
-    unless @job.locked
-      head :conflict and return
-    end
-    unless @job.locked_by == params[:locked_by]
-      head :bad_request and return
-    end
+    head :conflict and return unless @job.locked
+    head :bad_request and return unless @job.locked_by == params[:locked_by]
+
     @job.update(locked: false)
     render json: ::JobSerializer.new(@job, {}).serializable_hash
   end
@@ -55,9 +50,7 @@ class Api::V2::JobsController < Api::ApiController
     authorize! @job
     @job.update(job_params)
     puts "Job status: #{@job.status}"
-    if %w[completed errored].include?(@job.status)
-      Job::JobFinishedJob.perform_async(@job.id)
-    end
+    Job::JobFinishedJob.perform_async(@job.id) if %w[completed errored].include?(@job.status)
     render json: ::JobSerializer.new(@job, {}).serializable_hash
   end
 
@@ -68,8 +61,9 @@ class Api::V2::JobsController < Api::ApiController
   end
 
   private
+
   def job_params
-    map_params([:status, :locked_by])
+    map_params(%i[status locked_by])
   end
 
   def load_job

@@ -12,6 +12,6 @@ class PlanStructuredFileUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "structured.json"
+    'structured.json'
   end
 end

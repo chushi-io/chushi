@@ -89,12 +89,13 @@ class Api::V2::TeamsController < Api::ApiController
   end
 
   private
+
   def team_params
     map_params([
                  :name,
                  :description,
                  :visibility,
-                 "allow-member-token-management"
+                 'allow-member-token-management'
                ])
   end
 end

@@ -4,7 +4,7 @@ class TaskStage < ApplicationRecord
 
   has_many :task_results
   has_many :policy_evaluations
-  before_create -> { generate_id("ts") }
+  before_create -> { generate_id('ts') }
 end
 
 # pending	The initial status of a run task stage after creation.

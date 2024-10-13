@@ -17,7 +17,7 @@ class Api::V2::RegistryProviderVersionPlatformsController < Api::ApiController
     authorize! @org, to: :show?
     @platform = @version.provider_version_platforms.where(
       os: params[:os],
-      arch: params[:arch],
+      arch: params[:arch]
     ).first!
     render json: ::ProviderVersionPlatformSerializer.new(@platform, {}).serializable_hash
   end
@@ -27,13 +27,14 @@ class Api::V2::RegistryProviderVersionPlatformsController < Api::ApiController
   end
 
   private
+
   def load_organization
     @org = Organization.find_by(name: params[:organization_id])
   end
 
   def load_provider
     @provider = @org.providers.where(
-      registry: "private",
+      registry: 'private',
       namespace: params[:namespace],
       name: params[:name]
     ).first!
@@ -44,6 +45,6 @@ class Api::V2::RegistryProviderVersionPlatformsController < Api::ApiController
   end
 
   def platform_params
-    map_params([:os, :arch, :shasum, :filename])
+    map_params(%i[os arch shasum filename])
   end
 end

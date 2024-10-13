@@ -1,11 +1,11 @@
 class ProviderVersionPlatformSerializer < ApplicationSerializer
-  set_type ""
+  set_type ''
 
   attribute :os
   attribute :arch
   attribute :filename
   attribute :shasum
-  attribute :permissions do |object| {} end
+  attribute :permissions do |_object| {} end
   attribute :provider_binary_uploaded do |object|
     object.binary.present?
   end
@@ -14,15 +14,15 @@ class ProviderVersionPlatformSerializer < ApplicationSerializer
     object.provider_version
   end
 
-  link :provider_binary_upload, unless: Proc.new { |record, params|
+  link :provider_binary_upload, unless: proc { |record, _params|
     record.binary.present?
   } do |object|
-    encrypt_upload_url({id: object.id, class: object.class.name})
+    encrypt_upload_url({ id: object.id, class: object.class.name })
   end
 
-  link :provider_binary_download, if: Proc.new { |record, params|
+  link :provider_binary_download, if: proc { |record, _params|
     record.binary.present?
   } do |object|
-    encrypt_storage_url({id: object.id, class: object.class.name})
+    encrypt_storage_url({ id: object.id, class: object.class.name })
   end
 end

@@ -4,5 +4,5 @@ class Policy < ApplicationRecord
 
   mount_uploader :policy, PolicyUploader
 
-  before_create -> { generate_id("pol") }
+  before_create -> { generate_id('pol') }
 end

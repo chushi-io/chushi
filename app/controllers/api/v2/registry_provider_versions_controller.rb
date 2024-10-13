@@ -4,7 +4,7 @@ class Api::V2::RegistryProviderVersionsController < Api::ApiController
     authorize! @org, to: :show?
 
     @provider = @org.providers.where(
-      registry: "private",
+      registry: 'private',
       namespace: params[:namespace],
       name: params[:name]
     ).first!
@@ -17,7 +17,7 @@ class Api::V2::RegistryProviderVersionsController < Api::ApiController
     authorize! @org, to: :manage_modules?
 
     @provider = @org.providers.where(
-      registry: "private",
+      registry: 'private',
       namespace: params[:namespace],
       name: params[:name]
     ).first!
@@ -31,7 +31,7 @@ class Api::V2::RegistryProviderVersionsController < Api::ApiController
     authorize! @org, to: :show?
 
     @provider = @org.providers.where(
-      registry: "private",
+      registry: 'private',
       namespace: params[:namespace],
       name: params[:name]
     ).first!
@@ -46,7 +46,8 @@ class Api::V2::RegistryProviderVersionsController < Api::ApiController
   end
 
   private
+
   def version_params
-    map_params([:version, :key_id, :protocols])
+    map_params(%i[version key_id protocols])
   end
 end

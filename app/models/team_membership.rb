@@ -3,5 +3,5 @@ class TeamMembership < ApplicationRecord
   belongs_to :team
   belongs_to :user
 
-  before_create -> { generate_id("tu") }
+  before_create -> { generate_id('tu') }
 end

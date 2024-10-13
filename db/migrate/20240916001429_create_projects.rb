@@ -10,7 +10,7 @@ class CreateProjects < ActiveRecord::Migration[7.1]
       t.string :auto_destroy_activity_duration
 
       t.references :organization, foreign_key: true, type: :uuid
-      t.index [:organization_id, :name], unique: true
+      t.index %i[organization_id name], unique: true
 
       t.timestamps
     end

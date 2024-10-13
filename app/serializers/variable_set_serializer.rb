@@ -1,5 +1,5 @@
 class VariableSetSerializer < ApplicationSerializer
-  set_type "varsets"
+  set_type 'varsets'
 
   attribute :name
   attribute :description

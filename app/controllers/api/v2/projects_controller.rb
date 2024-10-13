@@ -50,7 +50,8 @@ class Api::V2::ProjectsController < Api::ApiController
   end
 
   private
+
   def project_params
-    map_params([:name, :description])
+    map_params(%i[name description])
   end
 end

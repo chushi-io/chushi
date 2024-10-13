@@ -1,23 +1,23 @@
 class Api::V2::RunsController < Api::ApiController
-  before_action :load_run, :except => [:create]
+  before_action :load_run, except: [:create]
   def create
-    @workspace = Workspace.find_by(external_id: run_params["workspace_id"])
-    if run_params["plan_only"]
+    @workspace = Workspace.find_by(external_id: run_params['workspace_id'])
+    if run_params['plan_only']
       authorize! @workspace, to: :can_queue_run?
     else
       authorize! @workspace, to: :can_queue_apply?
     end
 
     @run = @workspace.organization.runs.new(run_params)
-    if run_params["configuration_version_id"]
-      @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params["configuration_version_id"])
+    if run_params['configuration_version_id']
+      @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params['configuration_version_id'])
     end
     @run.workspace = @workspace
 
     begin
       RunCreator.call(@run)
       render json: ::RunSerializer.new(@run, {}).serializable_hash
-    rescue => exception
+    rescue StandardError
       render status: :internal_server_error
     end
   end
@@ -26,7 +26,7 @@ class Api::V2::RunsController < Api::ApiController
     authorize! @run.workspace, to: :can_queue_run?
 
     options = {}
-    options[:include] = params[:include].split(",") if params[:include]
+    options[:include] = params[:include].split(',') if params[:include]
     render json: ::RunSerializer.new(@run, options).serializable_hash
   end
 
@@ -59,7 +59,7 @@ class Api::V2::RunsController < Api::ApiController
 
   def apply
     authorize! @run, to: :can_apply
-    @run.update(status: "apply_queued")
+    @run.update(status: 'apply_queued')
     render json: ::RunSerializer.new(@run, {}).serializable_hash
   end
 
@@ -78,21 +78,21 @@ class Api::V2::RunsController < Api::ApiController
 
   def identity_token
     authorize! @run, to: :token?
-
   end
 
   private
+
   def load_run
     @run = Run.find_by(external_id: params[:id])
   end
 
   def run_params
     map_params([
-                 "plan-only",
+                 'plan-only',
                  :message,
                  :workspace,
-                 "is-destroy",
-                 "configuration-version"
+                 'is-destroy',
+                 'configuration-version'
                ])
   end
 end

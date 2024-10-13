@@ -7,23 +7,13 @@ class RegistryModulesController < AuthenticatedController
     @module = @organization.registry_modules.find_by(external_id: params[:id])
   end
 
-  def new
+  def new; end
 
-  end
+  def create; end
 
-  def create
+  def edit; end
 
-  end
+  def update; end
 
-  def edit
-
-  end
-
-  def update
-
-  end
-
-  def destroy
-
-  end
+  def destroy; end
 end

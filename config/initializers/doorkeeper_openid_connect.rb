@@ -4,10 +4,10 @@ Doorkeeper::OpenidConnect.configure do
   issuer Chushi.domain
 
   signing_key do
-    if ENV.has_key?("OIDC_PRIVATE_KEY")
-      ENV.fetch("OIDC_PRIVATE_KEY")
+    if ENV.has_key?('OIDC_PRIVATE_KEY')
+      ENV.fetch('OIDC_PRIVATE_KEY')
     else
-      File.read(ENV.fetch("OIDC_PRIVATE_KEY_FILE", "oidc_key.pem"))
+      File.read(ENV.fetch('OIDC_PRIVATE_KEY_FILE', 'oidc_key.pem'))
     end
   end
 
@@ -41,16 +41,13 @@ Doorkeeper::OpenidConnect.configure do
     # redirect_to account_select_url
   end
 
-  subject do |resource_owner, application|
+  subject do |resource_owner, _application|
     organization = resource_owner.workspace.organization.name
-    project = "default"
-    unless resource_owner.workspace.project.nil?
-      project = resource_owner.workspace.project.external_id
-    end
+    project = 'default'
+    project = resource_owner.workspace.project.external_id unless resource_owner.workspace.project.nil?
     workspace = resource_owner.workspace.name
-    operation = "plan"
+    operation = 'plan'
     "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"
-
   end
 
   # Protocol to use when generating URIs for the discovery endpoint,
@@ -64,24 +61,24 @@ Doorkeeper::OpenidConnect.configure do
 
   # Example claims:
   claims do
-    claim :workspace, response: [:id_token, :user_info] do |resource_owner|
+    claim :workspace, response: %i[id_token user_info] do |resource_owner|
       resource_owner.id
     end
 
-    claim :project, response: [:id_token, :user_info] do |resource_owner|
+    claim :project, response: %i[id_token user_info] do |resource_owner|
       resource_owner.agent_id
     end
 
-    claim :organization, response: [:id_token, :user_info] do |resource_owner|
+    claim :organization, response: %i[id_token user_info] do |resource_owner|
       resource_owner.organization_id
     end
 
-  #   normal_claim :_foo_ do |resource_owner|
-  #     resource_owner.foo
-  #   end
+    #   normal_claim :_foo_ do |resource_owner|
+    #     resource_owner.foo
+    #   end
 
-  #   normal_claim :_bar_ do |resource_owner|
-  #     resource_owner.bar
-  #   end
+    #   normal_claim :_bar_ do |resource_owner|
+    #     resource_owner.bar
+    #   end
   end
 end

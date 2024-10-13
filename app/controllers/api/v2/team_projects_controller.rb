@@ -24,10 +24,10 @@ class Api::V2::TeamProjectsController < Api::ApiController
 
   def create
     authorize! current_organization, to: :create_team_projects?
-    @team = current_organization.teams.find_by!(external_id: team_project_params["team_id"])
-    @project = current_organization.projects.find_by!(external_id: team_project_params["project_id"])
+    @team = current_organization.teams.find_by!(external_id: team_project_params['team_id'])
+    @project = current_organization.projects.find_by!(external_id: team_project_params['project_id'])
 
-    @team_project = current_organization.team_projects.new(access: team_project_params["access"])
+    @team_project = current_organization.team_projects.new(access: team_project_params['access'])
     @team_project.team = @team
     @team_project.project = @project
 
@@ -47,7 +47,7 @@ class Api::V2::TeamProjectsController < Api::ApiController
 
     authorize! @team_project
 
-    @team_project.access = team_project_params["access"]
+    @team_project.access = team_project_params['access']
     if @team_project.save
       render json: ::TeamProjectSerializer.new(@team_project, {}).serializable_hash
     else
@@ -66,13 +66,14 @@ class Api::V2::TeamProjectsController < Api::ApiController
   end
 
   private
+
   def team_project_params
     map_params([
-      :access,
-      "project-access",
-      "workspace-access",
-      :project,
-      :team
-    ])
+                 :access,
+                 'project-access',
+                 'workspace-access',
+                 :project,
+                 :team
+               ])
   end
 end

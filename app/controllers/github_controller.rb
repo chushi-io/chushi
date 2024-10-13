@@ -6,8 +6,8 @@ class GithubController < AuthenticatedController
     ).first
     unless @connection.present?
       @connection = @organization.vcs_connections.create(
-        name: "github-app",
-        provider: "github",
+        name: 'github-app',
+        provider: 'github',
         github_installation_id: params[:installation_id]
       )
     end

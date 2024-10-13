@@ -1,4 +1,4 @@
 class GpgKeySerializer
   include JSONAPI::Serializer
-  attributes 
+  attributes
 end

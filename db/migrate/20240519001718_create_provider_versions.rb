@@ -9,7 +9,7 @@ class CreateProviderVersions < ActiveRecord::Migration[7.1]
 
       t.references :provider, foreign_key: true, type: :uuid
 
-      t.index [:provider_id, :version], unique: true
+      t.index %i[provider_id version], unique: true
       t.timestamps
     end
   end

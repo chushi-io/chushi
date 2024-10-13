@@ -14,6 +14,6 @@ class RunStage::QueuingJob
     @job.save!
 
     # TODO: Check priority
-    @run.update(status: "plan_queued")
+    @run.update(status: 'plan_queued')
   end
 end

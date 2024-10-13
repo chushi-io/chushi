@@ -5,5 +5,5 @@ class SshKey < ApplicationRecord
   vault_attribute :private_key
   belongs_to :organization
 
-  before_create -> { generate_id("sshkey") }
+  before_create -> { generate_id('sshkey') }
 end

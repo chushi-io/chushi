@@ -1,5 +1,5 @@
 class TaskStageSerializer < ApplicationSerializer
-  set_type "task-stages"
+  set_type 'task-stages'
 
   attribute :status
   attribute :stage
@@ -12,7 +12,7 @@ class TaskStageSerializer < ApplicationSerializer
     object.task_results
   end
 
-  has_many :policy_evaluations, serializer: PolicyEvaluationSerializer, id_method_name: :external_id do |object|
+  has_many :policy_evaluations, serializer: PolicyEvaluationSerializer, id_method_name: :external_id do |_object|
     []
   end
 end

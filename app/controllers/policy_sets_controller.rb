@@ -19,16 +19,13 @@ class PolicySetsController < AuthenticatedController
     if @policy_set.save
       redirect_to policy_set_path(@organization.name, @policy_set.external_id)
     else
-      render "new"
+      render 'new'
     end
   end
 
-  def edit
-  end
+  def edit; end
 
-  def update
-
-  end
+  def update; end
 
   def destroy
     authorize! @organization, to: :is_admin?
@@ -37,6 +34,7 @@ class PolicySetsController < AuthenticatedController
   end
 
   private
+
   def policy_set_params
     params.require(:policy_set).permit(
       :name,
@@ -46,7 +44,7 @@ class PolicySetsController < AuthenticatedController
       :overrideable,
       :vcs_repo_branch,
       :vcs_repo_identifier,
-      :vcs_repo_oauth_token_id,
+      :vcs_repo_oauth_token_id
     )
   end
 

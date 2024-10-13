@@ -5,5 +5,5 @@ class PolicySet < ApplicationRecord
   has_many :workspace_policy_sets
   has_many :workspaces, through: :workspace_policy_sets
 
-  before_create -> { generate_id("polset") }
+  before_create -> { generate_id('polset') }
 end

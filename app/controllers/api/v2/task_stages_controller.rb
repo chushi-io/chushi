@@ -4,7 +4,7 @@ class Api::V2::TaskStagesController < Api::ApiController
     authorize! @task_stage.run.workspace, to: :read?
 
     options = {}
-    options[:include] = params[:include].split(",") if params[:include]
+    options[:include] = params[:include].split(',') if params[:include]
     render json: ::TaskStageSerializer.new(@task_stage, options).serializable_hash
   end
 end

@@ -1,5 +1,5 @@
 class PoliciesController < AuthenticatedController
-  before_action :load_policy, only: [:edit, :show, :update, :destroy]
+  before_action :load_policy, only: %i[edit show update destroy]
 
   def index
     @policies = @organization.policies
@@ -14,21 +14,15 @@ class PoliciesController < AuthenticatedController
     if @policy.save
       redirect_to policy_path(@organization.name, @policy.external_id)
     else
-      render "new"
+      render 'new'
     end
   end
 
-  def show
+  def show; end
 
-  end
+  def edit; end
 
-  def edit
-
-  end
-
-  def update
-
-  end
+  def update; end
 
   def destroy
     @policy_set.delete
@@ -36,13 +30,14 @@ class PoliciesController < AuthenticatedController
   end
 
   private
+
   def policy_params
     params.require(:policy).permit(
       :name,
       :description,
       :type,
       :query,
-      :enforcement_level,
+      :enforcement_level
     )
   end
 

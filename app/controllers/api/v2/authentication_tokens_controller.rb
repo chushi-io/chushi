@@ -1,8 +1,6 @@
 class Api::V2::AuthenticationTokensController < Api::ApiController
-  before_action :get_token, only: [:get_team_token, :show, :destroy_team_token, :destroy]
-  def index
-
-  end
+  before_action :get_token, only: %i[get_team_token show destroy_team_token destroy]
+  def index; end
 
   def list_team_tokens
     # @org = Organization.find_by(name: params[:organization_id])
@@ -37,7 +35,7 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     @token = @team.access_token
     if @token
       @team.generate_access_token
-      @team.expired_at = token_params["expired_at"]
+      @team.expired_at = token_params['expired_at']
     else
       @token = AccessToken.new(token_params)
       @token.token_authable = @team
@@ -46,8 +44,8 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
 
     if @token.save
       render json: ::AuthenticationTokenSerializer.new(@token, {
-        params: { show_token: true }
-      }).serializable_hash
+                                                         params: { show_token: true }
+                                                       }).serializable_hash
     else
       render json: @token.errors.full_messages, status: :bad_request
     end
@@ -61,9 +59,8 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     end
 
     authorize! @team, to: :create_access_token?
-    if @team.access_token.delete
-      head :accepted and return
-    end
+    head :accepted and return if @team.access_token.delete
+
     render json: @team.access_token.errors.full_messages, status: :bad_request
   end
 
@@ -78,15 +75,15 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     @token = @org.access_token
     if @token
       @token.generate_access_token
-      @token.expired_at = token_params["expired_at"]
+      @token.expired_at = token_params['expired_at']
     else
       @token = @org.access_token.new(token_params)
     end
 
     if @token.save
       render json: ::AuthenticationTokenSerializer.new(@token, {
-        params: { show_token: true }
-      }).serializable_hash
+                                                         params: { show_token: true }
+                                                       }).serializable_hash
     else
       render json: @token.errors.full_messages, status: :bad_request
     end
@@ -129,8 +126,8 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     @token = @agent.access_tokens.create(token_params)
     if @token
       render json: ::AuthenticationTokenSerializer.new(@token, {
-        params: { show_token: true }
-      }).serializable_hash
+                                                         params: { show_token: true }
+                                                       }).serializable_hash
     else
       head :bad_request
     end
@@ -160,13 +157,13 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
       @token.generate_access_token
       # @token.expired_at = token_params["expired_at"]
     else
-      @token = @run.create_access_token(description: "Token for run")
+      @token = @run.create_access_token(description: 'Token for run')
     end
 
     if @token.save
       render json: ::AuthenticationTokenSerializer.new(@token, {
-        params: { show_token: true }
-      }).serializable_hash
+                                                         params: { show_token: true }
+                                                       }).serializable_hash
     else
       render json: @token.errors.full_messages, status: :bad_request
     end
@@ -180,19 +177,18 @@ class Api::V2::AuthenticationTokensController < Api::ApiController
     end
 
     authorize! @token
-    if @token.delete
-      head :accepted and return
-    end
+    head :accepted and return if @token.delete
 
     render json: @token.errors.full_messages, status: :bad_request
   end
 
   private
+
   def get_token
     @token = AccessToken.find_by(external_id: params[:token_id])
   end
 
   def token_params
-    map_params(["expired-at", :description])
+    map_params(['expired-at', :description])
   end
 end

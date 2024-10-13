@@ -5,14 +5,10 @@ class Agents::V1::PlansController < Agents::V1::AgentsController
   def update
     @plan = Plan.find(params[:id])
 
-    if params[:status]
-      RunStatusUpdater.new(@plan.run).update_plan_status(params[:status])
-    end
+    RunStatusUpdater.new(@plan.run).update_plan_status(params[:status]) if params[:status]
 
     render json: @plan
   end
-
-
 end
 
 # 22:59:20 server.1   | Started GET "/api/v1/plans/b8e6fd60-1ddd-498f-834a-704f787e8eed/logs?limit=65536&offset=0" for 74.70.224.53 at 2024-05-28 22:59:20 -0400

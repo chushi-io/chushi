@@ -12,8 +12,6 @@ class ApplicationPolicy < ActionPolicy::Base
   authorize :run, optional: true
   authorize :organization, optional: true
 
-  private
-
   # Define shared methods useful for most policies.
   # For example:
   #

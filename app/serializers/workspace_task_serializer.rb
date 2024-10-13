@@ -1,5 +1,5 @@
 class WorkspaceTaskSerializer < ApplicationSerializer
-  set_type "workspace-tasks"
+  set_type 'workspace-tasks'
 
   attribute :enforcement_level
   attribute :stage

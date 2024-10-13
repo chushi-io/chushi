@@ -29,11 +29,10 @@ class Api::V2::RegistryProvidersController < Api::ApiController
     render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
   end
 
-  def destroy
-
-  end
+  def destroy; end
 
   private
+
   def provider_params
     map_params([:name])
   end

@@ -46,10 +46,11 @@ class Api::V2::AgentsController < Api::ApiController
   end
 
   private
+
   def agent_params
     map_params([
-      "organization-scoped",
-      :name,
-    ])
+                 'organization-scoped',
+                 :name
+               ])
   end
 end

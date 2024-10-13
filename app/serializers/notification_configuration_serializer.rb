@@ -1,5 +1,5 @@
 class NotificationConfigurationSerializer < ApplicationSerializer
-  set_type "notification-configurations"
+  set_type 'notification-configurations'
 
   attribute :enabled
   attribute :name
@@ -15,7 +15,7 @@ class NotificationConfigurationSerializer < ApplicationSerializer
         code: res.code,
         headers: res.headers,
         "sent-at": res.sent_at,
-        successful: res.successful,
+        successful: res.successful
       }
     end
   end

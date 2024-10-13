@@ -11,7 +11,7 @@ class Api::V2::SshKeysController < Api::ApiController
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_update_ssh_keys?
 
-    @ssh_key = @org.ssh_keys.new(name: ssh_key_params["name"], private_key: ssh_key_params["value"])
+    @ssh_key = @org.ssh_keys.new(name: ssh_key_params['name'], private_key: ssh_key_params['value'])
     if @ssh_key.save
       render json: ::SshKeySerializer.new(@ssh_key, {}).serializable_hash
     else
@@ -32,7 +32,7 @@ class Api::V2::SshKeysController < Api::ApiController
   def update
     @ssh_key = SshKey.find_by(external_id: params[:id])
     authorize! @ssh_key.organization, to: :can_update_ssh_keys?
-    if @ssh_key.update(name: ssh_key_params["name"])
+    if @ssh_key.update(name: ssh_key_params['name'])
       render json: ::SshKeySerializer.new(@ssh_key, {}).serializable_hash
     else
       render json: @ssh_key.errors.full_messages, status: :bad_request
@@ -50,7 +50,8 @@ class Api::V2::SshKeysController < Api::ApiController
   end
 
   private
+
   def ssh_key_params
-    map_params([:name, :value])
+    map_params(%i[name value])
   end
 end

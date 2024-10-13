@@ -13,15 +13,9 @@ class Api::V2::VariablesController < Api::ApiController
     render json: ::VariableSerializer.new(@variables, {}).serializable_hash
   end
 
-  def create
+  def create; end
 
-  end
+  def update; end
 
-  def update
-
-  end
-
-  def destroy
-
-  end
+  def destroy; end
 end

@@ -5,7 +5,7 @@ class WorkspaceSerializer < ApplicationSerializer
     workspace.organization
   end
 
-  attribute :permissions do |record|
+  attribute :permissions do |_record|
     {
       "can-queue-run": true,
       "can-queue-apply": true,
@@ -33,12 +33,12 @@ class WorkspaceSerializer < ApplicationSerializer
   attribute :run_failures
   attribute :source
   attribute :speculative_enabled
-  attribute :structured_run_output_enabled do |o| true end
+  attribute :structured_run_output_enabled do |_o| true end
   attribute :terraform_version do |object|
     object.tofu_version
   end
   attribute :trigger_prefixes
-  attribute :vcs_repo, if: Proc.new { |record|
+  attribute :vcs_repo, if: proc { |record|
     record.vcs_repo_branch.present? || record.vcs_repo_identifier.present?
   } do |o|
     {

@@ -15,7 +15,7 @@ class ProviderVersionUploader < CarrierWave::Uploader::Base
     model.filename
   end
 
-  def self.generate_url(model)
-    return ""
+  def self.generate_url(_model)
+    ''
   end
 end

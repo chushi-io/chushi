@@ -20,17 +20,18 @@ class Settings::TokensController < AuthenticatedController
       flash[:info] = "Access token created: #{@token.token}"
       redirect_to settings_tokens_path
     else
-      render "new"
+      render 'new'
     end
   end
 
   def destroy
     current_user.access_tokens.destroy(params[:id])
-    flash[:info] = "Access token deleted"
+    flash[:info] = 'Access token deleted'
     redirect_to settings_tokens_path
   end
 
   private
+
   def token_params
     params.require(:access_token).permit(:name, :scopes, :expires_at)
   end

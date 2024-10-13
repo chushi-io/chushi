@@ -12,6 +12,6 @@ class PolicyUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "policy.rego"
+    'policy.rego'
   end
 end

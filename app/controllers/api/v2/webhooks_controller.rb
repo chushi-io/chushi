@@ -15,26 +15,25 @@ class Api::V2::WebhooksController < Api::ApiController
   # HTTP_ACCEPT_ENCODING='gzip'
   # HTTP_VERSION='HTTP/1.1'
   def create
-    @webhook_id = "webhook:#{request.headers["X-GitHub-Delivery"]}"
+    @webhook_id = "webhook:#{request.headers['X-GitHub-Delivery']}"
     payload = JSON.parse(request.raw_post)
     Rails.cache.write(@webhook_id, payload)
 
-    case request.headers["X-GitHub-Event"]
-    when "installation"
+    case request.headers['X-GitHub-Event']
+    when 'installation'
       # Don't do anything for now
-    when "push"
+    when 'push'
       Webhook::PushEventJob.perform_async(@webhook_id)
-    when "pull_request"
+    when 'pull_request'
       Webhook::PullRequestJob.perform_async(@webhook_id)
     else
-      logger.info "unknown webhook event: #{request.headers["X-GitHub-Event"]}"
+      logger.info "unknown webhook event: #{request.headers['X-GitHub-Event']}"
     end
 
     head :no_content
   end
 
   private
-  def verify_hmac
 
-  end
+  def verify_hmac; end
 end

@@ -3,5 +3,5 @@ class WorkspaceTeam < ApplicationRecord
   belongs_to :workspace
   belongs_to :team
 
-  before_create -> { generate_id("tws") }
+  before_create -> { generate_id('tws') }
 end

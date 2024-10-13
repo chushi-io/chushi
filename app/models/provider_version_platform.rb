@@ -3,5 +3,5 @@ class ProviderVersionPlatform < ApplicationRecord
 
   mount_uploader :binary, ProviderVersionUploader
 
-  before_create -> { generate_id("provpltfrm") }
+  before_create -> { generate_id('provpltfrm') }
 end

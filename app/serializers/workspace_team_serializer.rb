@@ -1,11 +1,11 @@
 class WorkspaceTeamSerializer < ApplicationSerializer
-  set_type "team-workspaces"
+  set_type 'team-workspaces'
 
   attribute :access
   attribute :runs
   attribute :variables
   attribute :state_versions
-  attribute :sentinel_mocks do |o| "none" end
+  attribute :sentinel_mocks do |_o| 'none' end
   attribute :workspace_locking
   attribute :run_tasks
 
