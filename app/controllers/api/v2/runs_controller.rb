@@ -21,9 +21,7 @@ module Api
         end
 
         @run = @workspace.organization.runs.new(run_params)
-        if run_params['configuration_version_id']
-          @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params['configuration_version_id'])
-        end
+        @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params['configuration_version_id']) if run_params['configuration_version_id']
         @run.workspace = @workspace
 
         begin
