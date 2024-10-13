@@ -27,6 +27,11 @@ class Api::V2::WorkspacesController < Api::ApiController
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_create_workspace?
 
+    if workspace_params[:project_id]
+      @project = Project.find_by(external_id: workspace_params[:project_id])
+      authorize! @project, to: :can_create_workspace?
+    end
+    
     @workspace = @org.workspaces.new(workspace_params)
     if @workspace.save
       render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash

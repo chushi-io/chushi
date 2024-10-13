@@ -1,5 +1,13 @@
 class RunsController < AuthenticatedController
   before_action :set_workspace
+  before_action -> {
+    authorize! @workspace, to: :access?
+  }, only: [:index, :show]
+
+  before_action -> {
+    authorize! @workspace, to: :can_queue_run?
+  }, only: [:new, :create]
+
   def index
     @runs = @workspace.runs
   end
@@ -13,6 +21,11 @@ class RunsController < AuthenticatedController
   end
 
   def create
+    if run_params["plan_only"]
+      authorize! @workspace, to: :can_queue_run?
+    else
+      authorize! @workspace, to: :can_queue_apply?
+    end
     @run = @workspace.runs.new(run_params)
     @run.organization = @organization
     begin

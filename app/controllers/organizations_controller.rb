@@ -1,6 +1,9 @@
 class OrganizationsController < AuthenticatedController
   skip_before_action :set_organization!, except: [:show]
 
+  before_action -> {
+    authorize! current_user, to: :can_create_organizations
+  }, only: [:new, :create]
   def index
     @organizations = current_user.organizations
   end
@@ -12,6 +15,8 @@ class OrganizationsController < AuthenticatedController
   def show; end
 
   def create
+    authorize! current_user, to: :can_create_organizations?
+
     @organization = Organization.new(organization_params)
     # Attach the user to the organization
     @organization.users << current_user
@@ -24,23 +29,9 @@ class OrganizationsController < AuthenticatedController
 
 
     if @organization.save
-      # TODO: Trigger a job to create
-      # - default project
-      # - default agent
-      # - default team(s)
       redirect_to @organization
     else
       render :action => "new"
-    end
-  end
-
-  def selector
-    @organizations = current_user.organizations
-    if request.post?
-      session[:organization] = current_user.organizations.find(params[:organization_id]).id
-      redirect_to workspaces_path
-    else
-      render "selector"
     end
   end
 

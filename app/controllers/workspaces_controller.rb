@@ -14,6 +14,10 @@ class WorkspacesController < AuthenticatedController
   end
 
   def create
+    if workspace_params[:project_id]
+      @project = Project.find_by(external_id: workspace_param[:project_id])
+      authorize! @project, to: :can_create_workspace?
+    end
     @workspace = @organization.workspaces.new(workspace_params)
     if @workspace.save
       flash[:info] = "Workspace created"
