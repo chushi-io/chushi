@@ -19,6 +19,10 @@ class OrganizationPolicy < ApplicationPolicy
     organization.present? && organization.id == record.id
   end
 
+  def is_admin?
+    is_organization_token || in_owners_team
+  end
+
   # Mapped permissions
   def can_destroy?
     false
@@ -126,6 +130,18 @@ class OrganizationPolicy < ApplicationPolicy
   # - users or teams with one of the Team Management permissions.
   def can_manage_memberships?
     write_organization?
+  end
+
+  protected
+  def is_organization_token
+    organization.present? && organization.id == record.id
+  end
+
+  # Check if the authenticated user is present in the owners team
+  def in_owners_team
+    return false unless user.present?
+    team = organization.teams.find_by(name: "owners")
+    user.teams.map(&:id).include?(team.id)
   end
 
   ## When checking what a team can perform:

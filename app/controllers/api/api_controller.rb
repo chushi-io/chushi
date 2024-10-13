@@ -12,7 +12,7 @@ module Api
     authorize :agent, through: :current_agent
     authorize :run, through: :current_run
     authorize :team, through: :current_team
-    authorize :task, thorugh: :current_task
+    authorize :task, through: :current_task
 
     before_action :set_default_response_format
 
@@ -32,14 +32,13 @@ module Api
 
     def verify_access_token
       token = request.headers['Authorization'].to_s.split.last
+      render json: nil, status: :forbidden and return if token.nil?
+
       token_chunks = token.split('.')
 
       @access_token = AccessToken.find_by(external_id: "at-#{token_chunks[0]}")
-
       render json: nil, status: :forbidden and return if @access_token.nil?
-
       render json: nil, status: :forbidden and return if @access_token.token != token_chunks[1]
-
       return unless @access_token.expired_at.present? && @access_token.expired_at.after?(Time.zone.now)
 
       render json: nil, status: :forbidden

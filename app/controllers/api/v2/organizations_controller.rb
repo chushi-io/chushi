@@ -4,10 +4,13 @@ module Api
   module V2
     class OrganizationsController < Api::ApiController
       def entitlements
-        authorize!
+        @organization = Organization
+                          .where(name: params[:organization_id])
+                          .first!
+        authorize! @organization, to: :read?
         render json: {
           data: {
-            id: params[:organization_id],
+            id: @organization.name,
             type: 'entitlement-sets',
             attributes: {
               agents: true,
@@ -58,8 +61,12 @@ module Api
                         .where(name: params[:organization_id])
                         .first!
         authorize! @organization, to: :is_admin?
-        @organization.update!(org_params)
-        render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+        begin
+          @organization.update(org_params)
+          render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+        rescue ActiveRecord::ReadonlyAttributeError => exception
+          render json: nil, status: :bad_request
+        end
       end
 
       def queue
