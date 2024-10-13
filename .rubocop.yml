@@ -5,7 +5,7 @@ AllCops:
   Exclude:
     - 'db/migrate/*.rb'
     - 'db/schema.rb'
-    - 'vendor'
+    - 'vendor/**/*'
   SuggestExtensions:
     rubocop-capybara: false
   NewCops: enable
