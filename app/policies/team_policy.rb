@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TeamPolicy < ApplicationPolicy
   # Mapped permissions
   def can_update_membership?

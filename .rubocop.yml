@@ -1,0 +1,50 @@
+require:
+  - rubocop-rails
+
+AllCops:
+  Exclude:
+    - 'db/migrate/*.rb'
+    - 'db/schema.rb'
+    - 'vendor/**/*'
+  SuggestExtensions:
+    rubocop-capybara: false
+  NewCops: enable
+
+Style/Documentation:
+  Enabled: false
+
+# The following should be enabled, we'll want
+# to fix these afterwards
+Layout/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Style/ArgumentsForwarding:
+  Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false
+# End of to-be-enabled cops

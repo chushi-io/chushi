@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateVcsConnections < ActiveRecord::Migration[7.1]
   def change
     create_table :vcs_connections, id: :uuid  do |t|
@@ -18,7 +20,6 @@ class CreateVcsConnections < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    add_index(:vcs_connections, [:organization_id, :name])
-
+    add_index(:vcs_connections, %i[organization_id name])
   end
 end

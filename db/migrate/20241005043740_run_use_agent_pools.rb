@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunUseAgentPools < ActiveRecord::Migration[7.1]
   def change
     change_table :jobs do |t|

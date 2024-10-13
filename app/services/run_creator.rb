@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 class RunCreator < ApplicationService
   attr_reader :run
 
   def initialize(run)
+    super
     @run = run
   end
 
@@ -9,7 +12,7 @@ class RunCreator < ApplicationService
     ActiveRecord::Base.transaction do
       @plan = @run.organization.plans.create(
         execution_mode: @run.workspace.execution_mode,
-        status: "pending"
+        status: 'pending'
       )
       @run.plan = @plan
       unless @run.plan_only
@@ -27,30 +30,29 @@ class RunCreator < ApplicationService
       # and then create a "task_result" for each configured
       # run task that shares that stage
       task_stages = {
-        "pre_plan" => [],
-        "post_plan" => [],
-        "pre_apply" => [],
-        "post_apply" => [],
+        'pre_plan' => [],
+        'post_plan' => [],
+        'pre_apply' => [],
+        'post_apply' => []
       }
 
-      @run.workspace.tasks.each { |wstask|
+      @run.workspace.tasks.each do |wstask|
         task_stages[wstask.stage] << wstask
-      }
+      end
 
       task_stages.each do |stage, wstasks|
-
-        if wstasks.any? || (stage == "post_plan" && run.workspace.policy_sets.any?)
+        if wstasks.any? || (stage == 'post_plan' && run.workspace.policy_sets.any?)
           @stage = TaskStage.new(
-            stage: stage,
-            status: "pending",
+            stage:,
+            status: 'pending'
           )
 
           unless wstasks.empty?
-            wstasks.each { |wstask|
+            wstasks.each do |wstask|
               @result = TaskResult.new(
-                status: "pending",
+                status: 'pending',
                 # url: wstask.run_task.url,
-                stage: stage,
+                stage:,
                 task_id: wstask.run_task.external_id,
                 task_name: wstask.run_task.name,
                 task_url: wstask.run_task.url,
@@ -58,13 +60,13 @@ class RunCreator < ApplicationService
                 workspace_task_enforcement_level: wstask.enforcement_level
               )
               @stage.task_results << @result
-            }
+            end
           end
 
           unless @run.workspace.policy_sets.empty?
             @run.workspace.policy_sets.each do |policy_set|
               @stage.policy_evaluations << PolicyEvaluation.new(
-                policy_kind: "opa",
+                policy_kind: 'opa',
                 policy_set_id: policy_set.external_id
               )
             end
@@ -74,7 +76,7 @@ class RunCreator < ApplicationService
         @run.task_stages << @stage
       end
 
-      @run.status = "pending"
+      @run.status = 'pending'
       @run.save!
 
       @token = AccessToken.new
@@ -82,9 +84,7 @@ class RunCreator < ApplicationService
       @token.save!
 
       RunCreatedJob.perform_async(@run.id)
-      if @run.configuration_version.nil?
-        GenerateConfigurationVersionJob.perform_async(@run.id)
-      end
+      GenerateConfigurationVersionJob.perform_async(@run.id) if @run.configuration_version.nil?
     end
     true
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreatePolicySetOutcomes < ActiveRecord::Migration[7.1]
   def change
     create_table :policy_set_outcomes, id: :uuid do |t|

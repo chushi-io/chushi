@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StateVersionJsonUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -12,10 +14,10 @@ class StateVersionJsonUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "state.json"
+    'state.json'
   end
 
-  def self.generate_url(model)
-    return ""
+  def self.generate_url(_model)
+    ''
   end
 end

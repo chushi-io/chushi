@@ -1,11 +1,13 @@
-class TeamsController < AuthenticatedController
-  before_action :load_team, only: [:edit, :show, :update, :destroy]
+# frozen_string_literal: true
 
-  before_action -> {
+class TeamsController < AuthenticatedController
+  before_action :load_team, only: %i[edit show update destroy]
+
+  before_action lambda {
     authorize! @organization, to: :can_create_team
   }, only: [:create]
 
-  before_action -> {
+  before_action lambda {
     authorize! @team, to: :can_destroy?
   }, only: [:destroy]
 
@@ -13,30 +15,24 @@ class TeamsController < AuthenticatedController
     @teams = @organization.teams
   end
 
+  def show; end
+
   def new
     @team = @organization.teams.new
   end
+
+  def edit; end
 
   def create
     @team = @organization.teams.new(team_params)
     if @team.save
       redirect_to team_path(@organization.name, @team.external_id)
     else
-      render "new"
+      render 'new'
     end
   end
 
-  def show
-
-  end
-
-  def edit
-
-  end
-
-  def update
-
-  end
+  def update; end
 
   def destroy
     @team.destroy
@@ -44,6 +40,7 @@ class TeamsController < AuthenticatedController
   end
 
   private
+
   def load_team
     @team = @organization.teams.find_by(external_id: params[:id])
   end
@@ -52,7 +49,7 @@ class TeamsController < AuthenticatedController
     params.require(:team).permit(
       :name,
       :visibility,
-      :sso_team_id,
+      :sso_team_id
     )
   end
 end

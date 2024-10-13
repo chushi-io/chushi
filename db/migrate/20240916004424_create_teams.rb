@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateTeams < ActiveRecord::Migration[7.1]
   def change
     create_table :teams, id: :uuid do |t|
@@ -10,7 +12,7 @@ class CreateTeams < ActiveRecord::Migration[7.1]
       t.boolean :allow_member_token_management
 
       t.references :organization, foreign_key: true, type: :uuid
-      t.index [:organization_id, :name], unique: true
+      t.index %i[organization_id name], unique: true
 
       t.timestamps
     end

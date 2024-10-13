@@ -1,24 +1,26 @@
-class Api::V2::AppliesController < Api::ApiController
-  skip_before_action :verify_access_token, :only => [:logs]
-  skip_verify_authorized only: :logs
+# frozen_string_literal: true
 
-  def show
-    @apply = Apply.first(external_id: params[:id])
-    authorize! @org, to: :read
+module Api
+  module V2
+    class AppliesController < Api::ApiController
+      skip_before_action :verify_access_token, only: [:logs]
+      skip_verify_authorized only: :logs
 
-    render json: ::ApplySerializer.new(@apply, {}).serializable_hash
-  end
+      def show
+        @apply = Apply.first(external_id: params[:id])
+        authorize! @org, to: :read
 
-  def logs
-    head :no_content
-  end
+        render json: ::ApplySerializer.new(@apply, {}).serializable_hash
+      end
 
-  ### Agent-only routes
-  def update
+      def logs
+        head :no_content
+      end
 
-  end
+      ### Agent-only routes
+      def update; end
 
-  def upload_logs
-
+      def upload_logs; end
+    end
   end
 end

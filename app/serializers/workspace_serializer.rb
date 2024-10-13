@@ -1,15 +1,15 @@
+# frozen_string_literal: true
+
 class WorkspaceSerializer < ApplicationSerializer
   set_type :workspaces
 
-  belongs_to :organization, serializer: ::OrganizationSerializer, id_method_name: :name do |workspace|
-    workspace.organization
-  end
+  belongs_to :organization, serializer: ::OrganizationSerializer, id_method_name: :name, &:organization
 
-  attribute :permissions do |record|
+  attribute :permissions do |_record|
     {
-      "can-queue-run": true,
-      "can-queue-apply": true,
-      "can-queue-destroy": true
+      'can-queue-run': true,
+      'can-queue-apply': true,
+      'can-queue-destroy': true
     }
   end
 
@@ -33,17 +33,17 @@ class WorkspaceSerializer < ApplicationSerializer
   attribute :run_failures
   attribute :source
   attribute :speculative_enabled
-  attribute :structured_run_output_enabled do |o| true end
-  attribute :terraform_version do |object|
-    object.tofu_version
+  attribute :structured_run_output_enabled do |_o|
+    true
   end
+  attribute :terraform_version, &:tofu_version
   attribute :trigger_prefixes
-  attribute :vcs_repo, if: Proc.new { |record|
+  attribute :vcs_repo, if: proc { |record|
     record.vcs_repo_branch.present? || record.vcs_repo_identifier.present?
   } do |o|
     {
-      "branch": o.vcs_repo_branch,
-      "identifier": o.vcs_repo_identifier
+      branch: o.vcs_repo_branch,
+      identifier: o.vcs_repo_identifier
     }
   end
 
@@ -53,9 +53,7 @@ class WorkspaceSerializer < ApplicationSerializer
   #   object.current_state_version
   # end
 
-  belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id do |object|
-    object.agent_pool
-  end
+  belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id, &:agent_pool
 
   # attribute :setting_overwrites do |object| {} end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PlanFileUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -12,6 +14,6 @@ class PlanFileUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "tfplan"
+    'tfplan'
   end
 end

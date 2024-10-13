@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RegistryModulesController < AuthenticatedController
   def index
     @modules = @organization.registry_modules
@@ -7,23 +9,12 @@ class RegistryModulesController < AuthenticatedController
     @module = @organization.registry_modules.find_by(external_id: params[:id])
   end
 
-  def new
+  def new; end
 
-  end
+  def edit; end
+  def create; end
 
-  def create
+  def update; end
 
-  end
-
-  def edit
-
-  end
-
-  def update
-
-  end
-
-  def destroy
-
-  end
+  def destroy; end
 end

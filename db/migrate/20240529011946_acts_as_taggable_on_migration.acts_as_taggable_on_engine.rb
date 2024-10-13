@@ -3,8 +3,7 @@
 # This migration comes from acts_as_taggable_on_engine (originally 1)
 class ActsAsTaggableOnMigration < ActiveRecord::Migration[7.0]
   def self.up
-
-    create_table ActsAsTaggableOn.tags_table, id: :uuid  do |t|
+    create_table ActsAsTaggableOn.tags_table, id: :uuid do |t|
       t.string :name
       t.timestamps
     end
@@ -32,5 +31,4 @@ class ActsAsTaggableOnMigration < ActiveRecord::Migration[7.0]
     drop_table ActsAsTaggableOn.taggings_table
     drop_table ActsAsTaggableOn.tags_table
   end
-
 end

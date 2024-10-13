@@ -1,2 +1,8 @@
-module Api::V2::NotificationConfigurationsHelper
+# frozen_string_literal: true
+
+module Api
+  module V2
+    module NotificationConfigurationsHelper
+    end
+  end
 end

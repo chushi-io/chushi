@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplySerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
@@ -5,7 +7,7 @@ class ApplySerializer < ApplicationSerializer
 
   attribute :execution_details do |object|
     {
-      "mode": object.execution_mode
+      mode: object.execution_mode
     }
   end
 

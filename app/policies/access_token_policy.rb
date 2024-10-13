@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AccessTokenPolicy < ApplicationPolicy
   def show?
     token_access?
@@ -8,20 +10,19 @@ class AccessTokenPolicy < ApplicationPolicy
   end
 
   private
+
   def token_access?
     case record.token_authable_type
-    when "User"
-      return false
-    when "Organization"
-      return (organization.present? && organization.id == record.token_authable_id)
-    when "Agent"
+    when 'User'
+      false
+    when 'Organization'
+      organization.present? && organization.id == record.token_authable_id
+    when 'Agent'
       @agent = AgentPool.find(record.token_authable_id)
-      return (organization.present? && organization.id == @agent.organization_id)
-    when "Team"
+      organization.present? && organization.id == @agent.organization_id
+    when 'Team'
       @team = Team.find(record.token_authable_id)
-      return (organization.present? && organization.id == @team.organization_id)
-    else
-      return false
+      organization.present? && organization.id == @team.organization_id
     end
   end
 end

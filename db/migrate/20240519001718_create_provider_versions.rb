@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateProviderVersions < ActiveRecord::Migration[7.1]
   def change
     create_table :provider_versions, id: :uuid do |t|
@@ -9,7 +11,7 @@ class CreateProviderVersions < ActiveRecord::Migration[7.1]
 
       t.references :provider, foreign_key: true, type: :uuid
 
-      t.index [:provider_id, :version], unique: true
+      t.index %i[provider_id version], unique: true
       t.timestamps
     end
   end

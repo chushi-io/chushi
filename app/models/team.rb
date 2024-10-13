@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Team < ApplicationRecord
   belongs_to :organization
   has_many :team_projects
@@ -6,5 +8,5 @@ class Team < ApplicationRecord
   has_many :team_memberships
   has_many :users, through: :team_memberships
   has_one :access_token, as: :token_authable
-  before_create -> { generate_id("team") }
+  before_create -> { generate_id('team') }
 end

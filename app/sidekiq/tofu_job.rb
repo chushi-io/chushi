@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TofuJob
   include Sidekiq::Job
 
@@ -7,15 +9,13 @@ class TofuJob
 
     # Install terraform
     @tofu_version = @run.workspace.tofu_version
-    if @tofu_version.nil? || @tofu_version.empty?
-      @tofu_version = "1.8.2"
-    end
+    @tofu_version = '1.8.2' if @tofu_version.blank?
 
     url = "https://github.com/opentofu/opentofu/releases/download/v#{@tofu_version}/tofu_#{@tofu_version}_darwin_arm64.zip"
     input = HTTParty.get(url).body
     Zip::File.open(StringIO.new(input)) do |io|
-      while entry = io.get_next_entry
-        puts entry.name
+      while (entry = io.get_next_entry)
+        Rails.logger.debug entry.name
       end
     end
     # Download the configuration version

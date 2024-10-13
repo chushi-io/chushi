@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateWorkspaces < ActiveRecord::Migration[7.1]
   def change
     create_table :workspaces, id: :uuid do |t|
@@ -35,7 +37,6 @@ class CreateWorkspaces < ActiveRecord::Migration[7.1]
 
       t.references :vcs_connection, foreign_key: true, type: :uuid
       t.references :organization, foreign_key: true, type: :uuid
-
     end
   end
 end

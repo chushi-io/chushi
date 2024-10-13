@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Base class for application policies
 class ApplicationPolicy < ActionPolicy::Base
   # Configure additional authorization contexts here
@@ -11,8 +13,6 @@ class ApplicationPolicy < ActionPolicy::Base
   authorize :agent, optional: true
   authorize :run, optional: true
   authorize :organization, optional: true
-
-  private
 
   # Define shared methods useful for most policies.
   # For example:

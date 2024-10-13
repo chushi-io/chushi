@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class NotificationConfiguration < ApplicationRecord
   include Vault::EncryptedModel
   vault_lazy_decrypt!
@@ -6,5 +8,5 @@ class NotificationConfiguration < ApplicationRecord
   has_many :notification_delivery_responses
 
   belongs_to :workspace
-  before_create -> { generate_id("nc") }
+  before_create -> { generate_id('nc') }
 end

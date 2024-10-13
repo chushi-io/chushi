@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateSshKeys < ActiveRecord::Migration[7.1]
   def change
     create_table :ssh_keys, id: :uuid do |t|
@@ -8,8 +10,7 @@ class CreateSshKeys < ActiveRecord::Migration[7.1]
       t.text :private_key
       t.timestamps
 
-      t.index [:organization_id, :name], unique: true
-
+      t.index %i[organization_id name], unique: true
     end
   end
 end

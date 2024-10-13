@@ -1,2 +1,8 @@
-module Api::V1::PingHelper
+# frozen_string_literal: true
+
+module Api
+  module V1
+    module PingHelper
+    end
+  end
 end

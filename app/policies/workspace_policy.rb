@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WorkspacePolicy < ApplicationPolicy
   # Named policies
   def is_admin?
@@ -105,21 +107,13 @@ class WorkspacePolicy < ApplicationPolicy
   protected
 
   def can_access_workspace
-    if run.present?
-      return run.workspace.id == record.id
-    end
+    return run.workspace.id == record.id if run.present?
 
-    if agent.present?
-      return agent.id == record.agent_pool.id
-    end
+    return agent.id == record.agent_pool.id if agent.present?
 
-    if organization.present?
-      return organization.id == record.organization_id
-    end
+    return organization.id == record.organization_id if organization.present?
 
-    if user.present?
-      return user.organizations.map{|org| org.id}.include? record.organization_id
-    end
+    return user.organizations.map(&:id).include? record.organization_id if user.present?
 
     false
   end

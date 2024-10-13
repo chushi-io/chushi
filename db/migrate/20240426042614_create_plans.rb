@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreatePlans < ActiveRecord::Migration[7.1]
   def change
     create_table :plans, id: :uuid do |t|
@@ -10,7 +12,6 @@ class CreatePlans < ActiveRecord::Migration[7.1]
       t.boolean :resource_imports
       t.string :status
       t.string :logs_url
-
 
       t.references :organization, foreign_key: true, type: :uuid
 

@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class NotificationConfigurationSerializer < ApplicationSerializer
-  set_type "notification-configurations"
+  set_type 'notification-configurations'
 
   attribute :enabled
   attribute :name
@@ -14,13 +16,11 @@ class NotificationConfigurationSerializer < ApplicationSerializer
         body: res.body,
         code: res.code,
         headers: res.headers,
-        "sent-at": res.sent_at,
-        successful: res.successful,
+        'sent-at': res.sent_at,
+        successful: res.successful
       }
     end
   end
 
-  belongs_to :subscribable, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
-    object.workspace
-  end
+  belongs_to :subscribable, serializer: WorkspaceSerializer, id_method_name: :external_id, &:workspace
 end

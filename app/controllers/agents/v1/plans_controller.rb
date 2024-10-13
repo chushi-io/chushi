@@ -1,18 +1,20 @@
-class Agents::V1::PlansController < Agents::V1::AgentsController
-  before_action :verify_run_access
+# frozen_string_literal: true
 
-  # Endpoint for agents to update run information
-  def update
-    @plan = Plan.find(params[:id])
+module Agents
+  module V1
+    class PlansController < Agents::V1::AgentsController
+      before_action :verify_run_access
 
-    if params[:status]
-      RunStatusUpdater.new(@plan.run).update_plan_status(params[:status])
+      # Endpoint for agents to update run information
+      def update
+        @plan = Plan.find(params[:id])
+
+        RunStatusUpdater.new(@plan.run).update_plan_status(params[:status]) if params[:status]
+
+        render json: @plan
+      end
     end
-
-    render json: @plan
   end
-
-
 end
 
 # 22:59:20 server.1   | Started GET "/api/v1/plans/b8e6fd60-1ddd-498f-834a-704f787e8eed/logs?limit=65536&offset=0" for 74.70.224.53 at 2024-05-28 22:59:20 -0400

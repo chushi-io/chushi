@@ -1,7 +1,13 @@
-require "test_helper"
+# frozen_string_literal: true
 
-class Api::V2::JobsControllerTest < ActionDispatch::IntegrationTest
-  # test "the truth" do
-  #   assert true
-  # end
+require 'test_helper'
+
+module Api
+  module V2
+    class JobsControllerTest < ActionDispatch::IntegrationTest
+      # test "the truth" do
+      #   assert true
+      # end
+    end
+  end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProvidersController < AuthenticatedController
   def index
     @providers = @organization.providers

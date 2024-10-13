@@ -1,52 +1,59 @@
-class Api::V2::RegistryProviderVersionsController < Api::ApiController
-  def index
-    @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :show?
+# frozen_string_literal: true
 
-    @provider = @org.providers.where(
-      registry: "private",
-      namespace: params[:namespace],
-      name: params[:name]
-    ).first!
+module Api
+  module V2
+    class RegistryProviderVersionsController < Api::ApiController
+      def index
+        @org = Organization.find_by(name: params[:organization_id])
+        authorize! @org, to: :show?
 
-    render json: ::ProviderVersionSerializer.new(@provider.provider_versions, {}).serializable_hash
-  end
+        @provider = @org.providers.where(
+          registry: 'private',
+          namespace: params[:namespace],
+          name: params[:name]
+        ).first!
 
-  def create
-    @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :manage_modules?
+        render json: ::ProviderVersionSerializer.new(@provider.provider_versions, {}).serializable_hash
+      end
 
-    @provider = @org.providers.where(
-      registry: "private",
-      namespace: params[:namespace],
-      name: params[:name]
-    ).first!
+      def show
+        @org = Organization.find_by(name: params[:organization_id])
+        authorize! @org, to: :show?
 
-    @version = @provider.provider_versions.create(version_params)
-    render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
-  end
+        @provider = @org.providers.where(
+          registry: 'private',
+          namespace: params[:namespace],
+          name: params[:name]
+        ).first!
 
-  def show
-    @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :show?
+        @version = @provider.provider_versions.where(version: params[:version]).find!
 
-    @provider = @org.providers.where(
-      registry: "private",
-      namespace: params[:namespace],
-      name: params[:name]
-    ).first!
+        render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
+      end
 
-    @version = @provider.provider_versions.where(version: params[:version]).find!
+      def create
+        @org = Organization.find_by(name: params[:organization_id])
+        authorize! @org, to: :manage_modules?
 
-    render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
-  end
+        @provider = @org.providers.where(
+          registry: 'private',
+          namespace: params[:namespace],
+          name: params[:name]
+        ).first!
 
-  def destroy
-    head :not_implemented
-  end
+        @version = @provider.provider_versions.create(version_params)
+        render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
+      end
 
-  private
-  def version_params
-    map_params([:version, :key_id, :protocols])
+      def destroy
+        head :not_implemented
+      end
+
+      private
+
+      def version_params
+        map_params(%i[version key_id protocols])
+      end
+    end
   end
 end

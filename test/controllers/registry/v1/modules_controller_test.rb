@@ -1,7 +1,13 @@
-require "test_helper"
+# frozen_string_literal: true
 
-class Registry::V1::ModulesControllerTest < ActionDispatch::IntegrationTest
-  # test "the truth" do
-  #   assert true
-  # end
+require 'test_helper'
+
+module Registry
+  module V1
+    class ModulesControllerTest < ActionDispatch::IntegrationTest
+      # test "the truth" do
+      #   assert true
+      # end
+    end
+  end
 end

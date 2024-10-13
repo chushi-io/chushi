@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddCarrierwaveColumns < ActiveRecord::Migration[7.1]
   def change
     add_column :configuration_versions, :archive, :string

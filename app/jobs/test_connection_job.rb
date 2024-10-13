@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 class TestConnectionJob < ApplicationJob
   queue_as :default
 
   def perform(*args)
     # Do something later
     @workspace = Workspace.find(args.first)
-    priv_key = OpenSSL::PKey::RSA.new(File.read("private_key.pem"))
+    priv_key = OpenSSL::PKey::RSA.new(File.read('private_key.pem'))
 
-    @app_id = @workspace.vcs_connection.github_application_id || 930341
+    @app_id = @workspace.vcs_connection.github_application_id || 930_341
     payload = {
       # The time that this JWT was issued, _i.e._ now.
       iat: Time.now.to_i,
@@ -25,7 +27,6 @@ class TestConnectionJob < ApplicationJob
 
     # Add '//' to the URL to force full parse
     @repo_source = URI.parse("//#{@workspace.source}").path
-    @repo = @installation_client.repository(@repo_source.delete_prefix("/"))
-
+    @repo = @installation_client.repository(@repo_source.delete_prefix('/'))
   end
 end

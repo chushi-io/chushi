@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PlanLogUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -12,6 +14,6 @@ class PlanLogUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "logs"
+    'logs'
   end
 end

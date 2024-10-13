@@ -1,10 +1,14 @@
-class Api::V2::AccountDetailsController < Api::ApiController
-  skip_verify_authorized!
-  def show
-    unless is_user
-      head :unauthorized
-    end
+# frozen_string_literal: true
 
-    render json: ::UserSerializer.new(current_user, {}).serializable_hash
+module Api
+  module V2
+    class AccountDetailsController < Api::ApiController
+      skip_verify_authorized!
+      def show
+        head :unauthorized unless is_user
+
+        render json: ::UserSerializer.new(current_user, {}).serializable_hash
+      end
+    end
   end
 end

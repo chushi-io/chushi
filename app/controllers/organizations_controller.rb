@@ -1,18 +1,20 @@
+# frozen_string_literal: true
+
 class OrganizationsController < AuthenticatedController
   skip_before_action :set_organization!, except: [:show]
 
-  before_action -> {
+  before_action lambda {
     authorize! current_user, to: :can_create_organizations
-  }, only: [:new, :create]
+  }, only: %i[new create]
   def index
     @organizations = current_user.organizations
   end
 
+  def show; end
+
   def new
     @organization = Organization.new
   end
-
-  def show; end
 
   def create
     authorize! current_user, to: :can_create_organizations?
@@ -22,20 +24,20 @@ class OrganizationsController < AuthenticatedController
     @organization.users << current_user
 
     # Create the owners team, and add the user
-    @owner_team = Team.new(name: "owners", visibility: "organization")
+    @owner_team = Team.new(name: 'owners', visibility: 'organization')
     @owner_team.users << current_user
     @organization.teams << @owner_team
-    @organization.projects << Project.new(name: "Default Project")
-
+    @organization.projects << Project.new(name: 'Default Project')
 
     if @organization.save
       redirect_to @organization
     else
-      render :action => "new"
+      render action: 'new'
     end
   end
 
   private
+
   def organization_params
     params.require(:organization).permit(:name, :organization_type, :email)
   end

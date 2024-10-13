@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 class RunsController < AuthenticatedController
   before_action :set_workspace
-  before_action -> {
+  before_action lambda {
     authorize! @workspace, to: :access?
-  }, only: [:index, :show]
+  }, only: %i[index show]
 
-  before_action -> {
+  before_action lambda {
     authorize! @workspace, to: :can_queue_run?
-  }, only: [:new, :create]
+  }, only: %i[new create]
 
   def index
     @runs = @workspace.runs
@@ -21,7 +23,7 @@ class RunsController < AuthenticatedController
   end
 
   def create
-    if run_params["plan_only"]
+    if run_params['plan_only']
       authorize! @workspace, to: :can_queue_run?
     else
       authorize! @workspace, to: :can_queue_apply?
@@ -30,15 +32,16 @@ class RunsController < AuthenticatedController
     @run.organization = @organization
     begin
       RunCreator.call(@run)
-      flash[:info] = "Run created"
+      flash[:info] = 'Run created'
       redirect_to @workspace
-    rescue => exception
+    rescue StandardError
       flash[:error] = @run.errors.full_messages
-      render "new"
+      render 'new'
     end
   end
 
   private
+
   def set_workspace
     @workspace = @organization.workspaces.find_by(external_id: params[:workspace_id])
   end

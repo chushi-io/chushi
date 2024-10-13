@@ -1,7 +1,9 @@
-class TaskStage::TaskStageErroredJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args)
+module TaskStage
+  class TaskStageErroredJob
+    include Sidekiq::Job
 
+    def perform(*args); end
   end
 end

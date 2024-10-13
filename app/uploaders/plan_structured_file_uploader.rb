@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PlanStructuredFileUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -12,6 +14,6 @@ class PlanStructuredFileUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "structured.json"
+    'structured.json'
   end
 end

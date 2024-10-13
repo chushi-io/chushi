@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProviderVersionUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -11,11 +13,9 @@ class ProviderVersionUploader < CarrierWave::Uploader::Base
     "private/#{model.namespace}/#{model.name}"
   end
 
-  def filename
-    model.filename
-  end
+  delegate :filename, to: :model
 
-  def self.generate_url(model)
-    return ""
+  def self.generate_url(_model)
+    ''
   end
 end

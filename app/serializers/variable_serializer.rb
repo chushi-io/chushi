@@ -1,16 +1,16 @@
+# frozen_string_literal: true
+
 class VariableSerializer < ApplicationSerializer
   set_type :vars
 
-  attribute :key do |o|
-    o.name
-  end
+  attribute :key, &:name
   attribute :value
   attribute :description
   attribute :hcl do |o|
-    o.variable_type == "hcl"
+    o.variable_type == 'hcl'
   end
   attribute :sensitive
-  attribute :version_id do |o|
-    "00000000000000000000000000"
+  attribute :version_id do |_o|
+    '00000000000000000000000000'
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateNotificationConfigurations < ActiveRecord::Migration[7.1]
   def change
     create_table :notification_configurations, id: :uuid do |t|
@@ -10,8 +12,8 @@ class CreateNotificationConfigurations < ActiveRecord::Migration[7.1]
       t.text :triggers, array: true, default: []
       t.string :url
 
-      t.index [:workspace_id, :name], unique: true
-      t.index [:workspace_id, :url], unique: true
+      t.index %i[workspace_id name], unique: true
+      t.index %i[workspace_id url], unique: true
 
       t.timestamps
     end

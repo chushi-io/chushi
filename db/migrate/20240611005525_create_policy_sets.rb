@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreatePolicySets < ActiveRecord::Migration[7.1]
   def change
     create_table :policy_sets, id: :uuid do |t|
@@ -14,7 +16,7 @@ class CreatePolicySets < ActiveRecord::Migration[7.1]
       t.string :vcs_repo_oauth_token_id
 
       t.references :organization, foreign_key: true, type: :uuid
-      t.index [:organization_id, :name], unique: true
+      t.index %i[organization_id name], unique: true
 
       t.timestamps
     end

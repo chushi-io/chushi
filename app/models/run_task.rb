@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunTask < ApplicationRecord
   include Vault::EncryptedModel
   vault_lazy_decrypt!
@@ -6,6 +8,5 @@ class RunTask < ApplicationRecord
 
   belongs_to :organization
 
-
-  before_create -> { generate_id("task") }
+  before_create -> { generate_id('task') }
 end

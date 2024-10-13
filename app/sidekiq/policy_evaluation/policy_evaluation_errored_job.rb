@@ -1,7 +1,9 @@
-class PolicyEvaluation::PolicyEvaluationErroredJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args)
+module PolicyEvaluation
+  class PolicyEvaluationErroredJob
+    include Sidekiq::Job
 
+    def perform(*args); end
   end
 end

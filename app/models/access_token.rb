@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AccessToken < ApplicationRecord
   include Vault::EncryptedModel
   vault_lazy_decrypt!
@@ -5,7 +7,7 @@ class AccessToken < ApplicationRecord
   vault_attribute :token
   belongs_to :token_authable, polymorphic: true
   before_create :generate_access_token
-  before_create -> { generate_id("at") }
+  before_create -> { generate_id('at') }
 
   # belongs_to :user, optional: true
   # belongs_to :agent_pool, optional: true
@@ -13,8 +15,6 @@ class AccessToken < ApplicationRecord
   # belongs_to :organization, optional: true
 
   def generate_access_token
-    self.token = SecureRandom::base58(48)
+    self.token = SecureRandom.base58(48)
   end
-
-
 end

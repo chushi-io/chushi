@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateWorkspaceTasks < ActiveRecord::Migration[7.1]
   def change
     create_table :workspace_tasks, id: :uuid do |t|
@@ -8,7 +10,7 @@ class CreateWorkspaceTasks < ActiveRecord::Migration[7.1]
       t.text :stages, default: [], array: true
       t.string :enforcement_level
 
-      t.index [:workspace_id, :run_task_id], unique: true
+      t.index %i[workspace_id run_task_id], unique: true
 
       t.timestamps
     end

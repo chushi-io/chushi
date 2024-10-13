@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicyUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -12,6 +14,6 @@ class PolicyUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    "policy.rego"
+    'policy.rego'
   end
 end

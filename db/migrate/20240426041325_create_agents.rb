@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateAgents < ActiveRecord::Migration[7.1]
   def change
     create_table :agents, id: :uuid do |t|
@@ -10,6 +12,6 @@ class CreateAgents < ActiveRecord::Migration[7.1]
 
       t.timestamps
     end
-    add_index(:agents, [:organization_id, :name], unique: true)
+    add_index(:agents, %i[organization_id name], unique: true)
   end
 end
