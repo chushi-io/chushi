@@ -1,11 +1,7 @@
 class Api::V2::AgentsController < Api::ApiController
-  # def index
-  #   new_variable_path
-  # end
-
   def index
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :list_agent_pools?
+    authorize! @org, to: :read
 
     @agent_pools = @org.agents
     render ::AgentPoolSerializer.new(@agent_pools, {}).serializable_hash
@@ -25,13 +21,13 @@ class Api::V2::AgentsController < Api::ApiController
 
   def show
     @agent = AgentPool.find_by(external_id: params[:id])
-    authorize! @agent
+    authorize! @agent.organization, to: :read
     render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
   end
 
   def update
     @agent = AgentPool.find_by(external_id: params[:id])
-    authorize! @agent
+    authorize! @agent.organization, to: :update_agent_pools?
     if @agent.update(agent_params)
       render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
     else
@@ -41,7 +37,7 @@ class Api::V2::AgentsController < Api::ApiController
 
   def destroy
     @agent = Agent.find_by(external_id: params[:id])
-    authorize! @agent
+    authorize! @agent.organization, to: :update_agent_pools?
     if @agent.delete
       render status: :no_content
     else

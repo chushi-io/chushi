@@ -46,7 +46,7 @@ class Api::V2::OrganizationsController < Api::ApiController
     @organization = Organization.
       where(name: params[:organization_id]).
       first!
-    authorize! @organization
+    authorize! @organization, to: :read?
     render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
   end
 
@@ -54,7 +54,7 @@ class Api::V2::OrganizationsController < Api::ApiController
     @organization = Organization.
       where(name: params[:organization_id]).
       first!
-    authorize! @organization
+    authorize! @organization, to: :is_admin?
     @organization.update!(org_params)
     render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
   end

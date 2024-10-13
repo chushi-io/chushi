@@ -1,7 +1,7 @@
 class Api::V2::TeamsController < Api::ApiController
   def index
     @org = Organization.find_by(external_id: params[:organization_id])
-    authorize! @org, to: :list_teams?
+    authorize! @org, to: :access?
 
     @teams = @org.teams
     render json: ::TeamSerializer.new(@teams, {}).serializable_hash

@@ -26,6 +26,35 @@ class RunPolicy < ApplicationPolicy
       (organization.present? && record.workspace.organization.id == organization.id)
   end
 
+  # Mapped permissions
+  def can_apply?
+    true
+  end
+
+  def can_cancel?
+    true
+  end
+
+  def can_comment?
+    true
+  end
+
+  def can_discard?
+    true
+  end
+
+  def can_force_execute?
+    true
+  end
+
+  def can_force_cancel?
+    true
+  end
+
+  def can_override_policy_check?
+    true
+  end
+
   private
   def can_access_run
     if run.present?

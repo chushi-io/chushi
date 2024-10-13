@@ -6,7 +6,7 @@ class Api::V2::StateVersionOutputsController < Api::ApiController
       head :not_found and return
     end
 
-    authorize! @output.state_version.workspace, to: :show?
+    authorize! @output.state_version.workspace, to: :can_read_state_outputs
     render json: ::StateVersionOutputSerializer.new(@output, {}).serializable_hash
   end
 end

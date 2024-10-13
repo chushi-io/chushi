@@ -23,6 +23,13 @@
         </div>
       </div>
 
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :email, class: "form-control" %>
+          <label for="floatingInputGrid">Email</label>
+        </div>
+      </div>
+
       <div class="col-sm-6 col-md-4">
         <div class="form-floating">
           <%= form.select :organization_type, ["personal", "business"], {}, {class: "form-select"} %>

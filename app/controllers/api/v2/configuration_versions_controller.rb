@@ -2,7 +2,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
 
   def create
     @workspace = Workspace.find_by(external_id: params[:id])
-    authorize! @workspace, to: :create_configuration_version?
+    authorize! @workspace, to: :can_queue_runs?
 
     version = @workspace.configuration_versions.new(
       auto_queue_runs: params[:auto_queue_runs],
@@ -18,7 +18,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
 
   def download
     @version = ConfigurationVersion.find_by(external_id: params[:id])
-    authorize! @version
+    authorize! @version.workspace, to: :can_queue_runs?
 
     contents = @version.archive.read
     if contents.start_with?("vault:")
@@ -30,7 +30,7 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
 
   def show
     @version = ConfigurationVersion.find_by(external_id: params[:id])
-    authorize! @version
+    authorize! @version.workspace, to: :can_access?
     render json: ::ConfigurationVersionSerializer.new(@version, {}).serializable_hash
   end
 end

@@ -6,8 +6,8 @@ class Api::V2::RunTriggersController < Api::ApiController
       head :not_found and return
     end
 
+    authorize! @workspace, to: :can_access?
     @run_triggers = @workspace.run_triggers
-    authorize! @workspace, to: :list_run_triggers?
 
     render json: ::RunTriggerSerializer.new(@run_triggers, {}).serializable_hash
   end
@@ -18,10 +18,10 @@ class Api::V2::RunTriggersController < Api::ApiController
       skip_verify_authorized!
       head :not_found and return
     end
-    authorize! @workspace, to: :create_run_triggers?
+    authorize! @workspace, to: :can_manage_run_triggers?
     @trigger = @workspace.run_triggers.new
     @sourceable = Workspace.find_by(external_id: run_trigger_params["sourceable_id"])
-    authorize! @sourceable, to: :attach_trigger?
+    authorize! @sourceable, to: :can_read_run?
 
     @trigger.sourceable = @sourceable
     if @trigger.save
@@ -37,12 +37,13 @@ class Api::V2::RunTriggersController < Api::ApiController
       skip_verify_authorized!
       head :not_found and return
     end
-    authorize! @trigger
+    authorize! @trigger.workspace, to: :can_access?
     render json: ::RunTriggerSerializer.new(@trigger, {}).serializable_hash
   end
 
   def destroy
-    skip_verify_authorized!
+    @trigger = RunTrigger.find_by(external_id: params[:id])
+    authorize! @trigger.workspace, to: :can_manage_run_triggers?
     head :no_content
   end
 

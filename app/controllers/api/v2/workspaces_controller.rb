@@ -11,7 +11,9 @@ class Api::V2::WorkspacesController < Api::ApiController
         @workspaces = @workspaces.tagged_with(params[:search][:tags].split(","), :match_all => true)
       end
     end
-    render json: ::WorkspaceSerializer.new(@workspaces, {}).serializable_hash
+    render json: ::WorkspaceSerializer.new(@workspaces, {
+      params: { policy: policy_for(@workspaces) },
+    }).serializable_hash
   end
 
   def lock

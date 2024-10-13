@@ -4,7 +4,7 @@ class Api::V2::AppliesController < Api::ApiController
 
   def show
     @apply = Apply.first(external_id: params[:id])
-    authorize! @apply
+    authorize! @org, to: :read
 
     render json: ::ApplySerializer.new(@apply, {}).serializable_hash
   end
@@ -12,7 +12,6 @@ class Api::V2::AppliesController < Api::ApiController
   def logs
     head :no_content
   end
-
 
   ### Agent-only routes
   def update

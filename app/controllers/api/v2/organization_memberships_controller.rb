@@ -1,7 +1,8 @@
 class Api::V2::OrganizationMembershipsController < Api::ApiController
+
   def index
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :list_memberships?
+    authorize! @org, to: :can_manage_memberships?
 
     @memberships = @org.organization_memberships
     render json: ::OrganizationMembershipSerializer.new(@memberships, {}).serializable_hash
@@ -9,7 +10,7 @@ class Api::V2::OrganizationMembershipsController < Api::ApiController
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :create_memberships?
+    authorize! @org, to: :can_manage_memberships?
 
     @membership = @org.organization_memberships.new
     @user = User.find_by(email: membership_params["email"])
@@ -33,14 +34,19 @@ class Api::V2::OrganizationMembershipsController < Api::ApiController
       head :not_found and return
     end
 
-    authorize! @membership
+    authorize! @membership.organization, to: :can_manage_memberships?
     render json: ::OrganizationMembershipSerializer.new(@membership, {
       :include => [:user],
     }).serializable_hash
   end
 
   def update
-
+    @membership = OrganizationMembership.find_by(external_id: params[:id])
+    unless @membership
+      skip_verify_authorized!
+      head :not_found and return
+    end
+    authorize! @membership.organization, to: :can_manage_memberships?
   end
 
   def destroy
@@ -50,7 +56,7 @@ class Api::V2::OrganizationMembershipsController < Api::ApiController
       head :not_found and return
     end
 
-    authorize! @membership
+    authorize! @membership.organization, to: :can_manage_memberships?
     if @membership.delete
       render status: :no_content
     else
