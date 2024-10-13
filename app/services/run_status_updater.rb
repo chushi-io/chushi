@@ -4,6 +4,7 @@ class RunStatusUpdater < ApplicationService
   attr_reader :run
 
   def initialize(run)
+    super
     @run = run
   end
 
@@ -24,7 +25,7 @@ class RunStatusUpdater < ApplicationService
       when 'running'
         @run.update(status: 'planning')
       else
-        # no-op..
+        next
       end
     end
     true
@@ -43,7 +44,7 @@ class RunStatusUpdater < ApplicationService
       when 'running'
         @run.update(status: 'applying')
       else
-        # no-op..
+        next
       end
     end
     true

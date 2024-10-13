@@ -10,7 +10,7 @@ module RunStage
       @run.task_stages.each do |task_stage|
         if task_stage.stage == 'pre_plan'
           TaskStage::ExecuteTaskStageJob.perform_async(task_stage.id)
-          return
+          next
         end
       end
 

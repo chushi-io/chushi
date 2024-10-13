@@ -40,11 +40,11 @@ module Api
       end
 
       def destroy
-        if params[:provider]
-          # Delete just that provider?
-        else
-          # Delete for all providers
-        end
+        # if params[:provider]
+        # Delete just that provider?
+        # else
+        # Delete for all providers
+        # end
 
         head :not_implemented
       end

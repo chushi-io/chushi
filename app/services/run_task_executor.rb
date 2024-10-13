@@ -5,6 +5,7 @@ class RunTaskExecutor < ApplicationService
   attr_reader :task_result
 
   def initialize(task_result)
+    super
     @task_result = task_result
   end
 
@@ -45,7 +46,7 @@ class RunTaskExecutor < ApplicationService
     }
     response = Net::HTTP.post(uri, payload.to_json, headers)
 
-    return if response.code === '200'
+    return if response.code == '200'
 
     raise StandardError, 'Run task request failed'
   end

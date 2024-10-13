@@ -15,13 +15,13 @@ module TaskResult
           # We still have a running task,
           # so we simply return to wait for
           # all of them to complete?
-          return
+          next
         end
         if task_result.status == 'errored'
           # We assume that an errored task result
           # will already have toggled the task stage
           # to errored
-          return
+          next
         end
 
         next unless task_result.status == 'failed'

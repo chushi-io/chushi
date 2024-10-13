@@ -4,6 +4,7 @@ class RunCreator < ApplicationService
   attr_reader :run
 
   def initialize(run)
+    super
     @run = run
   end
 

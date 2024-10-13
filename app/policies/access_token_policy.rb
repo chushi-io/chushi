@@ -23,8 +23,6 @@ class AccessTokenPolicy < ApplicationPolicy
     when 'Team'
       @team = Team.find(record.token_authable_id)
       organization.present? && organization.id == @team.organization_id
-    else
-      false
     end
   end
 end

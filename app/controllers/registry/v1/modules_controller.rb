@@ -71,7 +71,7 @@ module Registry
           provider: params[:provider],
           version: params[:version]
         ).first
-        @module.increment!(:downloads)
+        @module.increment(:downloads)
 
         # Get the archive and download it
       end

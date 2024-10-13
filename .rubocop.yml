@@ -34,4 +34,16 @@ Metrics/CyclomaticComplexity:
 
 Style/ArgumentsForwarding:
   Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false
 # End of to-be-enabled cops

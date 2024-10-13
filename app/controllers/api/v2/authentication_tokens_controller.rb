@@ -3,7 +3,7 @@
 module Api
   module V2
     class AuthenticationTokensController < Api::ApiController
-      before_action :get_token, only: %i[get_team_token show destroy_team_token destroy]
+      before_action :load_token, only: %i[load_team_token show destroy_team_token destroy]
       def index; end
 
       def list_team_tokens
@@ -13,7 +13,7 @@ module Api
         #   joins(:teams).where('' => time_range)
       end
 
-      def get_team_token
+      def load_team_token
         @team = Team.find_by(external_id: params[:id])
         unless @team
           skip_verify_authorized!
@@ -93,7 +93,7 @@ module Api
         end
       end
 
-      def get_organization_token
+      def load_organization_token
         @organization = Organization.find_by(name: params[:organization_id])
         unless @organization
           skip_verify_authorized!
@@ -108,7 +108,7 @@ module Api
         render json: ::AuthenticationTokenSerializer.new(@organization.access_token, {}).serializable_hash
       end
 
-      def get_agent_tokens
+      def load_agent_tokens
         @agent = Agent.find_by(external_id: params[:id])
         unless @organization
           skip_verify_authorized!
@@ -188,7 +188,7 @@ module Api
 
       private
 
-      def get_token
+      def load_token
         @token = AccessToken.find_by(external_id: params[:token_id])
       end
 
