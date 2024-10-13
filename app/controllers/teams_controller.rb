@@ -1,6 +1,14 @@
 class TeamsController < AuthenticatedController
   before_action :load_team, only: [:edit, :show, :update, :destroy]
 
+  before_action -> {
+    authorize! @organization, to: :can_create_team
+  }, only: [:create]
+
+  before_action -> {
+    authorize! @team, to: :can_destroy?
+  }, only: [:destroy]
+
   def index
     @teams = @organization.teams
   end

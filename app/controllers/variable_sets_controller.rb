@@ -1,5 +1,13 @@
 class VariableSetsController < AuthenticatedController
   before_action :load_variable_set, only: [:show, :edit, :update, :destroy]
+  before_action -> {
+    authorize! @organization, to: :can_read_varsets?
+  }, only: [:index, :show]
+
+  before_action -> {
+    authorize! @organization, to: :can_manage_varsets?
+  }, only: [:new, :create, :edit, :update, :destroy]
+
   def index
     @variable_sets = @organization.variable_sets
   end

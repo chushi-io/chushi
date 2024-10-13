@@ -1,4 +1,8 @@
 class AgentPoolsController < AuthenticatedController
+  before_action -> {
+    authorize! @organization, to: :can_update_agent_pools?
+  }, only: [:new, :create]
+
   def index
     @agent_pools = @organization.agent_pools
   end
@@ -12,6 +16,7 @@ class AgentPoolsController < AuthenticatedController
   end
 
   def create
+    authorize! @organization, to: :can_update_agent_pools?
     @agent_pool = @organization.agent_pools.new(agent_pool_params)
     if @agent_pool.save
       @token = AccessToken.new

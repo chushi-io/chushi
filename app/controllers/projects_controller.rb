@@ -1,5 +1,18 @@
 class ProjectsController < AuthenticatedController
   before_action :load_project, only: [:edit, :show, :update, :destroy]
+
+  before_action -> {
+    authorize! @organization, to: :can_create_project?
+  }, only: [:create]
+
+  before_action -> {
+    authorize! @project, to: :can_update?
+  }, only: [:update]
+
+  before_action -> {
+    authorize! @project, to: :can_destroy?
+  }
+
   def index
     @projects = @organization.projects
   end
@@ -9,7 +22,7 @@ class ProjectsController < AuthenticatedController
   end
 
   def create
-    # TODO: Validate that user is able to create a project
+    authorize! @organization, to: :can_create_project?
     @project = @organization.projects.new(project_params)
     if @project.save
       redirect_to project_path(@organization.name, @project.external_id)
@@ -31,6 +44,7 @@ class ProjectsController < AuthenticatedController
   end
 
   def destroy
+    authorize! @project, to: :can_destroy?
     if @project.destroy
       redirect_to projects_path(@organization.name)
     else

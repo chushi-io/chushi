@@ -1,5 +1,9 @@
 class RunTasksController < AuthenticatedController
   before_action :load_run_task, only: [:edit, :show, :update, :destroy]
+  before_action -> {
+    authorize! @organization, to: :can_manage_run_tasks?
+  }, only: [:new, :create, :edit, :update, :destroy]
+
   def index
     @run_tasks = @organization.run_tasks
   end

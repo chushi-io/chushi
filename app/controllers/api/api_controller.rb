@@ -8,6 +8,8 @@ class Api::ApiController < ActionController::API
   authorize :organization, through: :current_organization
   authorize :agent, through: :current_agent
   authorize :run, through: :current_run
+  authorize :team, through: :current_team
+  authorize :task, thorugh: :current_task
 
   before_action :set_default_response_format
 
@@ -61,6 +63,18 @@ class Api::ApiController < ActionController::API
   def current_user
     if is_user
       User.find(@access_token.token_authable_id)
+    end
+  end
+
+  def current_team
+    if @access_token.token_authable_type == "Team"
+      Team.find(@access_token.token_authable_id)
+    end
+  end
+
+  def current_task
+    if @access_token.token_authable_type == "RunTask"
+      RunTask.find(@access_token.token_authable_id)
     end
   end
 

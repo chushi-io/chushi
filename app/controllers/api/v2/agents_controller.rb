@@ -9,9 +9,9 @@ class Api::V2::AgentsController < Api::ApiController
 
   def create
     @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :create_agent_pools?
+    authorize! @org, to: :can_update_agent_pools?
 
-    @agent_pool = @org.agents.new(agent_params)
+    @agent_pool = @org.agent_pools.new(agent_params)
     if @agent_pool.save
       render json: ::AgentPoolSerializer.new(@agent_pool, {}).serializable_hash
     else

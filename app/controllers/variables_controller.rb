@@ -1,4 +1,5 @@
 class VariablesController < AuthenticatedController
+  
   def index
     @variables = @organization.variables
   end
