@@ -12,6 +12,16 @@ class Api::V2::RunTriggersController < Api::ApiController
     render json: ::RunTriggerSerializer.new(@run_triggers, {}).serializable_hash
   end
 
+  def show
+    @trigger = RunTrigger.find_by(external_id: params[:id])
+    unless @trigger
+      skip_verify_authorized!
+      head :not_found and return
+    end
+    authorize! @trigger.workspace, to: :can_access?
+    render json: ::RunTriggerSerializer.new(@trigger, {}).serializable_hash
+  end
+
   def create
     @workspace = Workspace.find_by(external_id: params[:id])
     unless @workspace
@@ -29,16 +39,6 @@ class Api::V2::RunTriggersController < Api::ApiController
     else
       render json: @trigger.errors.full_messages, status: :bad_request
     end
-  end
-
-  def show
-    @trigger = RunTrigger.find_by(external_id: params[:id])
-    unless @trigger
-      skip_verify_authorized!
-      head :not_found and return
-    end
-    authorize! @trigger.workspace, to: :can_access?
-    render json: ::RunTriggerSerializer.new(@trigger, {}).serializable_hash
   end
 
   def destroy

@@ -14,6 +14,12 @@ class VariableSetsController < AuthenticatedController
 
   def show; end
 
+  def new
+    @variable_set = @organization.variable_sets.new
+  end
+
+  def edit; end
+
   def create
     @variable_set = @organization.variable_sets.new(variable_set_params)
     if @variable_set.save
@@ -22,12 +28,6 @@ class VariableSetsController < AuthenticatedController
       render 'new'
     end
   end
-
-  def new
-    @variable_set = @organization.variable_sets.new
-  end
-
-  def edit; end
 
   def update; end
 

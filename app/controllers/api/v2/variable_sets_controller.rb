@@ -8,6 +8,15 @@ class Api::V2::VariableSetsController < Api::ApiController
     render ::VariableSetSerializer.new(@varsets, {}).serializable_hash
   end
 
+  def show
+    unless @varset
+      skip_verify_authorized!
+      head :not_found and return
+    end
+    authorize! @varset.organization, to: :can_manage_varsets?
+    render json: ::VariableSetSerializer.new(@varset, {}).serializable_hash
+  end
+
   def create
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_manage_varsets?
@@ -18,15 +27,6 @@ class Api::V2::VariableSetsController < Api::ApiController
     else
       render json: @varset.errors.full_messages, status: :bad_request
     end
-  end
-
-  def show
-    unless @varset
-      skip_verify_authorized!
-      head :not_found and return
-    end
-    authorize! @varset.organization, to: :can_manage_varsets?
-    render json: ::VariableSetSerializer.new(@varset, {}).serializable_hash
   end
 
   def update

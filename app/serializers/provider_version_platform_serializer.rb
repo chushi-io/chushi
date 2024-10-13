@@ -5,7 +5,9 @@ class ProviderVersionPlatformSerializer < ApplicationSerializer
   attribute :arch
   attribute :filename
   attribute :shasum
-  attribute :permissions do |_object| {} end
+  attribute :permissions do |_object|
+    {}
+  end
   attribute :provider_binary_uploaded do |object|
     object.binary.present?
   end

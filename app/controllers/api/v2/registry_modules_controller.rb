@@ -20,10 +20,6 @@ class Api::V2::RegistryModulesController < Api::ApiController
     render json: ::RegistryModuleSerializer.new(@module, {}).serializable_hash
   end
 
-  def update
-    head :not_implemented
-  end
-
   def create
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :manage_modules?
@@ -33,6 +29,10 @@ class Api::V2::RegistryModulesController < Api::ApiController
     @registry_module.save!
 
     render json: ::RegistryModuleSerializer.new(@registry_module, {}).serializable_hash
+  end
+
+  def update
+    head :not_implemented
   end
 
   def destroy

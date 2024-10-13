@@ -15,16 +15,16 @@ class Api::V2::TaskResultsController < Api::ApiController
 
   def null_stage
     @response = ::HTTParty.patch(params[:task_result_callback_url], body: {
-                                   "data": {
-                                     "type": 'task-results',
-                                     "attributes": {
-                                       "status": 'passed',
-                                       "message": '4 passed, 0 skipped, 0 failed',
-                                       "url": 'https://some-non-existent-url.com'
+                                   data: {
+                                     type: 'task-results',
+                                     attributes: {
+                                       status: 'passed',
+                                       message: '4 passed, 0 skipped, 0 failed',
+                                       url: 'https://some-non-existent-url.com'
                                      }
                                    }
                                  }, headers: {
-                                   'Authorization': "Bearer #{params[:access_token]}"
+                                   Authorization: "Bearer #{params[:access_token]}"
                                  })
     puts @response.to_json
     head :ok

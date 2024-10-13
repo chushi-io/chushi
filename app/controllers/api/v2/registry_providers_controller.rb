@@ -7,17 +7,6 @@ class Api::V2::RegistryProvidersController < Api::ApiController
     render json: ::ProviderSerializer.new(@providers, {}).serializable_hash
   end
 
-  def create
-    @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :manage_modules?
-
-    @provider = @org.providers.new(provider_params)
-    @provider.namespace = @org.name
-    @provider.registry = 'private'
-    @provider.save
-    render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
-  end
-
   def show
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :show?
@@ -26,6 +15,17 @@ class Api::V2::RegistryProvidersController < Api::ApiController
       name: params[:name]
     ).first
 
+    render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
+  end
+
+  def create
+    @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :manage_modules?
+
+    @provider = @org.providers.new(provider_params)
+    @provider.namespace = @org.name
+    @provider.registry = 'private'
+    @provider.save
     render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
   end
 

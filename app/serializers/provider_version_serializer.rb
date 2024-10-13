@@ -6,7 +6,9 @@ class ProviderVersionSerializer < ApplicationSerializer
   attribute :updated_at
   attribute :key_id
   attribute :protocols
-  attribute :permissions do |_object| {} end
+  attribute :permissions do |_object|
+    {}
+  end
   attribute :shasums_uploaded
   attribute :shasums_sig_uploaded
 end

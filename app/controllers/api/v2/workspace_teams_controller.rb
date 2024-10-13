@@ -4,6 +4,17 @@ class Api::V2::WorkspaceTeamsController < Api::ApiController
     head :not_implemented
   end
 
+  def show
+    @workspace_team = WorkspaceTeam.find_by(external_id: params[:id])
+    unless @workspace_team
+      skip_verify_authorized!
+      head :not_found and return
+    end
+
+    authorize! @workspace_team.workspace, to: :is_admin?
+    render json: ::WorkspaceTeamSerializer.new(@workspace_team, {}).serializable_hash
+  end
+
   def create
     @workspace = Workspace.find_by(external_id: workspace_team_params['workspace_id'])
     @team = Team.find_by(external_id: workspace_team_params['team_id'])
@@ -23,17 +34,6 @@ class Api::V2::WorkspaceTeamsController < Api::ApiController
     else
       render json: @workspace_team.errors.full_messages, status: :bad_request
     end
-  end
-
-  def show
-    @workspace_team = WorkspaceTeam.find_by(external_id: params[:id])
-    unless @workspace_team
-      skip_verify_authorized!
-      head :not_found and return
-    end
-
-    authorize! @workspace_team.workspace, to: :is_admin?
-    render json: ::WorkspaceTeamSerializer.new(@workspace_team, {}).serializable_hash
   end
 
   def update

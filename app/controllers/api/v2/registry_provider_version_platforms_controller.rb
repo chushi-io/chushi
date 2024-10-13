@@ -7,18 +7,18 @@ class Api::V2::RegistryProviderVersionPlatformsController < Api::ApiController
     render json: ::ProviderVersionPlatformSerializer.new(@version.provider_version_platforms, {}).serializable_hash
   end
 
-  def create
-    authorize! @org, to: :manage_modules?
-    @platform = @version.provider_version_platforms.create(platform_params)
-    render json: ::ProviderVersionPlatformSerializer.new(@platform, {}).serializable_hash
-  end
-
   def show
     authorize! @org, to: :show?
     @platform = @version.provider_version_platforms.where(
       os: params[:os],
       arch: params[:arch]
     ).first!
+    render json: ::ProviderVersionPlatformSerializer.new(@platform, {}).serializable_hash
+  end
+
+  def create
+    authorize! @org, to: :manage_modules?
+    @platform = @version.provider_version_platforms.create(platform_params)
     render json: ::ProviderVersionPlatformSerializer.new(@platform, {}).serializable_hash
   end
 

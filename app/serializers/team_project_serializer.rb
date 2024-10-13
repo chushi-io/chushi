@@ -4,21 +4,21 @@ class TeamProjectSerializer < ApplicationSerializer
   attribute :access
   attribute :project_access do |o|
     {
-      "settings": o.project_settings,
-      "teams": o.project_teams
+      settings: o.project_settings,
+      teams: o.project_teams
     }
   end
   attribute :workspace_access do |o|
     {
-      "create": o.workspace_create,
-      "move": o.workspace_move,
-      "locking": o.workspace_locking,
-      "delete": o.workspace_delete,
-      "runs": o.workspace_runs,
-      "variables": o.workspace_variables,
-      "state-versions": o.workspace_state_versions,
-      "sentinel-mocks": false,
-      "run-tasks": p.workspace_run_tasks
+      create: o.workspace_create,
+      move: o.workspace_move,
+      locking: o.workspace_locking,
+      delete: o.workspace_delete,
+      runs: o.workspace_runs,
+      variables: o.workspace_variables,
+      'state-versions': o.workspace_state_versions,
+      'sentinel-mocks': false,
+      'run-tasks': p.workspace_run_tasks
     }
   end
 

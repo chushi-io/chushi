@@ -9,6 +9,16 @@ class Api::V2::TeamsController < Api::ApiController
     render json: ::TeamSerializer.new(@teams, {}).serializable_hash
   end
 
+  def show
+    @team = Team.find_by(external_id: params[:id])
+    unless @team
+      skip_verify_authorized!
+      head :not_found and return
+    end
+    authorize! @team
+    render json: ::TeamSerializer.new(@team, {}).serializable_hash
+  end
+
   def create
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_create_team?
@@ -19,16 +29,6 @@ class Api::V2::TeamsController < Api::ApiController
     else
       render json: @team.errors.full_messages, status: :bad_request
     end
-  end
-
-  def show
-    @team = Team.find_by(external_id: params[:id])
-    unless @team
-      skip_verify_authorized!
-      head :not_found and return
-    end
-    authorize! @team
-    render json: ::TeamSerializer.new(@team, {}).serializable_hash
   end
 
   def update

@@ -17,9 +17,13 @@ class ProjectsController < AuthenticatedController
     @projects = @organization.projects
   end
 
+  def show; end
+
   def new
     @project = @organization.projects.new
   end
+
+  def edit; end
 
   def create
     authorize! @organization, to: :can_create_project?
@@ -30,10 +34,6 @@ class ProjectsController < AuthenticatedController
       render 'new'
     end
   end
-
-  def show; end
-
-  def edit; end
 
   def update; end
 

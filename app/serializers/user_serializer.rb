@@ -2,15 +2,23 @@ class UserSerializer < ApplicationSerializer
   set_type 'users'
 
   attribute :email
-  attribute :username do |o| o.email end
-  attribute :is_service_account do |_o| false end
-  attribute :avatar_url do |_o| '' end
-  attribute :v2_only do |_o| false end
+  attribute :username do |o|
+    o.email
+  end
+  attribute :is_service_account do |_o|
+    false
+  end
+  attribute :avatar_url do |_o|
+    ''
+  end
+  attribute :v2_only do |_o|
+    false
+  end
   attribute :permissions do |_o|
     {
-      "can-create-organizations": true,
-      "can-change-email": true,
-      "can-change-username": true
+      'can-create-organizations': true,
+      'can-change-email': true,
+      'can-change-username': true
     }
   end
 

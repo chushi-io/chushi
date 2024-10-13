@@ -12,20 +12,6 @@ class Api::V2::RegistryProviderVersionsController < Api::ApiController
     render json: ::ProviderVersionSerializer.new(@provider.provider_versions, {}).serializable_hash
   end
 
-  def create
-    @org = Organization.find_by(name: params[:organization_id])
-    authorize! @org, to: :manage_modules?
-
-    @provider = @org.providers.where(
-      registry: 'private',
-      namespace: params[:namespace],
-      name: params[:name]
-    ).first!
-
-    @version = @provider.provider_versions.create(version_params)
-    render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
-  end
-
   def show
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :show?
@@ -38,6 +24,20 @@ class Api::V2::RegistryProviderVersionsController < Api::ApiController
 
     @version = @provider.provider_versions.where(version: params[:version]).find!
 
+    render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
+  end
+
+  def create
+    @org = Organization.find_by(name: params[:organization_id])
+    authorize! @org, to: :manage_modules?
+
+    @provider = @org.providers.where(
+      registry: 'private',
+      namespace: params[:namespace],
+      name: params[:name]
+    ).first!
+
+    @version = @provider.provider_versions.create(version_params)
     render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
   end
 

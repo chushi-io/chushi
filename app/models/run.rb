@@ -2,8 +2,6 @@ class Run < ApplicationRecord
   belongs_to :organization
   belongs_to :workspace
 
-  has_one :access_token, as: :token_authable
-
   belongs_to :configuration_version, optional: true
   belongs_to :plan, optional: true
   belongs_to :apply, optional: true

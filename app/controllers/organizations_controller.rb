@@ -8,11 +8,11 @@ class OrganizationsController < AuthenticatedController
     @organizations = current_user.organizations
   end
 
+  def show; end
+
   def new
     @organization = Organization.new
   end
-
-  def show; end
 
   def create
     authorize! current_user, to: :can_create_organizations?

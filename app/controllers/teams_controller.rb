@@ -13,9 +13,13 @@ class TeamsController < AuthenticatedController
     @teams = @organization.teams
   end
 
+  def show; end
+
   def new
     @team = @organization.teams.new
   end
+
+  def edit; end
 
   def create
     @team = @organization.teams.new(team_params)
@@ -25,10 +29,6 @@ class TeamsController < AuthenticatedController
       render 'new'
     end
   end
-
-  def show; end
-
-  def edit; end
 
   def update; end
 

@@ -7,6 +7,12 @@ class Api::V2::AgentsController < Api::ApiController
     render ::AgentPoolSerializer.new(@agent_pools, {}).serializable_hash
   end
 
+  def show
+    @agent = AgentPool.find_by(external_id: params[:id])
+    authorize! @agent.organization, to: :read
+    render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
+  end
+
   def create
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_update_agent_pools?
@@ -17,12 +23,6 @@ class Api::V2::AgentsController < Api::ApiController
     else
       render json: @agent_pool.errors.full_messages, status: :bad_request
     end
-  end
-
-  def show
-    @agent = AgentPool.find_by(external_id: params[:id])
-    authorize! @agent.organization, to: :read
-    render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
   end
 
   def update

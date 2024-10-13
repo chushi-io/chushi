@@ -1,5 +1,13 @@
 class Api::V2::RunsController < Api::ApiController
   before_action :load_run, except: [:create]
+  def show
+    authorize! @run.workspace, to: :can_queue_run?
+
+    options = {}
+    options[:include] = params[:include].split(',') if params[:include]
+    render json: ::RunSerializer.new(@run, options).serializable_hash
+  end
+
   def create
     @workspace = Workspace.find_by(external_id: run_params['workspace_id'])
     if run_params['plan_only']
@@ -20,14 +28,6 @@ class Api::V2::RunsController < Api::ApiController
     rescue StandardError
       render status: :internal_server_error
     end
-  end
-
-  def show
-    authorize! @run.workspace, to: :can_queue_run?
-
-    options = {}
-    options[:include] = params[:include].split(',') if params[:include]
-    render json: ::RunSerializer.new(@run, options).serializable_hash
   end
 
   def discard

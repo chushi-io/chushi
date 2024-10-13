@@ -7,6 +7,16 @@ class Api::V2::SshKeysController < Api::ApiController
     render json: ::SshKeySerializer.new(@ssh_keys, {}).serializable_hash
   end
 
+  def show
+    @ssh_key = SshKey.find_by(external_id: params[:id])
+    unless @ssh_key
+      skip_verify_authorized!
+      head :not_found and return
+    end
+    authorize! @ssh_key.organization, to: :read?
+    render json: ::SshKeySerializer.new(@ssh_key, {}).serializable_hash
+  end
+
   def create
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_update_ssh_keys?
@@ -17,16 +27,6 @@ class Api::V2::SshKeysController < Api::ApiController
     else
       render json: @ssh_key.errors.full_messsages, status: :bad_request
     end
-  end
-
-  def show
-    @ssh_key = SshKey.find_by(external_id: params[:id])
-    unless @ssh_key
-      skip_verify_authorized!
-      head :not_found and return
-    end
-    authorize! @ssh_key.organization, to: :read?
-    render json: ::SshKeySerializer.new(@ssh_key, {}).serializable_hash
   end
 
   def update

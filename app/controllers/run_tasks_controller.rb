@@ -8,9 +8,13 @@ class RunTasksController < AuthenticatedController
     @run_tasks = @organization.run_tasks
   end
 
+  def show; end
+
   def new
     @run_task = @organization.run_tasks.new
   end
+
+  def edit; end
 
   def create
     @run_task = @organization.run_tasks.new(run_task_params)
@@ -21,10 +25,6 @@ class RunTasksController < AuthenticatedController
       render 'new'
     end
   end
-
-  def show; end
-
-  def edit; end
 
   def update; end
 

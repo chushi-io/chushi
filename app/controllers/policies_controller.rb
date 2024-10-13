@@ -5,9 +5,13 @@ class PoliciesController < AuthenticatedController
     @policies = @organization.policies
   end
 
+  def show; end
+
   def new
     @policy = @organization.policies.new
   end
+
+  def edit; end
 
   def create
     @policy = @organization.policies.new(policy_params)
@@ -17,10 +21,6 @@ class PoliciesController < AuthenticatedController
       render 'new'
     end
   end
-
-  def show; end
-
-  def edit; end
 
   def update; end
 

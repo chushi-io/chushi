@@ -14,7 +14,7 @@ class NotificationConfigurationSerializer < ApplicationSerializer
         body: res.body,
         code: res.code,
         headers: res.headers,
-        "sent-at": res.sent_at,
+        'sent-at': res.sent_at,
         successful: res.successful
       }
     end

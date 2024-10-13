@@ -11,9 +11,7 @@ class ProviderVersionUploader < CarrierWave::Uploader::Base
     "private/#{model.namespace}/#{model.name}"
   end
 
-  def filename
-    model.filename
-  end
+  delegate :filename, to: :model
 
   def self.generate_url(_model)
     ''

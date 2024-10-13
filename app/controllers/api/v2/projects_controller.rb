@@ -7,6 +7,16 @@ class Api::V2::ProjectsController < Api::ApiController
     render json: ::ProjectSerializer.new(@projects, {}).serializable_hash
   end
 
+  def show
+    @project = Project.find_by(external_id: params[:id])
+    unless @project
+      skip_verify_authorized!
+      head :not_found and return
+    end
+    authorize! @org, to: :read?
+    render json: ::ProjectSerializer.new(@project, {}).serializable_hash
+  end
+
   def create
     @org = Organization.find_by(name: params[:organization_id])
     authorize! @org, to: :can_create_project?
@@ -17,16 +27,6 @@ class Api::V2::ProjectsController < Api::ApiController
     else
       render json: @project.errors.full_messages, status: :bad_request
     end
-  end
-
-  def show
-    @project = Project.find_by(external_id: params[:id])
-    unless @project
-      skip_verify_authorized!
-      head :not_found and return
-    end
-    authorize! @org, to: :read?
-    render json: ::ProjectSerializer.new(@project, {}).serializable_hash
   end
 
   def update

@@ -7,6 +7,13 @@ class Api::V2::StateVersionsController < Api::ApiController
     render json: ::StateVersionSerializer.new(versions, {}).serializable_hash
   end
 
+  def show
+    @version = StateVersion.find_by(external_id: params[:id])
+    authorize! @version.workspace, to: :can_read_state_versions?
+
+    render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
+  end
+
   def create
     authorize! @workspace, to: :can_create_state_versions?
     version_params = jsonapi_deserialize(params, only: [
@@ -39,13 +46,6 @@ class Api::V2::StateVersionsController < Api::ApiController
     authorize! @workspace, to: :can_read_state_outputs?
     @version = StateVersion.find(@workspace.current_state_version_id)
     render json: ::StateVersionOutputSerializer.new(@version.state_version_outputs, {}).serializable_hash
-  end
-
-  def show
-    @version = StateVersion.find_by(external_id: params[:id])
-    authorize! @version.workspace, to: :can_read_state_versions?
-
-    render json: ::StateVersionSerializer.new(@version, {}).serializable_hash
   end
 
   private

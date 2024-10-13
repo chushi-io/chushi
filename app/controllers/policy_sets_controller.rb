@@ -13,6 +13,8 @@ class PolicySetsController < AuthenticatedController
     @policy_set = @organization.policy_sets.new
   end
 
+  def edit; end
+
   def create
     authorize! @organization, to: :is_admin?
     @policy_set = @organization.policy_sets.new(policy_set_params)
@@ -22,8 +24,6 @@ class PolicySetsController < AuthenticatedController
       render 'new'
     end
   end
-
-  def edit; end
 
   def update; end
 

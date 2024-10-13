@@ -1,4 +1,10 @@
 class Api::V2::ConfigurationVersionsController < Api::ApiController
+  def show
+    @version = ConfigurationVersion.find_by(external_id: params[:id])
+    authorize! @version.workspace, to: :can_access?
+    render json: ::ConfigurationVersionSerializer.new(@version, {}).serializable_hash
+  end
+
   def create
     @workspace = Workspace.find_by(external_id: params[:id])
     authorize! @workspace, to: :can_queue_runs?
@@ -23,11 +29,5 @@ class Api::V2::ConfigurationVersionsController < Api::ApiController
     contents = Vault::Rails.decrypt('transit', 'chushi_storage_contents', obj.read) if contents.start_with?('vault:')
 
     render body: contents, layout: false
-  end
-
-  def show
-    @version = ConfigurationVersion.find_by(external_id: params[:id])
-    authorize! @version.workspace, to: :can_access?
-    render json: ::ConfigurationVersionSerializer.new(@version, {}).serializable_hash
   end
 end

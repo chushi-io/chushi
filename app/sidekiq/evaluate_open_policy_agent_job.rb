@@ -16,8 +16,8 @@ class EvaluateOpenPolicyAgentJob
       # Ensure the policy is created on the OPA server
       HTTParty.put("#{Chushi.opa.endpoint}/v1/policies/#{policy.id}")
       response = HTTParty.post("#{Chushi.opa.endpoint}/v1/query", {
-                                 "query": policy.query,
-                                 "input": input
+                                 query: policy.query,
+                                 input:
                                })
       puts response
     end

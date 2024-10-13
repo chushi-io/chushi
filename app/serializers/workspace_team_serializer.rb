@@ -5,7 +5,9 @@ class WorkspaceTeamSerializer < ApplicationSerializer
   attribute :runs
   attribute :variables
   attribute :state_versions
-  attribute :sentinel_mocks do |_o| 'none' end
+  attribute :sentinel_mocks do |_o|
+    'none'
+  end
   attribute :workspace_locking
   attribute :run_tasks
 

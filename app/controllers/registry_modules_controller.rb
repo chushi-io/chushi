@@ -9,9 +9,8 @@ class RegistryModulesController < AuthenticatedController
 
   def new; end
 
-  def create; end
-
   def edit; end
+  def create; end
 
   def update; end
 

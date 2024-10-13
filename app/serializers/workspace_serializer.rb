@@ -7,9 +7,9 @@ class WorkspaceSerializer < ApplicationSerializer
 
   attribute :permissions do |_record|
     {
-      "can-queue-run": true,
-      "can-queue-apply": true,
-      "can-queue-destroy": true
+      'can-queue-run': true,
+      'can-queue-apply': true,
+      'can-queue-destroy': true
     }
   end
 
@@ -33,7 +33,9 @@ class WorkspaceSerializer < ApplicationSerializer
   attribute :run_failures
   attribute :source
   attribute :speculative_enabled
-  attribute :structured_run_output_enabled do |_o| true end
+  attribute :structured_run_output_enabled do |_o|
+    true
+  end
   attribute :terraform_version do |object|
     object.tofu_version
   end
@@ -42,8 +44,8 @@ class WorkspaceSerializer < ApplicationSerializer
     record.vcs_repo_branch.present? || record.vcs_repo_identifier.present?
   } do |o|
     {
-      "branch": o.vcs_repo_branch,
-      "identifier": o.vcs_repo_identifier
+      branch: o.vcs_repo_branch,
+      identifier: o.vcs_repo_identifier
     }
   end
 

@@ -2,40 +2,40 @@ class Api::V2::OrganizationsController < Api::ApiController
   def entitlements
     authorize!
     render json: {
-      "data": {
-        "id": params[:organization_id],
-        "type": 'entitlement-sets',
-        "attributes": {
-          "agents": true,
-          "audit-logging": false,
-          "configuration-designer": true,
-          "cost-estimation": false,
-          "global-run-tasks": false,
-          "module-tests-generation": false,
-          "operations": true,
-          "policy-enforcement": false,
-          "policy-limit": 5,
-          "policy-mandatory-enforcement-limit": 0,
-          "policy-set-limit": 1,
-          "private-module-registry": true,
-          "private-policy-agents": false,
-          "private-vcs": false,
-          "run-task-limit": 1,
-          "run-task-mandatory-enforcement-limit": 1,
-          "run-task-workspace-limit": 10,
-          "run-tasks": false,
-          "self-serve-billing": true,
-          "sentinel": false,
-          "sso": false,
-          "state-storage": true,
-          "teams": false,
-          "usage-reporting": false,
-          "user-limit": 5,
-          "vcs-integrations": true,
-          "versioned-policy-set-limit": 1
+      data: {
+        id: params[:organization_id],
+        type: 'entitlement-sets',
+        attributes: {
+          agents: true,
+          'audit-logging': false,
+          'configuration-designer': true,
+          'cost-estimation': false,
+          'global-run-tasks': false,
+          'module-tests-generation': false,
+          operations: true,
+          'policy-enforcement': false,
+          'policy-limit': 5,
+          'policy-mandatory-enforcement-limit': 0,
+          'policy-set-limit': 1,
+          'private-module-registry': true,
+          'private-policy-agents': false,
+          'private-vcs': false,
+          'run-task-limit': 1,
+          'run-task-mandatory-enforcement-limit': 1,
+          'run-task-workspace-limit': 10,
+          'run-tasks': false,
+          'self-serve-billing': true,
+          sentinel: false,
+          sso: false,
+          'state-storage': true,
+          teams: false,
+          'usage-reporting': false,
+          'user-limit': 5,
+          'vcs-integrations': true,
+          'versioned-policy-set-limit': 1
         },
-        "links": {
-          "self": "/api/v2/entitlement-sets/#{params[:organization_id]}"
+        links: {
+          self: "/api/v2/entitlement-sets/#{params[:organization_id]}"
         }
       }
     }
