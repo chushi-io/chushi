@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JobSerializer
   include JSONAPI::Serializer
 
@@ -10,19 +12,11 @@ class JobSerializer
   attribute :locked
   attribute :operation
 
-  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
-    object.workspace
-  end
+  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id, &:workspace
 
-  belongs_to :run, serializer: RunSerializer, id_method_name: :external_id do |object|
-    object.run
-  end
+  belongs_to :run, serializer: RunSerializer, id_method_name: :external_id, &:run
 
-  belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id do |object|
-    object.agent_pool
-  end
+  belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id, &:agent_pool
 
-  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name do |object|
-    object.organization
-  end
+  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
 end

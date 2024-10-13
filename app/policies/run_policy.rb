@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunPolicy < ApplicationPolicy
   def token?
     (agent.present? && record.workspace.agent_pool.id == agent.id) ||
@@ -42,7 +44,7 @@ class RunPolicy < ApplicationPolicy
 
     return organization.id == record.workspace.organization_id if organization.present?
 
-    return user.organizations.map { |org| org.id }.include? record.workspace.organization_id if user.present?
+    return user.organizations.map(&:id).include? record.workspace.organization_id if user.present?
 
     false
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 after 'development:users' do
   @organization = Organization.find_by(name: 'chushi')
 
@@ -39,7 +41,7 @@ after 'development:users' do
   Workspace.where(name: %w[
                     chushi-tags-ws-1
                     chushi-tags-ws-2
-                  ]).each do |workspace|
+                  ]).find_each do |workspace|
     workspace.tag_list.add('tags:test', 'env:dev')
     workspace.save!
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunStatusUpdater < ApplicationService
   attr_reader :run
 

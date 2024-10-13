@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateProviderVersionPlatforms < ActiveRecord::Migration[7.1]
   def change
     create_table :provider_version_platforms, id: :uuid do |t|

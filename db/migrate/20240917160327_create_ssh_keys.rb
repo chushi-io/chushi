@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateSshKeys < ActiveRecord::Migration[7.1]
   def change
     create_table :ssh_keys, id: :uuid do |t|

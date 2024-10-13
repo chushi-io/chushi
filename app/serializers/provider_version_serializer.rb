@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProviderVersionSerializer < ApplicationSerializer
   set_type 'registry-provider-versions'
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateVariables < ActiveRecord::Migration[7.1]
   def change
     create_table :variables, id: :uuid do |t|

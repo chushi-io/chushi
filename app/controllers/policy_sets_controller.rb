@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicySetsController < AuthenticatedController
   before_action :load_policy_set
   before_action -> { authorize! @organization, to: :is_admin? }

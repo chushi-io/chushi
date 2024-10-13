@@ -1,25 +1,31 @@
-class Agents::V1::AgentsController < Api::ApiController
-  before_action :authenticate_agent
-  skip_verify_authorized
+# frozen_string_literal: true
 
-  protected
+module Agents
+  module V1
+    class AgentsController < Api::ApiController
+      before_action :authenticate_agent
+      skip_verify_authorized
 
-  def authenticate_agent
-    token = request.headers['Authorization'].to_s.split(' ').last
-    @access_token = AccessToken.find_by_token(token)
+      protected
 
-    render json: nil, status: :forbidden and return if @access_token.nil?
+      def authenticate_agent
+        token = request.headers['Authorization'].to_s.split.last
+        @access_token = AccessToken.find_by(token:)
 
-    if @access_token.expires_at.present? && @access_token.expires_at.after?(Time.now)
-      render json: nil, status: :forbidden
+        render json: nil, status: :forbidden and return if @access_token.nil?
+
+        if @access_token.expires_at.present? && @access_token.expires_at.after?(Time.zone.now)
+          render json: nil, status: :forbidden
+        end
+
+        render json: nil, status: :forbidden unless @access_token.token_authable_type == 'Agent'
+
+        @agent = Agent.find(@access_token.token_authable_id)
+      end
+
+      def verify_run_access
+        true
+      end
     end
-
-    render json: nil, status: :forbidden unless @access_token.token_authable_type == 'Agent'
-
-    @agent = Agent.find(@access_token.token_authable_id)
-  end
-
-  def verify_run_access
-    true
   end
 end

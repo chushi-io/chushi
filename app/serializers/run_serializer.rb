@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunSerializer < ApplicationSerializer
   set_type :runs
 
@@ -50,20 +52,10 @@ class RunSerializer < ApplicationSerializer
     []
   end
 
-  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
-    object.workspace
-  end
+  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id, &:workspace
   has_one :configuration_version, key: 'configuration-version', serializer: ConfigurationVersionSerializer,
-                                  id_method_name: :external_id do |object|
-    object.configuration_version
-  end
-  has_one :plan, serializer: PlanSerializer, id_method_name: :external_id do |object|
-    object.plan
-  end
-  has_one :apply, serializer: ApplySerializer, id_method_name: :external_id do |object|
-    object.apply
-  end
-  has_many :task_stages, serializer: TaskStageSerializer, id_method_name: :external_id do |object|
-    object.task_stages
-  end
+                                  id_method_name: :external_id, &:configuration_version
+  has_one :plan, serializer: PlanSerializer, id_method_name: :external_id, &:plan
+  has_one :apply, serializer: ApplySerializer, id_method_name: :external_id, &:apply
+  has_many :task_stages, serializer: TaskStageSerializer, id_method_name: :external_id, &:task_stages
 end

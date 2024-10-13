@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RegistryModuleVersionSerializer < ApplicationSerializer
   set_type 'registry-module-versions'
 

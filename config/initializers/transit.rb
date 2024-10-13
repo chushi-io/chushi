@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'vault/rails'
 
 Vault::Rails.configure do |vault|
-  if ENV.has_key?('CI')
+  if ENV.key?('CI')
     vault.enabled = false
   else
     vault.enabled = Rails.env.production?

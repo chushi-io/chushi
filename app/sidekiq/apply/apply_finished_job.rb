@@ -1,5 +1,9 @@
-class Apply::ApplyFinishedJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args); end
+module Apply
+  class ApplyFinishedJob
+    include Sidekiq::Job
+
+    def perform(*args); end
+  end
 end

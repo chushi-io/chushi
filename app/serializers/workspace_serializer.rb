@@ -1,9 +1,9 @@
+# frozen_string_literal: true
+
 class WorkspaceSerializer < ApplicationSerializer
   set_type :workspaces
 
-  belongs_to :organization, serializer: ::OrganizationSerializer, id_method_name: :name do |workspace|
-    workspace.organization
-  end
+  belongs_to :organization, serializer: ::OrganizationSerializer, id_method_name: :name, &:organization
 
   attribute :permissions do |_record|
     {
@@ -36,9 +36,7 @@ class WorkspaceSerializer < ApplicationSerializer
   attribute :structured_run_output_enabled do |_o|
     true
   end
-  attribute :terraform_version do |object|
-    object.tofu_version
-  end
+  attribute :terraform_version, &:tofu_version
   attribute :trigger_prefixes
   attribute :vcs_repo, if: proc { |record|
     record.vcs_repo_branch.present? || record.vcs_repo_identifier.present?
@@ -55,9 +53,7 @@ class WorkspaceSerializer < ApplicationSerializer
   #   object.current_state_version
   # end
 
-  belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id do |object|
-    object.agent_pool
-  end
+  belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id, &:agent_pool
 
   # attribute :setting_overwrites do |object| {} end
 end

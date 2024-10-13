@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StateVersion < ApplicationRecord
   mount_uploader :state_file, StateVersionUploader
   mount_uploader :state_json_file, StateVersionJsonUploader

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrganizationTokensController < AuthenticatedController
   before_action -> { authorize! @organization, to: :can_update_api_token? }
   def index

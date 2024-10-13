@@ -1,2 +1,8 @@
-module Api::V2::TaskStagesHelper
+# frozen_string_literal: true
+
+module Api
+  module V2
+    module TaskStagesHelper
+    end
+  end
 end

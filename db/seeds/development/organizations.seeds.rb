@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Create the default Chushi organization
 Organization
   .create_with(

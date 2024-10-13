@@ -4,7 +4,7 @@ Doorkeeper::OpenidConnect.configure do
   issuer Chushi.domain
 
   signing_key do
-    if ENV.has_key?('OIDC_PRIVATE_KEY')
+    if ENV.key?('OIDC_PRIVATE_KEY')
       ENV.fetch('OIDC_PRIVATE_KEY')
     else
       File.read(ENV.fetch('OIDC_PRIVATE_KEY_FILE', 'oidc_key.pem'))
@@ -61,17 +61,11 @@ Doorkeeper::OpenidConnect.configure do
 
   # Example claims:
   claims do
-    claim :workspace, response: %i[id_token user_info] do |resource_owner|
-      resource_owner.id
-    end
+    claim :workspace, response: %i[id_token user_info], &:id
 
-    claim :project, response: %i[id_token user_info] do |resource_owner|
-      resource_owner.agent_id
-    end
+    claim :project, response: %i[id_token user_info], &:agent_id
 
-    claim :organization, response: %i[id_token user_info] do |resource_owner|
-      resource_owner.organization_id
-    end
+    claim :organization, response: %i[id_token user_info], &:organization_id
 
     #   normal_claim :_foo_ do |resource_owner|
     #     resource_owner.foo

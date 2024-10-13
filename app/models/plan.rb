@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Plan < ApplicationRecord
   mount_uploader :plan_file, PlanFileUploader
   mount_uploader :plan_json_file, PlanJsonFileUploader

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunTasksController < AuthenticatedController
   before_action :load_run_task, only: %i[edit show update destroy]
   before_action lambda {

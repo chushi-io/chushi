@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunTriggerSerializer < ApplicationSerializer
   set_type 'run_triggers'
 
@@ -11,11 +13,7 @@ class RunTriggerSerializer < ApplicationSerializer
 
   attribute :created_at
 
-  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
-    object.workspace
-  end
+  belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id, &:workspace
 
-  belongs_to :sourceable, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
-    object.sourceable
-  end
+  belongs_to :sourceable, serializer: WorkspaceSerializer, id_method_name: :external_id, &:sourceable
 end

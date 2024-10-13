@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddApiKeyToAgents < ActiveRecord::Migration[7.1]
   def change
     add_column :agents, :api_key, :string

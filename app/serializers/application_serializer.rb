@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationSerializer
   include JSONAPI::Serializer
 
@@ -5,7 +7,7 @@ class ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
   set_key_transform :dash
-  set_id { |object| object.external_id } # <- encoded id!
+  set_id(&:external_id) # <- encoded id!
   #
   #   class << self
   #     attr_reader :rules

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunCreator < ApplicationService
   attr_reader :run
 

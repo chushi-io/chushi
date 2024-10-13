@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 after 'development:users' do
   # Generate an access token for the user
   User

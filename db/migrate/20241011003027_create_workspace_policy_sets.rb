@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateWorkspacePolicySets < ActiveRecord::Migration[7.1]
   def change
     create_table :workspace_policy_sets, id: :uuid do |t|

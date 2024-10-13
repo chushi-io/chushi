@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class VariablesController < AuthenticatedController
   def index
     @variables = @organization.variables

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TaskStage < ApplicationRecord
   # belongs_to :run_task
   belongs_to :run

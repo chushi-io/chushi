@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TestConnectionJob < ApplicationJob
   queue_as :default
 

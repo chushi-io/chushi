@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrganizationsController < AuthenticatedController
   skip_before_action :set_organization!, except: [:show]
 

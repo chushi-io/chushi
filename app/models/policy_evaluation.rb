@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicyEvaluation < ApplicationRecord
   belongs_to :task_stage
   has_many :policy_set_outcomes

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TaskResultSerializer < ApplicationSerializer
   set_type 'task-results'
 
@@ -17,7 +19,5 @@ class TaskResultSerializer < ApplicationSerializer
   attribute :workspace_task_id
   attribute :workspace_task_enforcement_level
 
-  belongs_to :task_stage, serializer: TaskStageSerializer, id_method_name: :external_id do |object|
-    object.task_stage
-  end
+  belongs_to :task_stage, serializer: TaskStageSerializer, id_method_name: :external_id, &:task_stage
 end

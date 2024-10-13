@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TagsController < AuthenticatedController
   # TODO: Tags are not unique per organization, but are instead
   # global to the installation. These need to be moved to a

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class VcsConnectionsController < AuthenticatedController
   def index
     @vcs_connections = @organization.vcs_connections

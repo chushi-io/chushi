@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrganizationSerializer < ApplicationSerializer
   set_type :organizations
   set_id :name

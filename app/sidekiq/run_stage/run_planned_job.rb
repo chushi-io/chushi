@@ -1,5 +1,9 @@
-class RunStage::RunPlannedJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args); end
+module RunStage
+  class RunPlannedJob
+    include Sidekiq::Job
+
+    def perform(*args); end
+  end
 end

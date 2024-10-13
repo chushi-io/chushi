@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ModuleVersion < ApplicationRecord
   has_one_attached :archive
 

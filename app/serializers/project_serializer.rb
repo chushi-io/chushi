@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProjectSerializer < ApplicationSerializer
   set_type 'projects'
 
@@ -10,7 +12,5 @@ class ProjectSerializer < ApplicationSerializer
   end
   attribute :auto_destroy_activity_duration
 
-  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name do |object|
-    object.organization
-  end
+  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
 end

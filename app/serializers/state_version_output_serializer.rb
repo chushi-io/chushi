@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StateVersionOutputSerializer < ApplicationSerializer
   set_type 'state-version-outputs'
 

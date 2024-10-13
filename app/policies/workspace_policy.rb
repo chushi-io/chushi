@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WorkspacePolicy < ApplicationPolicy
   # Named policies
   def is_admin?
@@ -111,7 +113,7 @@ class WorkspacePolicy < ApplicationPolicy
 
     return organization.id == record.organization_id if organization.present?
 
-    return user.organizations.map { |org| org.id }.include? record.organization_id if user.present?
+    return user.organizations.map(&:id).include? record.organization_id if user.present?
 
     false
   end

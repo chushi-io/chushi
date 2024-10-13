@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateConfigurationVersions < ActiveRecord::Migration[7.1]
   def change
     create_table :configuration_versions, id: :uuid do |t|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PlanStructuredFileUploader < CarrierWave::Uploader::Base
   storage :fog
 

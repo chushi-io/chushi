@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WorkspacesController < AuthenticatedController
   def index
     @workspaces = @organization.workspaces

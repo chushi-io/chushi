@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class NotificationConfigurationSerializer < ApplicationSerializer
   set_type 'notification-configurations'
 
@@ -20,7 +22,5 @@ class NotificationConfigurationSerializer < ApplicationSerializer
     end
   end
 
-  belongs_to :subscribable, serializer: WorkspaceSerializer, id_method_name: :external_id do |object|
-    object.workspace
-  end
+  belongs_to :subscribable, serializer: WorkspaceSerializer, id_method_name: :external_id, &:workspace
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicySetOutcome < ApplicationRecord
   belongs_to :policy_evaluation
 

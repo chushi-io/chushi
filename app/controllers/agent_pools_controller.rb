@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AgentPoolsController < AuthenticatedController
   before_action lambda {
     authorize! @organization, to: :can_update_agent_pools?

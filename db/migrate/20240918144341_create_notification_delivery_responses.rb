@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateNotificationDeliveryResponses < ActiveRecord::Migration[7.1]
   def change
     create_table :notification_delivery_responses, id: :uuid do |t|

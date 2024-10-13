@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateStateVersionOutputs < ActiveRecord::Migration[7.1]
   def change
     create_table :state_version_outputs, id: :uuid do |t|

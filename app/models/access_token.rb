@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AccessToken < ApplicationRecord
   include Vault::EncryptedModel
   vault_lazy_decrypt!

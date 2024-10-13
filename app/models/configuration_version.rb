@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ConfigurationVersion < ApplicationRecord
   def to_param
     external_id

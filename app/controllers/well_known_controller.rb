@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WellKnownController < ApplicationController
   def terraform
     render json: {

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddFieldsProviderVersion < ActiveRecord::Migration[7.1]
   def change
     remove_column :provider_versions, :platforms, :json

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddAgentIdToObjects < ActiveRecord::Migration[7.1]
   def change
     change_table :workspaces do |t|

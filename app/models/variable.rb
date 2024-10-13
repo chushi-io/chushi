@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Variable < ApplicationRecord
   include Vault::EncryptedModel
   vault_lazy_decrypt!

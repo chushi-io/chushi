@@ -1,7 +1,11 @@
-class TaskStage::TaskStageFailedJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*_args)
-    puts 'Ope, our task stage failed'
+module TaskStage
+  class TaskStageFailedJob
+    include Sidekiq::Job
+
+    def perform(*_args)
+      Rails.logger.debug 'Ope, our task stage failed'
+    end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class EvaluateOpenPolicyAgentJob
   include Sidekiq::Job
 
@@ -19,7 +21,7 @@ class EvaluateOpenPolicyAgentJob
                                  query: policy.query,
                                  input:
                                })
-      puts response
+      Rails.logger.debug response
     end
 
     # Do something

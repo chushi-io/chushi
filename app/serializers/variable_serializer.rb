@@ -1,9 +1,9 @@
+# frozen_string_literal: true
+
 class VariableSerializer < ApplicationSerializer
   set_type :vars
 
-  attribute :key do |o|
-    o.name
-  end
+  attribute :key, &:name
   attribute :value
   attribute :description
   attribute :hcl do |o|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProviderVersionPlatformSerializer < ApplicationSerializer
   set_type ''
 
@@ -12,9 +14,8 @@ class ProviderVersionPlatformSerializer < ApplicationSerializer
     object.binary.present?
   end
 
-  belongs_to :registry_provider_version, serializer: ProviderVersionSerializer, id_method_name: :name do |object|
-    object.provider_version
-  end
+  belongs_to :registry_provider_version, serializer: ProviderVersionSerializer, id_method_name: :name,
+             &:provider_version
 
   link :provider_binary_upload, unless: proc { |record, _params|
     record.binary.present?

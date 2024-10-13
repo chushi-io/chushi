@@ -1,2 +1,8 @@
-module Api::V1::WebhooksHelper
+# frozen_string_literal: true
+
+module Api
+  module V1
+    module WebhooksHelper
+    end
+  end
 end

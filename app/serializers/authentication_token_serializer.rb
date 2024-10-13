@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AuthenticationTokenSerializer < ApplicationSerializer
   set_type 'authentication-tokens'
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RegistryModulesController < AuthenticatedController
   def index
     @modules = @organization.registry_modules

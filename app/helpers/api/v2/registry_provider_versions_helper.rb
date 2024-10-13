@@ -1,2 +1,8 @@
-module Api::V2::RegistryProviderVersionsHelper
+# frozen_string_literal: true
+
+module Api
+  module V2
+    module RegistryProviderVersionsHelper
+    end
+  end
 end

@@ -1,2 +1,8 @@
-module Api::V2::ProjectsHelper
+# frozen_string_literal: true
+
+module Api
+  module V2
+    module ProjectsHelper
+    end
+  end
 end

@@ -1,12 +1,18 @@
-class Agents::V1::AppliesController < Agents::V1::AgentsController
-  before_action :verify_run_access
+# frozen_string_literal: true
 
-  # Endpoint for agents to update run information
-  def update
-    @apply = Apply.find(params[:id])
+module Agents
+  module V1
+    class AppliesController < Agents::V1::AgentsController
+      before_action :verify_run_access
 
-    RunStatusUpdater.new(@apply.run).update_apply_status(params[:status]) if params[:status]
+      # Endpoint for agents to update run information
+      def update
+        @apply = Apply.find(params[:id])
 
-    render json: @apply
+        RunStatusUpdater.new(@apply.run).update_apply_status(params[:status]) if params[:status]
+
+        render json: @apply
+      end
+    end
   end
 end

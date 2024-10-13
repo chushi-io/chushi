@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateRunTasks < ActiveRecord::Migration[7.1]
   def change
     create_table :run_tasks, id: :uuid do |t|

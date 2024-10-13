@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicySetOutcomeSerializer < ApplicationSerializer
   set_type 'policy-set-outcomes'
 
@@ -9,7 +11,6 @@ class PolicySetOutcomeSerializer < ApplicationSerializer
   attribute :result_count
   attribute :policy_tool_version
 
-  belongs_to :policy_evaluation, serializer: PolicyEvaluationSerializer, id_method_name: :external_id do |object|
-    object.policy_evaluation
-  end
+  belongs_to :policy_evaluation, serializer: PolicyEvaluationSerializer, id_method_name: :external_id,
+             &:policy_evaluation
 end

@@ -1,6 +1,10 @@
+# frozen_string_literal: true
+
 require 'test_helper'
-class Stage::ConfigurationVersionUploadedJobTest < Minitest::Test
-  def test_example
-    skip "add some examples to (or delete) #{__FILE__}"
+module Stage
+  class ConfigurationVersionUploadedJobTest < Minitest::Test
+    def test_example
+      skip "add some examples to (or delete) #{__FILE__}"
+    end
   end
 end

@@ -1,17 +1,21 @@
-class RunStage::PrePlanRunningJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args)
-    @run = Run.find(args.first)
+module RunStage
+  class PrePlanRunningJob
+    include Sidekiq::Job
 
-    @run.task_stages.each do |task_stage|
-      if task_stage.stage == 'pre_plan'
-        TaskStage::ExecuteTaskStageJob.perform_async(task_stage.id)
-        return
+    def perform(*args)
+      @run = Run.find(args.first)
+
+      @run.task_stages.each do |task_stage|
+        if task_stage.stage == 'pre_plan'
+          TaskStage::ExecuteTaskStageJob.perform_async(task_stage.id)
+          return
+        end
       end
-    end
 
-    @run.update(status: 'queuing')
-    RunStage::QueuingJob.perform_async(@run.id)
+      @run.update(status: 'queuing')
+      RunStage::QueuingJob.perform_async(@run.id)
+    end
   end
 end

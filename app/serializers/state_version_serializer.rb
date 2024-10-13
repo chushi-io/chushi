@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StateVersionSerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 
@@ -37,9 +39,7 @@ class StateVersionSerializer < ApplicationSerializer
   attribute :resources_processed
   attribute :serial
   attribute :state_version
-  attribute :terraform_version do |object|
-    object.tofu_version
-  end
+  attribute :terraform_version, &:tofu_version
   attribute :vcs_commit_url
   attribute :vcs_commit_sha
 end

@@ -1,7 +1,11 @@
-class PolicyEvaluation::PolicyEvaluationPassedJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args)
-    @policy_evaluation = PolicyEvaluation.find(args.first)
+module PolicyEvaluation
+  class PolicyEvaluationPassedJob
+    include Sidekiq::Job
+
+    def perform(*args)
+      @policy_evaluation = PolicyEvaluation.find(args.first)
+    end
   end
 end

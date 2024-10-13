@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddExternalIdToProviders < ActiveRecord::Migration[7.1]
   def change
     add_column :providers, :external_id, :string

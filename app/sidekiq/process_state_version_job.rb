@@ -1,21 +1,23 @@
+# frozen_string_literal: true
+
 class ProcessStateVersionJob
   include Sidekiq::Job
 
   def perform(*args)
     @version = StateVersion.find(args.first)
     unless @version.json_state_file.attached?
-      puts 'State version has not been uploaded'
+      Rails.logger.debug 'State version has not been uploaded'
       raise ActiveRecord::RecordNotFound
     end
     if @version.resources_processed
-      puts 'State version already processed'
+      Rails.logger.debug 'State version already processed'
       return
     end
 
     @version.json_state_file.open do |tempfile|
       # Parse all of the outputs
       @parsed_json = ActiveSupport::JSON.decode(File.read(tempfile))
-      if @parsed_json['values'].has_key?('outputs')
+      if @parsed_json['values'].key?('outputs')
         @parsed_json['values']['outputs'].each do |key, output|
           @output = @version.state_version_outputs.find_by(name: key)
           if @output
@@ -57,15 +59,15 @@ class ProcessStateVersionJob
   protected
 
   def process_module(contents, path)
-    if contents.has_key?('resources')
+    if contents.key?('resources')
       contents['resources'].each do |resource|
         resource_name = resource['name']
         resource_type = resource['type']
         provider_key = "provider[\"#{resource['provider_name']}\"]"
 
-        @modules[path] = Hash.new(0) unless @modules.has_key?(path)
+        @modules[path] = Hash.new(0) unless @modules.key?(path)
         @modules[path][resource_type] += 1
-        @providers[provider_key] = Hash.new(0) unless @providers.has_key?(provider_key)
+        @providers[provider_key] = Hash.new(0) unless @providers.key?(provider_key)
         @providers[provider_key][resource_type] += 1
         # TODO: This is probably wildly inefficient
         found = false
@@ -90,7 +92,7 @@ class ProcessStateVersionJob
       end
     end
 
-    return unless contents.has_key?('child_modules')
+    return unless contents.key?('child_modules')
 
     contents['child_modules'].each do |child|
       process_module(child, "root.#{child['address'].split('.').delete_if { |x| x == 'module' }.join('.')}")

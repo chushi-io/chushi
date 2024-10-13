@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Workspace < ApplicationRecord
   acts_as_taggable_on :tags
   acts_as_taggable_tenant :organization_id

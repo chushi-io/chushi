@@ -1,10 +1,10 @@
+# frozen_string_literal: true
+
 class UserSerializer < ApplicationSerializer
   set_type 'users'
 
   attribute :email
-  attribute :username do |o|
-    o.email
-  end
+  attribute :username, &:email
   attribute :is_service_account do |_o|
     false
   end

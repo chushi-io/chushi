@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PlanSerializer < ApplicationSerializer
   singleton_class.include Rails.application.routes.url_helpers
 

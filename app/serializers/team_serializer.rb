@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TeamSerializer < ApplicationSerializer
   set_type 'teams'
 
@@ -13,7 +15,5 @@ class TeamSerializer < ApplicationSerializer
     {}
   end
 
-  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name do |object|
-    object.organization
-  end
+  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
 end

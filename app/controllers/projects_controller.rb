@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProjectsController < AuthenticatedController
   before_action :load_project, only: %i[edit show update destroy]
 

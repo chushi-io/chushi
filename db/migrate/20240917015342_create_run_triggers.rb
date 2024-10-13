@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateRunTriggers < ActiveRecord::Migration[7.1]
   def change
     create_table :run_triggers, id: :uuid do |t|

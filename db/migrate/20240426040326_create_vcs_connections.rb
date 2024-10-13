@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateVcsConnections < ActiveRecord::Migration[7.1]
   def change
     create_table :vcs_connections, id: :uuid  do |t|

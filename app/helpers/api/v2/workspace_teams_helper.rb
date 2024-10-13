@@ -1,2 +1,8 @@
-module Api::V2::WorkspaceTeamsHelper
+# frozen_string_literal: true
+
+module Api
+  module V2
+    module WorkspaceTeamsHelper
+    end
+  end
 end

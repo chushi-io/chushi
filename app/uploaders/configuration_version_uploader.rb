@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ConfigurationVersionUploader < CarrierWave::Uploader::Base
   storage :fog
 

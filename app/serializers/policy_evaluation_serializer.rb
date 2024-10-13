@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicyEvaluationSerializer < ApplicationSerializer
   set_type 'policy-evaluations'
 
@@ -9,7 +11,5 @@ class PolicyEvaluationSerializer < ApplicationSerializer
   attribute :created_at
   attribute :updated_at
 
-  belongs_to :policy_attachable, serializer: TaskStageSerializer, id_method_name: :external_id do |object|
-    object.task_stage
-  end
+  belongs_to :policy_attachable, serializer: TaskStageSerializer, id_method_name: :external_id, &:task_stage
 end

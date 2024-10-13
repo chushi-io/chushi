@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RegistryModuleSerializer < ApplicationSerializer
   set_type 'registry-modules'
 
@@ -21,7 +23,5 @@ class RegistryModuleSerializer < ApplicationSerializer
     {}
   end
 
-  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name do |object|
-    object.organization
-  end
+  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
 end

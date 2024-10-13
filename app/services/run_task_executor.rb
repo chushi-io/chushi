@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunTaskExecutor < ApplicationService
   include Rails.application.routes.url_helpers
   attr_reader :task_result
@@ -45,7 +47,7 @@ class RunTaskExecutor < ApplicationService
 
     return if response.code === '200'
 
-    raise StandardError.new 'Run task request failed'
+    raise StandardError, 'Run task request failed'
   end
 
   class << self

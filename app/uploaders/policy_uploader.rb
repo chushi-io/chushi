@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicyUploader < CarrierWave::Uploader::Base
   storage :fog
 

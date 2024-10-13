@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rubygems/package'
 require 'open-uri'
 
@@ -28,18 +30,18 @@ class GenerateConfigurationVersionJob
     # If we've already processed this configuration version
     # just go ahead and ignore
     if @run.configuration_version.archive.attached?
-      puts 'Run already has configuration version attached'
+      Rails.logger.debug 'Run already has configuration version attached'
       return
     end
 
     # If we've previously archived this configuration version,
     # we don't want to recreate it
     if @run.configuration_version.status == 'archived'
-      puts 'Configuration version has already been archived'
+      Rails.logger.debug 'Configuration version has already been archived'
       return
     end
 
-    puts 'Fetching the configuration version'
+    Rails.logger.debug 'Fetching the configuration version'
     @run.update(status: 'fetching')
 
     path = SecureRandom.hex
@@ -73,8 +75,8 @@ class GenerateConfigurationVersionJob
         @run.update(status: 'fetching_completed')
         RunStage::FetchingCompletedJob.perform_async(@run.id)
       ensure
-        FileUtils.remove_file(archive_name) if File.exist?(archive_name)
-        FileUtils.remove_dir(path) if File.exist?(path)
+        FileUtils.rm_f(archive_name)
+        FileUtils.rm_rf(path)
       end
     else
       priv_key = OpenSSL::PKey::RSA.new(File.read('private_key.pem'))
@@ -105,7 +107,7 @@ class GenerateConfigurationVersionJob
       @run.update(status: 'fetching_completed')
     end
 
-    puts 'Configuration version completed'
+    Rails.logger.debug 'Configuration version completed'
     @run.update(status: 'fetching_completed')
   end
 end

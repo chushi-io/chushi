@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DiscoveryController < ApplicationController
   def show
     case params[:id]

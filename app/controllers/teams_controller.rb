@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TeamsController < AuthenticatedController
   before_action :load_team, only: %i[edit show update destroy]
 

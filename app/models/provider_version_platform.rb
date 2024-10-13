@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProviderVersionPlatform < ApplicationRecord
   belongs_to :provider_version
 

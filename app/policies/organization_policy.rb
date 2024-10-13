@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrganizationPolicy < ApplicationPolicy
   # Users that are members of an organization are expected
   # to be view a fair amount of data
@@ -5,7 +7,7 @@ class OrganizationPolicy < ApplicationPolicy
   # - Projects (that aren't "secret")
   def read_organization?
     (agent.present? && agent.organization_id == record.id) ||
-      (user.present? && user.organizations.map { |org| org.id }.include?(record.id)) ||
+      (user.present? && user.organizations.map(&:id).include?(record.id)) ||
       (organization.present? && organization.id == record.id)
   end
 

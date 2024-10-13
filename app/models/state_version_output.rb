@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StateVersionOutput < ApplicationRecord
   belongs_to :state_version
   include Vault::EncryptedModel

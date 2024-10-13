@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ChangePlanColumnsToInt < ActiveRecord::Migration[7.1]
   def change
     change_column :plans, :resource_additions, :integer, using: '0'

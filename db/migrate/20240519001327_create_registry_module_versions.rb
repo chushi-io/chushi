@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateRegistryModuleVersions < ActiveRecord::Migration[7.1]
   def change
     create_table :registry_module_versions, id: :uuid do |t|

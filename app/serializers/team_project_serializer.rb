@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TeamProjectSerializer < ApplicationSerializer
   set_type 'team-projects'
 
@@ -22,11 +24,7 @@ class TeamProjectSerializer < ApplicationSerializer
     }
   end
 
-  belongs_to :project, serializer: ProjectSerializer, id_method_name: :external_id do |object|
-    object.project
-  end
+  belongs_to :project, serializer: ProjectSerializer, id_method_name: :external_id, &:project
 
-  belongs_to :team, serializer: TeamSerializer, id_method_name: :external_id do |object|
-    object.team
-  end
+  belongs_to :team, serializer: TeamSerializer, id_method_name: :external_id, &:team
 end

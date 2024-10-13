@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PoliciesController < AuthenticatedController
   before_action :load_policy, only: %i[edit show update destroy]
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RegistryModuleVersion < ApplicationRecord
   belongs_to :registry_module
 

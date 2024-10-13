@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UseEncryptedFields < ActiveRecord::Migration[7.1]
   def change
     add_column :variables, :value_encrypted, :string

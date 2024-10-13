@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateNotificationConfigurations < ActiveRecord::Migration[7.1]
   def change
     create_table :notification_configurations, id: :uuid do |t|

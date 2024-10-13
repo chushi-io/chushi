@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RunsController < AuthenticatedController
   before_action :set_workspace
   before_action lambda {

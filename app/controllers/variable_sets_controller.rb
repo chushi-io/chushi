@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class VariableSetsController < AuthenticatedController
   before_action :load_variable_set, only: %i[show edit update destroy]
   before_action lambda {

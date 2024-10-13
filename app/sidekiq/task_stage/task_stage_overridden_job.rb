@@ -1,5 +1,9 @@
-class TaskStage::TaskStageOverriddenJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  def perform(*args); end
+module TaskStage
+  class TaskStageOverriddenJob
+    include Sidekiq::Job
+
+    def perform(*args); end
+  end
 end
