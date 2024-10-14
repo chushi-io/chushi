@@ -3,6 +3,8 @@ require 'rails_helper'
 describe Api::V2::OrganizationsController, type: :request do
   organization = Fabricate(:organization)
   token = Fabricate(:access_token, token_authable: organization)
+  organization.teams.create(name: "owners")
+
   headers = {
     "Authorization": "Bearer #{token.external_id.delete_prefix("at-")}.#{token.token}",
     "Content-Type": "application/json"
@@ -34,11 +36,11 @@ describe Api::V2::OrganizationsController, type: :request do
 
     it 'fails for non-member' do
       user = Fabricate(:user)
-      user_token = Fabricate(:access_token, token_authable: organization)
+      user_token = Fabricate(:access_token, token_authable: user)
       get api_v2_organization_path(organization.name), headers: {
         "Authorization": "Bearer #{user_token.external_id.delete_prefix("at-")}.#{user_token.token}"
       }
-      expect(response).to have_http_status :ok
+      expect(response).to have_http_status :not_found
     end
   end
 
@@ -76,5 +78,27 @@ describe Api::V2::OrganizationsController, type: :request do
     end
 
     # TODO: Verify that non-owners can't update the organization
+    it 'disallows updates from non-owners' do
+      # Create the user and add to the organization
+      user = Fabricate(:user)
+      user_token = Fabricate(:access_token, token_authable: user)
+      OrganizationMembership.create(user_id: user.id, organization_id: organization.id)
+      team = Fabricate(:team, organization_id: organization.id)
+      team.users << user
+      team.save!
+
+      patch api_v2_organization_path(organization.name), params: {
+        "data" => {
+          "type" => "organizations",
+          "id" => organization.name,
+          "attributes" => {
+            "default-execution-mode" => "local"
+          }
+        }
+      }.to_json, headers: {
+        "Authorization": "Bearer #{user_token.external_id.delete_prefix("at-")}.#{user_token.token}"
+      }
+      expect(response).to have_http_status :not_found
+    end
   end
 end

@@ -61,11 +61,11 @@ module Api
                         .where(name: params[:organization_id])
                         .first!
         authorize! @organization, to: :is_admin?
-        begin
-          @organization.update(org_params)
+        render json: nil, status: :bad_request and return if org_params["name"]
+        if @organization.update(org_params)
           render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
-        rescue ActiveRecord::ReadonlyAttributeError => exception
-          render json: nil, status: :bad_request
+        else
+          render json: @organization.errors.full_messages, status: :bad_request
         end
       end
 
@@ -91,6 +91,7 @@ module Api
       def org_params
         map_params([
                      :name,
+                     :email,
                      'default-execution-mode'
                    ])
       end

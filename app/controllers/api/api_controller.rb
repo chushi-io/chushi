@@ -18,6 +18,12 @@ module Api
 
     verify_authorized
 
+    rescue_from ActionPolicy::Unauthorized do |ex|
+      p "details: #{ex.result.reasons.details}"
+      p "full messages: #{ex.result.reasons.full_messages}"
+      render json: {}, status: :not_found
+    end
+
     protected
 
     def set_default_response_format
