@@ -3,7 +3,7 @@
 require_relative 'boot'
 
 require 'rails/all'
-require './lib/middleware/consider_all_request_json_middleware'
+require 'lib/middleware/consider_all_request_json_middleware'
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
