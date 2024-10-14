@@ -198,12 +198,7 @@ Rails.application.routes.draw do
       end
 
       resources :vars, controller: :variables, except: [:show]
-      resources :applies do
-        member do
-          get 'logs', action: :logs
-          post 'logs', action: :upload_logs
-        end
-      end
+      resources :applies
       resources :runs, except: [:index] do
         member do
           post 'actions/discard', action: :discard, controller: :runs

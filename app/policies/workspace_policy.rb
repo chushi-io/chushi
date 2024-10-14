@@ -47,6 +47,7 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def can_queue_apply?
+    return false unless can_access_workspace?
     true
   end
 
@@ -106,15 +107,30 @@ class WorkspacePolicy < ApplicationPolicy
 
   protected
 
-  def can_access_workspace
-    return run.workspace.id == record.id if run.present?
+  def can_access_workspace?
 
+    # If its coming from its agent, again, explicit access
     return agent.id == record.agent_pool.id if agent.present?
-
+    # If the run is executing for the current workspace, explicit access
+    return run.workspace.id == record.id if run.present?
+    # Organization tokens can manage all workspaces
     return organization.id == record.organization_id if organization.present?
 
-    return user.organizations.map(&:id).include? record.organization_id if user.present?
+    if user.present?
+      # Check if user in "owners" organization team
+      team = record.organization.teams.find_by(name: 'owners')
+      return true if user.teams.map(&:id).include?(team.id)
 
+      # Lastly, check if the user is in a team attached to the current
+      # Note: This only qualifies read permissions
+      record.teams.each do |wsteam|
+        if wsteam.users.map(&:id).include?(user.id)
+          return true
+        end
+      end
+    end
+
+    # By default, deny access
     false
   end
 end

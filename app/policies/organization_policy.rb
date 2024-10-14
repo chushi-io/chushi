@@ -141,10 +141,7 @@ class OrganizationPolicy < ApplicationPolicy
   # Check if the authenticated user is present in the owners team
   def in_owners_team
     return false if user.blank?
-
-    Rails.logger.debug record.teams
     team = record.teams.find_by(name: 'owners')
-    Rails.logger.debug team.inspect
     user.teams.map(&:id).include?(team.id)
   end
 

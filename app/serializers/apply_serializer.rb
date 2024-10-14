@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ApplySerializer < ApplicationSerializer
-  singleton_class.include Rails.application.routes.url_helpers
-
   set_type :applies
 
   attribute :execution_details do |object|
@@ -12,7 +10,7 @@ class ApplySerializer < ApplicationSerializer
   end
 
   attribute :log_read_url do |object|
-    logs_api_v1_apply_url(object, host: Chushi.domain, protocol: 'https')
+    encrypt_upload_url({ id: object.id, class: object.class.name, file: 'logs' })
   end
 
   attribute :status

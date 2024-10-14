@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "execution-mode": {
+              "type": "object",
+              "properties": {
+                "mode": { "type": "string" }
+              }
+            },
+            "status": { "type": "string" },
+            "status-timestamps": { "type": "object" },
+            "log-read-url": { "type": "string" },
+            "resource-additions": { "type": "number" },
+            "resource-changes": { "type": "number" },
+            "resource-destructions": { "type": "number" },
+            "resource-imports": { "type": "number" }
+          },
+          "required": ["status", "log-read-url"]
+        }
+      },
+      "required": ["id", "type", "attributes"]
+    }
+  },
+  "required": ["data"]
+}

@@ -14,10 +14,8 @@ describe Api::V2::OrganizationsController do
 
     it 'responds with list of users organizations' do
       # Fabricate another organization we *dont* give the user access to
-      Fabricate(:organization)
-      user = Fabricate(:user)
-      user_token = Fabricate(:access_token, token_authable: user)
-      OrganizationMembership.create(user_id: user.id, organization_id: organization.id)
+      other_org, other_org_token = seed_org
+      user, user_token = seed_user_with_teams(other_org.id)
       get api_v2_organizations_path, headers: auth_headers(user_token)
       expect(response).to have_http_status :ok
       expect(response.body).to match_response_schema('organizations', strict: true)
@@ -90,12 +88,8 @@ describe Api::V2::OrganizationsController do
     # TODO: Verify that non-owners can't update the organization
     it 'disallows updates from non-owners' do
       # Create the user and add to the organization
-      user = Fabricate(:user)
-      user_token = Fabricate(:access_token, token_authable: user)
-      OrganizationMembership.create(user_id: user.id, organization_id: organization.id)
       team = Fabricate(:team, organization_id: organization.id)
-      team.users << user
-      team.save!
+      user, user_token = seed_user_with_teams(organization.id, [team])
 
       patch api_v2_organization_path(organization.name), params: {
         'data' => {
