@@ -3,12 +3,11 @@
 module Api
   module V2
     class OrganizationsController < Api::ApiController
-
       skip_verify_authorized only: [:index]
       def entitlements
         @organization = Organization
-                          .where(name: params[:organization_id])
-                          .first!
+                        .where(name: params[:organization_id])
+                        .first!
         authorize! @organization, to: :read?
         render json: {
           data: {
@@ -52,6 +51,7 @@ module Api
 
       def index
         render json: nil, status: :not_found and return unless is_user
+
         @organizations = current_user.organizations
         render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
       end
@@ -69,7 +69,8 @@ module Api
                         .where(name: params[:organization_id])
                         .first!
         authorize! @organization, to: :is_admin?
-        render json: nil, status: :bad_request and return if org_params["name"]
+        render json: nil, status: :bad_request and return if org_params['name']
+
         if @organization.update(org_params)
           render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
         else

@@ -133,16 +133,18 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   protected
+
   def is_organization_token
     organization.present? && organization.id == record.id
   end
 
   # Check if the authenticated user is present in the owners team
   def in_owners_team
-    return false unless user.present?
-    puts record.teams
-    team = record.teams.find_by(name: "owners")
-    puts team.inspect
+    return false if user.blank?
+
+    Rails.logger.debug record.teams
+    team = record.teams.find_by(name: 'owners')
+    Rails.logger.debug team.inspect
     user.teams.map(&:id).include?(team.id)
   end
 

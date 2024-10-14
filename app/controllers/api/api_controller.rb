@@ -21,7 +21,7 @@ module Api
     # Anytime we fail an authorization policy, we
     # simply return "not found". While not ideal,
     # this prevents identifying that a resource exists
-    rescue_from ActionPolicy::Unauthorized do |ex|
+    rescue_from ActionPolicy::Unauthorized do |_ex|
       render json: {}, status: :not_found
     end
 

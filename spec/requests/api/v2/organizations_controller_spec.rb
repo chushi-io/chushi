@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-describe Api::V2::OrganizationsController, type: :request do
+describe Api::V2::OrganizationsController do
   organization = Fabricate(:organization)
   token = Fabricate(:access_token, token_authable: organization)
-  organization.teams.create(name: "owners")
+  organization.teams.create(name: 'owners')
 
   headers = {
-    "Authorization": "Bearer #{token.external_id.delete_prefix("at-")}.#{token.token}",
-    "Content-Type": "application/json"
+    Authorization: "Bearer #{token.external_id.delete_prefix('at-')}.#{token.token}",
+    'Content-Type': 'application/json'
   }
 
   describe 'GET /api/v2/organizations' do
@@ -23,8 +25,8 @@ describe Api::V2::OrganizationsController, type: :request do
       user_token = Fabricate(:access_token, token_authable: user)
       OrganizationMembership.create(user_id: user.id, organization_id: organization.id)
       get api_v2_organizations_path, headers: {
-        "Authorization": "Bearer #{user_token.external_id.delete_prefix("at-")}.#{user_token.token}",
-        "Content-Type": "application/json"
+        Authorization: "Bearer #{user_token.external_id.delete_prefix('at-')}.#{user_token.token}",
+        'Content-Type': 'application/json'
       }
       expect(response).to have_http_status :ok
       # TODO: Ensure only 1 org responds
@@ -39,7 +41,7 @@ describe Api::V2::OrganizationsController, type: :request do
     end
 
     it 'responds with OK status' do
-      get api_v2_organization_entitlement_set_path(organization.name), headers: headers
+      get(api_v2_organization_entitlement_set_path(organization.name), headers:)
 
       expect(response).to have_http_status :ok
     end
@@ -52,7 +54,7 @@ describe Api::V2::OrganizationsController, type: :request do
     end
 
     it 'responds with OK status' do
-      get api_v2_organization_path(organization.name), headers: headers
+      get(api_v2_organization_path(organization.name), headers:)
       expect(response).to have_http_status :ok
     end
 
@@ -60,7 +62,7 @@ describe Api::V2::OrganizationsController, type: :request do
       user = Fabricate(:user)
       user_token = Fabricate(:access_token, token_authable: user)
       get api_v2_organization_path(organization.name), headers: {
-        "Authorization": "Bearer #{user_token.external_id.delete_prefix("at-")}.#{user_token.token}"
+        Authorization: "Bearer #{user_token.external_id.delete_prefix('at-')}.#{user_token.token}"
       }
       expect(response).to have_http_status :not_found
     end
@@ -73,28 +75,28 @@ describe Api::V2::OrganizationsController, type: :request do
     end
 
     it 'responds with OK status when updating execution mode' do
-      patch api_v2_organization_path(organization.name), params: {
-        "data" => {
-          "type" => "organizations",
-          "id" => organization.name,
-          "attributes" => {
-            "default-execution-mode" => "local"
+      patch(api_v2_organization_path(organization.name), params: {
+        'data' => {
+          'type' => 'organizations',
+          'id' => organization.name,
+          'attributes' => {
+            'default-execution-mode' => 'local'
           }
         }
-      }.to_json, headers: headers
+      }.to_json, headers:)
       expect(response).to have_http_status :ok
     end
 
     it 'disallows updating organization name' do
-      patch api_v2_organization_path(organization.name), params: {
-        "data" => {
-          "type" => "organizations",
-          "id" => organization.name,
-          "attributes" => {
-            "name" => Faker::Alphanumeric.alpha(number: 10)
+      patch(api_v2_organization_path(organization.name), params: {
+        'data' => {
+          'type' => 'organizations',
+          'id' => organization.name,
+          'attributes' => {
+            'name' => Faker::Alphanumeric.alpha(number: 10)
           }
         }
-      }.to_json, headers: headers
+      }.to_json, headers:)
       expect(response).to have_http_status :bad_request
     end
 
@@ -109,15 +111,15 @@ describe Api::V2::OrganizationsController, type: :request do
       team.save!
 
       patch api_v2_organization_path(organization.name), params: {
-        "data" => {
-          "type" => "organizations",
-          "id" => organization.name,
-          "attributes" => {
-            "default-execution-mode" => "local"
+        'data' => {
+          'type' => 'organizations',
+          'id' => organization.name,
+          'attributes' => {
+            'default-execution-mode' => 'local'
           }
         }
       }.to_json, headers: {
-        "Authorization": "Bearer #{user_token.external_id.delete_prefix("at-")}.#{user_token.token}"
+        Authorization: "Bearer #{user_token.external_id.delete_prefix('at-')}.#{user_token.token}"
       }
       expect(response).to have_http_status :not_found
     end

@@ -1,5 +1,7 @@
 require:
   - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rspec_rails
 
 AllCops:
   Exclude:
@@ -13,6 +15,8 @@ AllCops:
 Style/Documentation:
   Enabled: false
 
+RSpec/ExampleLength:
+  Enabled: false
 # The following should be enabled, we'll want
 # to fix these afterwards
 Layout/LineLength:
