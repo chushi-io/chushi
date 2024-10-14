@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ConsiderAllRequestJsonMiddleware
+class Middleware::ConsiderAllRequestJsonMiddleware
   def initialize(app)
     @app = app
   end
