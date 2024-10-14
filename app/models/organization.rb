@@ -6,6 +6,8 @@ class Organization < ApplicationRecord
   acts_as_taggable_on :tags
   acts_as_taggable_tenant :id
 
+  attr_readonly :name
+
   has_many :workspaces
 
   has_many :agent_pools

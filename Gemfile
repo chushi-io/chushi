@@ -51,6 +51,8 @@ end
 
 group :test do
   gem 'capybara'
+  gem 'json_matchers'
+  gem 'rspec-rails'
   gem 'selenium-webdriver'
 end
 
@@ -74,4 +76,9 @@ gem 'fog-core', '~> 2.4'
 
 gem 'rubocop', '~> 1.66'
 
-gem 'rubocop-rails', '~> 2.26'
+gem 'rubocop-rails', require: false
+gem 'rubocop-rspec', require: false
+gem 'rubocop-rspec_rails', require: false
+
+gem 'fabrication'
+gem 'faker', '~> 3.4'

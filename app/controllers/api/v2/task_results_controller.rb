@@ -10,7 +10,7 @@ module Api
         # TODO: This endpoint not currently authenticated
         @task_result = TaskResult.find_by(external_id: params[:task_result_id])
         if @task_result.update(task_result_params)
-          TaskResult::TaskResultCompletedJob.perform_async(@task_result.id)
+          TaskResultCompletedJob.perform_async(@task_result.id)
           render json: ::TaskResultSerializer.new(@task_result, {}).serializable_hash
         else
           render json: @task_result.errors.full_messages, status: :bad_request

@@ -3,11 +3,15 @@
 module Api
   module V2
     class OrganizationsController < Api::ApiController
+      skip_verify_authorized only: [:index]
       def entitlements
-        authorize!
+        @organization = Organization
+                        .where(name: params[:organization_id])
+                        .first!
+        authorize! @organization, to: :read?
         render json: {
           data: {
-            id: params[:organization_id],
+            id: @organization.name,
             type: 'entitlement-sets',
             attributes: {
               agents: true,
@@ -45,6 +49,13 @@ module Api
         }
       end
 
+      def index
+        render json: nil, status: :not_found and return unless is_user
+
+        @organizations = current_user.organizations
+        render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+      end
+
       def show
         @organization = Organization
                         .where(name: params[:organization_id])
@@ -58,8 +69,13 @@ module Api
                         .where(name: params[:organization_id])
                         .first!
         authorize! @organization, to: :is_admin?
-        @organization.update!(org_params)
-        render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+        render json: nil, status: :bad_request and return if org_params['name']
+
+        if @organization.update(org_params)
+          render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+        else
+          render json: @organization.errors.full_messages, status: :bad_request
+        end
       end
 
       def queue
@@ -84,6 +100,7 @@ module Api
       def org_params
         map_params([
                      :name,
+                     :email,
                      'default-execution-mode'
                    ])
       end
