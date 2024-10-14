@@ -3,12 +3,11 @@
 require 'vault/rails'
 
 Vault::Rails.configure do |vault|
+  vault.application = ENV.fetch('VAULT_APP', 'chushi')
   if ENV.key?('CI')
     vault.enabled = false
   else
     vault.enabled = Rails.env.production?
-    vault.application = ENV.fetch('VAULT_APP', 'chushi')
-
     # Set up approle configuration
     if Rails.env.production?
       vault.namespace = ENV.fetch('VAULT_NAMESPACE', 'admin')
