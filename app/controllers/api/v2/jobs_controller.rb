@@ -54,7 +54,7 @@ module Api
         authorize! @job
         @job.update(job_params)
         Rails.logger.debug { "Job status: #{@job.status}" }
-        Job::JobFinishedJob.perform_async(@job.id) if %w[completed errored].include?(@job.status)
+        JobFinishedJob.perform_async(@job.id) if %w[completed errored].include?(@job.status)
         render json: ::JobSerializer.new(@job, {}).serializable_hash
       end
 
