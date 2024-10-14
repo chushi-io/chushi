@@ -7,15 +7,9 @@ describe Api::V2::OrganizationsController do
   token = Fabricate(:access_token, token_authable: organization)
   organization.teams.create(name: 'owners')
 
-  headers = {
-    Authorization: "Bearer #{token.external_id.delete_prefix('at-')}.#{token.token}",
-    'Content-Type': 'application/json'
-  }
-
   describe 'GET /api/v2/organizations' do
     it 'responds with 403 when not authenticated' do
-      get api_v2_organizations_path
-      expect(response).to have_http_status :forbidden
+      verify_unauthenticated('get', api_v2_organizations_path)
     end
 
     it 'responds with list of users organizations' do
@@ -24,57 +18,49 @@ describe Api::V2::OrganizationsController do
       user = Fabricate(:user)
       user_token = Fabricate(:access_token, token_authable: user)
       OrganizationMembership.create(user_id: user.id, organization_id: organization.id)
-      get api_v2_organizations_path, headers: {
-        Authorization: "Bearer #{user_token.external_id.delete_prefix('at-')}.#{user_token.token}",
-        'Content-Type': 'application/json'
-      }
+      get api_v2_organizations_path, headers: auth_headers(user_token)
       expect(response).to have_http_status :ok
-      # TODO: Ensure only 1 org responds
-      puts response.body
+      expect(response.body).to match_response_schema('organizations', strict: true)
     end
   end
 
   describe 'GET /api/v2/organizations/:id/entitlement-set' do
     it 'responds with 403 when not authenticated' do
-      get api_v2_organization_entitlement_set_path(organization.name)
-      expect(response).to have_http_status :forbidden
+      verify_unauthenticated('get', api_v2_organization_entitlement_set_path(organization.name))
     end
 
     it 'responds with OK status' do
-      get(api_v2_organization_entitlement_set_path(organization.name), headers:)
-
+      get(api_v2_organization_entitlement_set_path(organization.name), headers: auth_headers(token))
       expect(response).to have_http_status :ok
+      # expect(response.body).to match_response_schema('organization', strict: true)
     end
   end
 
   describe 'GET /api/v2/organizations/:id' do
     it 'responds with 403 when not authenticated' do
-      get api_v2_organization_path(organization.name)
-      expect(response).to have_http_status :forbidden
+      verify_unauthenticated('get', api_v2_organization_path(organization.name))
     end
 
     it 'responds with OK status' do
-      get(api_v2_organization_path(organization.name), headers:)
+      get(api_v2_organization_path(organization.name), headers: auth_headers(token))
       expect(response).to have_http_status :ok
+      expect(response.body).to match_response_schema('organization', strict: true)
     end
 
     it 'fails for non-member' do
       user = Fabricate(:user)
       user_token = Fabricate(:access_token, token_authable: user)
-      get api_v2_organization_path(organization.name), headers: {
-        Authorization: "Bearer #{user_token.external_id.delete_prefix('at-')}.#{user_token.token}"
-      }
+      get api_v2_organization_path(organization.name), headers: auth_headers(user_token)
       expect(response).to have_http_status :not_found
     end
   end
 
   describe 'PUT /api/v2/organizations/:id' do
     it 'responds with 403 when not authenticated' do
-      patch api_v2_organization_path(organization.name)
-      expect(response).to have_http_status :forbidden
+      verify_unauthenticated('patch', api_v2_organization_path(organization.name))
     end
 
-    it 'responds with OK status when updating execution mode' do
+    it 'updates default execution mode' do
       patch(api_v2_organization_path(organization.name), params: {
         'data' => {
           'type' => 'organizations',
@@ -83,8 +69,9 @@ describe Api::V2::OrganizationsController do
             'default-execution-mode' => 'local'
           }
         }
-      }.to_json, headers:)
+      }.to_json, headers: auth_headers(token))
       expect(response).to have_http_status :ok
+      expect(response.body).to match_response_schema('organization', strict: true)
     end
 
     it 'disallows updating organization name' do
@@ -96,7 +83,7 @@ describe Api::V2::OrganizationsController do
             'name' => Faker::Alphanumeric.alpha(number: 10)
           }
         }
-      }.to_json, headers:)
+      }.to_json, headers: auth_headers(token))
       expect(response).to have_http_status :bad_request
     end
 
@@ -118,9 +105,7 @@ describe Api::V2::OrganizationsController do
             'default-execution-mode' => 'local'
           }
         }
-      }.to_json, headers: {
-        Authorization: "Bearer #{user_token.external_id.delete_prefix('at-')}.#{user_token.token}"
-      }
+      }.to_json, headers: auth_headers(user_token)
       expect(response).to have_http_status :not_found
     end
   end

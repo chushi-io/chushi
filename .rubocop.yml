@@ -17,8 +17,13 @@ Style/Documentation:
 
 RSpec/ExampleLength:
   Enabled: false
+
 # The following should be enabled, we'll want
 # to fix these afterwards
+RSpec/MultipleExpectations:
+  Enabled: false
+RSpec/NoExpectationExample:
+  Enabled: false
 Layout/LineLength:
   Enabled: false
 

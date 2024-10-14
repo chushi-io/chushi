@@ -15,6 +15,13 @@
 # it.
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+require 'json_matchers/rspec'
+
+JsonMatchers.schema_root = 'spec/support/api/schemas/v2'
+
+require './spec/support/unauthenticated_check'
+require './spec/support/token_authentication'
+
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
@@ -91,4 +98,6 @@ RSpec.configure do |config|
   #   # test failures related to randomization by passing the same `--seed` value
   #   # as the one that triggered the failure.
   #   Kernel.srand config.seed
+  config.include UnauthenticatedCheck
+  config.include TokenAuthentication
 end

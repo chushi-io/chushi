@@ -17,14 +17,12 @@
             "attributes": {
               "type": "object",
               "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "author": {
-                  "type": "string"
-                }
+                "name": { "type": "string" },
+                "created-at": { "type": "string" },
+                "organization-scoped": { "type": "boolean" },
+                "agent-count": { "type": "number" }
               },
-              "required": ["title", "author"]
+              "required": ["name", "created-at", "organization-scoped", "agent-count"]
             }
           },
           "required": ["id", "type", "attributes"]

@@ -5,6 +5,8 @@ module Api
     include JSONAPI::Deserialization
     include ActionPolicy::Controller
 
+    before_action :set_default_response_format
+
     before_action :verify_access_token
 
     authorize :user, through: :current_user
@@ -13,8 +15,6 @@ module Api
     authorize :run, through: :current_run
     authorize :team, through: :current_team
     authorize :task, through: :current_task
-
-    before_action :set_default_response_format
 
     verify_authorized
 
