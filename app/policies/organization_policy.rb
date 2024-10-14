@@ -80,7 +80,7 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   def can_update_agent_pools?
-    write_organization?
+    is_organization_token || in_owners_team
   end
 
   def can_manage_tags?

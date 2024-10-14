@@ -10,5 +10,6 @@ class OrganizationSerializer < ApplicationSerializer
   attribute :collaborator_auth_policy do |_o|
     'password'
   end
+  attribute :name
   attribute :default_execution_mode
 end

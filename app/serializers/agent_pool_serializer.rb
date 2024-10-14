@@ -6,6 +6,8 @@ class AgentPoolSerializer < ApplicationSerializer
   attribute :name
   attribute :created_at
   attribute :organization_scoped
-  # attribute :agent_count do |o| 0 end
+  attribute :agent_count do |_o|
+    0
+  end
   belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
 end

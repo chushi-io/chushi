@@ -5,15 +5,15 @@ module Api
     class AgentsController < Api::ApiController
       def index
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :read
+        authorize! @org, to: :read?
 
-        @agent_pools = @org.agents
-        render ::AgentPoolSerializer.new(@agent_pools, {}).serializable_hash
+        @agent_pools = @org.agent_pools
+        render json: ::AgentPoolSerializer.new(@agent_pools, {}).serializable_hash
       end
 
       def show
         @agent = AgentPool.find_by(external_id: params[:id])
-        authorize! @agent.organization, to: :read
+        authorize! @agent.organization, to: :read?
         render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
       end
 
@@ -23,7 +23,7 @@ module Api
 
         @agent_pool = @org.agent_pools.new(agent_params)
         if @agent_pool.save
-          render json: ::AgentPoolSerializer.new(@agent_pool, {}).serializable_hash
+          render json: ::AgentPoolSerializer.new(@agent_pool, {}).serializable_hash, status: :created
         else
           render json: @agent_pool.errors.full_messages, status: :bad_request
         end
@@ -31,7 +31,7 @@ module Api
 
       def update
         @agent = AgentPool.find_by(external_id: params[:id])
-        authorize! @agent.organization, to: :update_agent_pools?
+        authorize! @agent.organization, to: :can_update_agent_pools?
         if @agent.update(agent_params)
           render json: ::AgentPoolSerializer.new(@agent, {}).serializable_hash
         else
@@ -40,10 +40,10 @@ module Api
       end
 
       def destroy
-        @agent = Agent.find_by(external_id: params[:id])
-        authorize! @agent.organization, to: :update_agent_pools?
+        @agent = AgentPool.find_by(external_id: params[:id])
+        authorize! @agent.organization, to: :can_update_agent_pools?
         if @agent.delete
-          render status: :no_content
+          head :no_content
         else
           render status: :internal_server_error
         end

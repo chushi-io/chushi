@@ -5,6 +5,8 @@ module Api
     include JSONAPI::Deserialization
     include ActionPolicy::Controller
 
+    prepend_before_action :set_default_response_format
+
     before_action :verify_access_token
 
     authorize :user, through: :current_user
@@ -13,8 +15,6 @@ module Api
     authorize :run, through: :current_run
     authorize :team, through: :current_team
     authorize :task, through: :current_task
-
-    before_action :set_default_response_format
 
     verify_authorized
 
@@ -29,6 +29,10 @@ module Api
 
     def set_default_response_format
       request.format = :json
+      Rails.logger.debug request.headers['Content-Type']
+      return if request.headers['Content-Type'].present?
+
+      request.headers['Content-Type'] = 'application/json'
     end
 
     def authenticated

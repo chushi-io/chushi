@@ -53,7 +53,7 @@ module Api
         render json: nil, status: :not_found and return unless is_user
 
         @organizations = current_user.organizations
-        render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+        render json: ::OrganizationSerializer.new(@organizations, {}).serializable_hash
       end
 
       def show

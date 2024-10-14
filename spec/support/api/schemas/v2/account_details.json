@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "username": { "type": "string" },
+            "email": { "type": "string" },
+            "is-service-account": { "type": "boolean" },
+            "auth-method": { "type": "string" },
+            "avatar-url": { "type": "string" },
+            "permissions": { "type": "object" }
+          },
+          "required": ["username", "email", "is-service-account", "avatar-url"]
+        }
+      },
+      "required": ["id", "type", "attributes"]
+    }
+  },
+  "required": ["data"]
+}
