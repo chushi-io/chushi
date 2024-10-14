@@ -5,7 +5,7 @@ module Api
     include JSONAPI::Deserialization
     include ActionPolicy::Controller
 
-    before_action :set_default_response_format
+    prepend_before_action :set_default_response_format
 
     before_action :verify_access_token
 
@@ -29,6 +29,10 @@ module Api
 
     def set_default_response_format
       request.format = :json
+      puts request.headers['Content-Type']
+      unless request.headers['Content-Type'].present?
+        request.headers['Content-Type'] = 'application/json'
+      end
     end
 
     def authenticated

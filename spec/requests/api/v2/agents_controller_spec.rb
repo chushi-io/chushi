@@ -63,7 +63,7 @@ describe Api::V2::AgentsController do
               'organization-scoped': false
             }
           }
-        }.to_json, headers: auth_headers(org_token)
+        }.to_json, headers: auth_headers(org_token).merge(common_headers)
         expect(response).to have_http_status :created
       end
     end
@@ -79,7 +79,7 @@ describe Api::V2::AgentsController do
               'organization-scoped': false
             }
           }
-        }.to_json, headers: auth_headers(user_token)
+        }.to_json, headers: auth_headers(user_token).merge(common_headers)
         expect(response).to have_http_status :created
         expect(response).to match_response_schema('agent_pool', strict: true)
       end

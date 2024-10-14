@@ -21,6 +21,7 @@ JsonMatchers.schema_root = 'spec/support/api/schemas/v2'
 
 require './spec/support/unauthenticated_check'
 require './spec/support/token_authentication'
+require './spec/support/api_helpers'
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -100,4 +101,5 @@ RSpec.configure do |config|
   #   Kernel.srand config.seed
   config.include UnauthenticatedCheck
   config.include TokenAuthentication
+  config.include ApiHelpers
 end

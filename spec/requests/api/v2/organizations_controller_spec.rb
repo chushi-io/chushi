@@ -69,7 +69,7 @@ describe Api::V2::OrganizationsController do
             'default-execution-mode' => 'local'
           }
         }
-      }.to_json, headers: auth_headers(token))
+      }.to_json, headers: auth_headers(token).merge(common_headers))
       expect(response).to have_http_status :ok
       expect(response.body).to match_response_schema('organization', strict: true)
     end
