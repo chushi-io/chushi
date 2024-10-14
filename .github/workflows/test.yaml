@@ -30,13 +30,21 @@ jobs:
     - run: bundle exec rubocop
 
   api-integration-tests:
-    name: "API Integration Tests"
     runs-on: ubuntu-latest
+    name: "API Integration Tests"
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: [ '5432:5432' ]
     env:
       RAILS_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chushi_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-      - run: bundle exec rspec spec/requests
+      - run: bundle exec rails db:prepare
+      - run: bundle exec rspec spec
