@@ -18,9 +18,10 @@ module Api
 
     verify_authorized
 
+    # Anytime we fail an authorization policy, we
+    # simply return "not found". While not ideal,
+    # this prevents identifying that a resource exists
     rescue_from ActionPolicy::Unauthorized do |ex|
-      p "details: #{ex.result.reasons.details}"
-      p "full messages: #{ex.result.reasons.full_messages}"
       render json: {}, status: :not_found
     end
 

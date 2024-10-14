@@ -74,7 +74,7 @@ Rails.application.routes.draw do
       post :webhooks, action: :create, controller: 'webhooks'
       get :ping, action: :ping, controller: 'ping'
       get 'account/details', action: :show, controller: :account_details
-
+      get 'organizations', action: :index, controller: :organizations
       get 'object/:key', action: :show, controller: :storage, as: :get_storage
       put 'object/:key', action: :update, controller: :storage, as: :upload_storage
       scope '/organizations/:organization_id', as: :organization do

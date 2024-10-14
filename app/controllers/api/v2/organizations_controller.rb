@@ -3,6 +3,8 @@
 module Api
   module V2
     class OrganizationsController < Api::ApiController
+
+      skip_verify_authorized only: [:index]
       def entitlements
         @organization = Organization
                           .where(name: params[:organization_id])
@@ -46,6 +48,12 @@ module Api
             }
           }
         }
+      end
+
+      def index
+        render json: nil, status: :not_found and return unless is_user
+        @organizations = current_user.organizations
+        render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
       end
 
       def show

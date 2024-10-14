@@ -10,6 +10,28 @@ describe Api::V2::OrganizationsController, type: :request do
     "Content-Type": "application/json"
   }
 
+  describe 'GET /api/v2/organizations' do
+    it 'responds with 403 when not authenticated' do
+      get api_v2_organizations_path
+      expect(response).to have_http_status :forbidden
+    end
+
+    it 'responds with list of users organizations' do
+      # Fabricate another organization we *dont* give the user access to
+      Fabricate(:organization)
+      user = Fabricate(:user)
+      user_token = Fabricate(:access_token, token_authable: user)
+      OrganizationMembership.create(user_id: user.id, organization_id: organization.id)
+      get api_v2_organizations_path, headers: {
+        "Authorization": "Bearer #{user_token.external_id.delete_prefix("at-")}.#{user_token.token}",
+        "Content-Type": "application/json"
+      }
+      expect(response).to have_http_status :ok
+      # TODO: Ensure only 1 org responds
+      puts response.body
+    end
+  end
+
   describe 'GET /api/v2/organizations/:id/entitlement-set' do
     it 'responds with 403 when not authenticated' do
       get api_v2_organization_entitlement_set_path(organization.name)
@@ -73,7 +95,6 @@ describe Api::V2::OrganizationsController, type: :request do
           }
         }
       }.to_json, headers: headers
-      puts response.body
       expect(response).to have_http_status :bad_request
     end
 
