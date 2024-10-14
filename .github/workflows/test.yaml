@@ -40,6 +40,7 @@ jobs:
         ports: [ '5432:5432' ]
     env:
       RAILS_ENV: test
+      CI: true
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chushi_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
