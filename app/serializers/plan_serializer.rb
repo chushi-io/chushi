@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class PlanSerializer < ApplicationSerializer
-  singleton_class.include Rails.application.routes.url_helpers
-
   set_type :plans
 
   attribute :execution_details do |object|

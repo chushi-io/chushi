@@ -3,6 +3,7 @@
 class AuthenticatedController < ApplicationController
   before_action :authenticate_user!
   before_action :set_organization!
+  include ActionPolicy::Controller
   authorize :user, through: :current_user
 
   def set_organization!

@@ -2,6 +2,18 @@
 
 module UnauthenticatedCheck
   def verify_unauthenticated(method, path)
+    send_request(method, path)
+    expect(response).to have_http_status :forbidden
+  end
+
+  def verify_not_found(method, path)
+    send_request(method, path)
+    expect(response).to have_http_status :not_found
+  end
+
+  private
+
+  def send_request(method, path)
     case method
     when 'get'
       get path
@@ -16,6 +28,5 @@ module UnauthenticatedCheck
     else
       raise ArgumentError
     end
-    expect(response).to have_http_status :forbidden
   end
 end
