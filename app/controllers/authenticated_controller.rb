@@ -3,7 +3,7 @@
 class AuthenticatedController < ApplicationController
   before_action :authenticate_user!
   before_action :set_organization!
-  authorize :user, through: :current_user
+  authorize! :user, through: :current_user
 
   def set_organization!
     return unless params[:organization]
