@@ -20,6 +20,9 @@ class Workspace < ApplicationRecord
   has_many :workspace_policy_sets
   has_many :policy_sets, through: :workspace_policy_sets
 
+  has_many :workspace_teams
+  has_many :teams, through: :workspace_teams
+
   belongs_to :agent_pool, optional: true
 
   before_create -> { generate_id('ws') }

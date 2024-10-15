@@ -23,6 +23,6 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   end
 
   link :download do |object|
-    download_api_v2_configuration_version_path(object) if object.archive.present?
+    download_api_v2_configuration_version_path(object)
   end
 end

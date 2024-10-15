@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 Fabricator(:apply) do
-  execution_mode "local"
-  status "pending"
+  execution_mode 'local'
+  status 'pending'
   resource_additions 0
   resource_changes 0
   resource_destructions 0

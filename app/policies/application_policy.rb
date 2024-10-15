@@ -20,4 +20,24 @@ class ApplicationPolicy < ActionPolicy::Base
   #  def owner?
   #    record.user_id == user.id
   #  end
+  protected
+
+  def is_org_member?(organization)
+    return false if user.blank?
+
+    user.organizations.map(&:id).include?(organization.id)
+  end
+
+  def in_owners_team?(organization)
+    return false if user.blank?
+
+    team = organization.teams.find_by(name: 'owners')
+    return false if team.blank?
+
+    user.teams.map(&:id).include?(team.id)
+  end
+
+  def using_org_token?(org)
+    organization.present? && organization.id == org.id
+  end
 end

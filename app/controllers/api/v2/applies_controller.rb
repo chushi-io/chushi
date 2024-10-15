@@ -5,7 +5,7 @@ module Api
     class AppliesController < Api::ApiController
       def show
         @apply = Apply.find_by(external_id: params[:id])
-        authorize! @apply.run.workspace, to: :can_queue_apply?
+        authorize! @apply.run.workspace, to: :can_read_run?
 
         render json: ::ApplySerializer.new(@apply, {}).serializable_hash
       end

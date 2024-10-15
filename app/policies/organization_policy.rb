@@ -20,107 +20,107 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   def is_admin?
-    is_organization_token || in_owners_team
+    is_organization_token || in_owners_team?(record)
   end
 
   # Mapped permissions
   def can_destroy?
-    false
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_access_via_teams?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_create_module?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   # We only allow admin organization members
   # or the organization owner
   # to create teams
   def can_create_team?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_create_workspace?
-    true
+    is_organization_token || in_owners_team?(record) || is_org_member?(record)
   end
 
   def can_manage_users?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_subscription?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_sso?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_update_oauth?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_update_ssh_keys?
-    write_organization?
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_update_api_token?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_traverse?
-    true
+    is_organization_token || in_owners_team?(record) || is_org_member?(record)
   end
 
   def can_start_trial?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_update_agent_pools?
-    is_organization_token || in_owners_team
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_tags?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_varsets?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_read_varsets?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_public_providers?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_create_provider?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_public_modules?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_custom_providers?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_manage_run_tasks?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_read_run_tasks?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   def can_create_project?
-    true
+    is_organization_token || in_owners_team?(record)
   end
 
   # NOTE: Organization membership management is restricted to
@@ -129,20 +129,13 @@ class OrganizationPolicy < ApplicationPolicy
   # - the organization API token
   # - users or teams with one of the Team Management permissions.
   def can_manage_memberships?
-    write_organization?
+    is_organization_token || in_owners_team?(record)
   end
 
   protected
 
   def is_organization_token
     organization.present? && organization.id == record.id
-  end
-
-  # Check if the authenticated user is present in the owners team
-  def in_owners_team
-    return false if user.blank?
-    team = record.teams.find_by(name: 'owners')
-    user.teams.map(&:id).include?(team.id)
   end
 
   ## When checking what a team can perform:

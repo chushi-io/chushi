@@ -23,6 +23,10 @@ require './spec/support/unauthenticated_check'
 require './spec/support/token_authentication'
 require './spec/support/api_helpers'
 
+require 'action_policy'
+require 'action_policy/rails/controller'
+require 'action_policy/behaviour'
+
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest

@@ -5,7 +5,7 @@ module Api
     class ConfigurationVersionsController < Api::ApiController
       def show
         @version = ConfigurationVersion.find_by(external_id: params[:id])
-        authorize! @version.workspace, to: :can_access?
+        authorize! @version.workspace, to: :can_read_run?
         render json: ::ConfigurationVersionSerializer.new(@version, {}).serializable_hash
       end
 

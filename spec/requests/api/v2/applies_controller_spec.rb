@@ -4,7 +4,7 @@ require 'rails_helper'
 
 describe Api::V2::AppliesController do
   organization = Fabricate(:organization)
-  token = Fabricate(:access_token, token_authable: organization)
+  Fabricate(:access_token, token_authable: organization)
   organization.teams.create(name: 'owners')
   project = Fabricate(:project, organization_id: organization.id)
 
@@ -17,7 +17,7 @@ describe Api::V2::AppliesController do
     end
 
     context 'when using an agent token' do
-      agent = Fabricate(:agent_pool, organization_id: organization.id)
+      agent = Fabricate(:agent_pool, organization:)
       agent_token = Fabricate(:access_token, token_authable: agent)
       workspace.update!(agent_pool_id: agent.id)
 
@@ -28,17 +28,6 @@ describe Api::V2::AppliesController do
       end
     end
 
-    context 'when using an organization token' do
-
-    end
-
-    context 'when user has access to workspace' do
-
-    end
-
-    context 'when user is in "owners" group' do
-
-    end
     # Create a run
     # Create an
   end

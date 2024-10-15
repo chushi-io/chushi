@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "error": { "type": "string" },
+            "error-message": { "type":  "string"},
+            "source": { "type": "string"},
+            "speculative": {"type": "boolean"},
+            "status": {"type": "string"},
+            "status-timestamps": { "type": "object"},
+            "provisional": { "type": "boolean"}
+          },
+          "required": ["status"]
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "download": {"type": "string"}
+          },
+          "required": ["download"]
+        }
+      },
+      "required": ["id", "type", "attributes", "links"]
+    }
+  },
+  "required": ["data"]
+}
