@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "actions": {
+              "type": "object"
+            },
+            "allow-destroy-plan": { "type": ["boolean","null"]},
+            "assessments-enabled": { "type": ["boolean","null"] },
+            "auto-apply": { "type": ["boolean","null"] },
+            "auto-apply-run-trigger": { "type": ["boolean","null"] },
+            "auto-destroy-at": {"type": ["string", "null"]},
+            "auto-destroy-status": {"type": ["string", "null"]},
+            "auto-destroy-activity-duration": {"type": ["string", "null"]},
+            "inherits-project-auto-destroy": {"type": ["string", "null"]},
+            "created-at": {"type": ["string", "null"]},
+            "description": {"type": ["string", "null"]},
+            "environment": {"type": ["string", "null"]},
+            "execution-mode": {"type": ["string", "null"]},
+            "file-triggers-enabled": { "type": ["boolean","null"]},
+            "global-remote-state": { "type": ["boolean","null"] },
+            "latest-change-at": {"type": ["string", "null"]},
+            "last-assessment-result-at" : {"type": ["string", "null"]},
+            "locked": { "type": ["boolean","null"]},
+            "locked-reason": {"type": ["string", "null"]},
+            "name": {"type": ["string", "null"]},
+            "oauth-client-name": {"type": ["string", "null"]},
+            "operations": { "type": ["boolean","null"]},
+            "permissions": {
+              "type" : "object"
+            },
+            "apply-duration-average": {"type": ["number", "null"]},
+            "plan-duration-average": {"type": ["number", "null"]},
+            "policy-check-failures": {"type":  ["boolean","null"]},
+            "queue-all-runs": { "type": ["boolean","null"] },
+            "resource-count": { "type": ["number", "null"]},
+            "run-failures":  { "type": ["number", "null"]},
+            "source": {"type": ["string", "null"]},
+            "source-name": {"type": ["string", "null"]},
+            "source-url": {"type": ["string", "null"]},
+            "speculative-enabled": { "type": ["boolean","null"]},
+            "structured-run-output-enabled": { "type": ["boolean","null"]},
+            "tag-names": { "type":  "array", "items": { "type": ["string", "null"]}},
+            "terraform-version": {"type": ["string", "null"]},
+            "trigger-prefixes": { "type":  "array", "items": {"type": ["string", "null"]}},
+            "updated-at": {"type": ["string", "null"]},
+            "vcs-repo": {"type": ["string", "null"]},
+            "vcs-repo-identifier": {"type": ["string", "null"]},
+            "working-directory": {"type": ["string", "null"]},
+            "workspace-kpis-runs-count": {"type": ["number", "null"]},
+            "setting-overwrites": {
+              "execution-mode": { "type": ["boolean","null"]},
+              "agent-pool": { "type": ["boolean","null"]}
+            }
+          }
+        }
+      },
+      "required": ["id", "type", "attributes"]
+    }
+  },
+  "required": ["data"]
+}
