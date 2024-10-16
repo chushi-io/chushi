@@ -37,7 +37,9 @@ class WorkspaceSerializer < ApplicationSerializer
     true
   end
   attribute :terraform_version, &:tofu_version
-  attribute :trigger_prefixes do |o| [] end
+  attribute :trigger_prefixes do |_o|
+    []
+  end
   attribute :vcs_repo, if: proc { |record|
     record.vcs_repo_branch.present? || record.vcs_repo_identifier.present?
   } do |o|
