@@ -158,8 +158,7 @@ class WorkspacePolicy < ApplicationPolicy
 
     record.workspace_teams
           .select { |wsteam| wsteam.team.users.map(&:id).include?(user.id) }
-          .any? do |wsteam|  wsteam.scopes[scope.to_sym] == true
-    end
+          .any? { |wsteam| wsteam.scopes[scope.to_sym] == true }
   end
 
   def check_project_access?(scopes)

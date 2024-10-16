@@ -50,7 +50,7 @@ class RunSerializer < ApplicationSerializer
   attribute :refresh_only do |o|
     o.refresh_only || false
   end
-  attribute :refresh_addrs do |o|
+  attribute :refresh_addrs do |_o|
     # o.refresh_addrs || []
     []
   end

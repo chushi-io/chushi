@@ -4,6 +4,6 @@ Fabricator(:policy_set) do
   name { Faker::Alphanumeric.alpha(number: 10) }
   description { Faker::Alphanumeric.alpha(number: 10) }
   global false
-  kind "opa"
+  kind 'opa'
   overridable false
 end

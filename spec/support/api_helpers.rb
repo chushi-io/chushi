@@ -35,7 +35,7 @@ module ApiHelpers
         }
       }
     end
-    workspace = {
+    {
       'data' => {
         'type' => 'workspaces',
         'attributes' => {
@@ -44,7 +44,6 @@ module ApiHelpers
         'relationships' => relationships
       }
     }
-    workspace
   end
 
   def workspace_update_params
@@ -61,22 +60,22 @@ module ApiHelpers
 
   def base_run_params(workspace, config_version, attrs = {})
     {
-      "data": {
-        "attributes": {
-          "message": Faker::Alphanumeric.alpha(number: 20)
+      data: {
+        attributes: {
+          message: Faker::Alphanumeric.alpha(number: 20)
         }.merge(attrs),
-        "type":"runs",
-        "relationships": {
-          "workspace": {
-            "data": {
-              "type": "workspaces",
-              "id": workspace.external_id,
+        type: 'runs',
+        relationships: {
+          workspace: {
+            data: {
+              type: 'workspaces',
+              id: workspace.external_id
             }
           },
-          "configuration-version": {
-            "data": {
-              "type": "configuration-versions",
-              "id": config_version.external_id
+          'configuration-version': {
+            data: {
+              type: 'configuration-versions',
+              id: config_version.external_id
             }
           }
         }

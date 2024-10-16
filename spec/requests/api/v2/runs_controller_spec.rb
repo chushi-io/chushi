@@ -9,7 +9,7 @@ describe Api::V2::RunsController do
     organization = Fabricate(:organization)
     user = Fabricate(:user)
     team = Fabricate(:team, organization:, users: [user])
-    workspace = Fabricate(:workspace, organization:, execution_mode: "agent")
+    workspace = Fabricate(:workspace, organization:, execution_mode: 'agent')
     user_token = Fabricate(:access_token, token_authable: user)
     Fabricate(:workspace_team, team:, workspace:, organization:, access: 'admin')
     config_version = Fabricate(:configuration_version, workspace:, organization:)
@@ -26,12 +26,12 @@ describe Api::V2::RunsController do
     it 'can create a plan-only run' do
       headers = auth_headers(user_token).merge(common_headers)
       input = base_run_params(workspace, config_version, {
-        "plan-only": true
-      })
+                                'plan-only': true
+                              })
       post(api_v2_runs_path, params: input.to_json, headers:)
       expect(response).to have_http_status :created
       expect(response).to match_json_schema('run', strict: true)
-      body = jsonapi_deserialize(JSON.parse(response.body))
+      body = jsonapi_deserialize(response.parsed_body)
       expect(body['plan-only']).to be true
     end
 
@@ -43,7 +43,7 @@ describe Api::V2::RunsController do
       post(api_v2_runs_path, params: input.to_json, headers:)
       expect(response).to have_http_status :created
       expect(response).to match_json_schema('run', strict: true)
-      body = jsonapi_deserialize(JSON.parse(response.body))
+      body = jsonapi_deserialize(response.parsed_body)
       expect(body['task-stage_ids'].length).to be 1
       # expect(body['plan-only']).to be true
     end
@@ -53,7 +53,7 @@ describe Api::V2::RunsController do
       user_token = Fabricate(:access_token, token_authable: user)
       policy_set = Fabricate(:policy_set, organization:)
       Fabricate(:policy, organization:, policy_set:)
-      workspace = Fabricate(:workspace, organization:, execution_mode: "agent")
+      workspace = Fabricate(:workspace, organization:, execution_mode: 'agent')
       WorkspacePolicySet.create!(policy_set:, workspace:)
       Fabricate(:workspace_team, team:, workspace:, organization:, access: 'admin')
       headers = auth_headers(user_token).merge(common_headers)
@@ -61,7 +61,7 @@ describe Api::V2::RunsController do
       post(api_v2_runs_path, params: input.to_json, headers:)
       expect(response).to have_http_status :created
       expect(response).to match_json_schema('run', strict: true)
-      body = jsonapi_deserialize(JSON.parse(response.body))
+      body = jsonapi_deserialize(response.parsed_body)
       expect(body['task-stage_ids'].length).to be 1
     end
   end

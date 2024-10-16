@@ -44,9 +44,8 @@ class RunCreator < ApplicationService
       end
 
       task_stages.each do |stage, wstasks|
-        unless wstasks.any? || (stage == 'post_plan' && run.workspace.policy_sets.any?)
-          next
-        end
+        next unless wstasks.any? || (stage == 'post_plan' && run.workspace.policy_sets.any?)
+
         @stage = TaskStage.new(
           stage:,
           status: 'pending'
