@@ -24,4 +24,38 @@ module ApiHelpers
     end
     [user, user_token]
   end
+
+  def workspace_params(project_id = nil)
+    relationships = {}
+    unless project_id.nil?
+      relationships['project'] = {
+        'data' => {
+          'type' => 'projects',
+          'id' => project_id
+        }
+      }
+    end
+    workspace = {
+      'data' => {
+        'type' => 'workspaces',
+        'attributes' => {
+          'name' => Faker::Alphanumeric.alpha(number: 10)
+        },
+        'relationships' => relationships
+      }
+    }
+    workspace.to_json
+  end
+
+  def workspace_update_params
+    {
+      'data' => {
+        'type' => 'workspaces',
+        'attributes' => {
+          'name' => Faker::Alphanumeric.alpha(number: 10),
+          'execution-mode' => 'local'
+        }
+      }
+    }.to_json
+  end
 end
