@@ -2,6 +2,9 @@
 
 class PoliciesController < AuthenticatedController
   before_action :load_policy, only: %i[edit show update destroy]
+  before_action lambda {
+    authorize! @organization, to: :is_admin?
+  }, only: %i[new create update destroy]
 
   def index
     @policies = @organization.policies

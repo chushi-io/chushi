@@ -13,7 +13,7 @@ class ProjectsController < AuthenticatedController
 
   before_action lambda {
     authorize! @project, to: :can_destroy?
-  }
+  }, only: [:destroy]
 
   def index
     @projects = @organization.projects
@@ -28,7 +28,6 @@ class ProjectsController < AuthenticatedController
   def edit; end
 
   def create
-    authorize! @organization, to: :can_create_project?
     @project = @organization.projects.new(project_params)
     if @project.save
       redirect_to project_path(@organization.name, @project.external_id)
@@ -40,7 +39,6 @@ class ProjectsController < AuthenticatedController
   def update; end
 
   def destroy
-    authorize! @project, to: :can_destroy?
     if @project.destroy
       redirect_to projects_path(@organization.name)
     else

@@ -17,8 +17,6 @@ class OrganizationsController < AuthenticatedController
   end
 
   def create
-    authorize! current_user, to: :can_create_organizations?
-
     @organization = Organization.new(organization_params)
     # Attach the user to the organization
     @organization.users << current_user
@@ -27,7 +25,7 @@ class OrganizationsController < AuthenticatedController
     @owner_team = Team.new(name: 'owners', visibility: 'organization')
     @owner_team.users << current_user
     @organization.teams << @owner_team
-    @organization.projects << Project.new(name: 'Default Project')
+    @organization.projects << Project.new(name: 'Default Project', is_default: true)
 
     if @organization.save
       redirect_to @organization

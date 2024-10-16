@@ -1,12 +1,19 @@
 # frozen_string_literal: true
 
 class WorkspacesController < AuthenticatedController
+  before_action :load_workspace, except: %i[index new]
+  before_action lambda {
+    authorize! @organization, to: :read?
+  }, only: %i[index]
+
+  before_action -> { authorize! @workspace, to: :can_update }, only: %i[update]
+  before_action -> { authorize! @workspace, to: :can_destroy }, only: %i[destroy]
+
   def index
     @workspaces = @organization.workspaces
   end
 
   def show
-    @workspace = @organization.workspaces.find_by(external_id: params[:id])
     @runs = @workspace.runs.order('created_at desc').limit(10)
   end
 
@@ -55,5 +62,9 @@ class WorkspacesController < AuthenticatedController
       :working_directory,
       :source
     )
+  end
+
+  def load_workspace
+    @workspace = @organization.workspaces.find_by(external_id: params[:id])
   end
 end
