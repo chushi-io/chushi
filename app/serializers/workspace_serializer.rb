@@ -56,6 +56,6 @@ class WorkspaceSerializer < ApplicationSerializer
   # end
 
   belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id, &:agent_pool
-
+  belongs_to :project, serializer: ProjectSerializer, id_method_name: :external_id, &:project
   # attribute :setting_overwrites do |object| {} end
 end
