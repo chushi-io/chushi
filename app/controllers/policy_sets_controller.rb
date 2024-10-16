@@ -2,7 +2,10 @@
 
 class PolicySetsController < AuthenticatedController
   before_action :load_policy_set
-  before_action -> { authorize! @organization, to: :is_admin? }
+  before_action lambda {
+    authorize! @organization, to: :is_admin?
+  }, only: %i[new create update destroy]
+
   def index
     @policy_sets = @organization.policy_sets
   end
@@ -18,7 +21,6 @@ class PolicySetsController < AuthenticatedController
   def edit; end
 
   def create
-    authorize! @organization, to: :is_admin?
     @policy_set = @organization.policy_sets.new(policy_set_params)
     if @policy_set.save
       redirect_to policy_set_path(@organization.name, @policy_set.external_id)
@@ -30,7 +32,6 @@ class PolicySetsController < AuthenticatedController
   def update; end
 
   def destroy
-    authorize! @organization, to: :is_admin?
     @policy_set.delete
     redirect_to policy_sets_path(@organization.name)
   end

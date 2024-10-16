@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 class VariablesController < AuthenticatedController
+  before_action lambda {
+    authorize! @organization, to: :can_read_varsets?
+  }, only: %i[index show]
+
+  before_action lambda {
+    authorize! @organization, to: :can_manage_varsets?
+  }, only: %i[new create edit update destroy]
+
   def index
     @variables = @organization.variables
   end
