@@ -6,8 +6,8 @@ class WorkspacesController < AuthenticatedController
     authorize! @organization, to: :read?
   }, only: %i[index]
 
-  before_action lambda { authorize! @workspace, to: :can_update }, only: %i[update]
-  before_action lambda { authorize! @workspace, to: :can_destroy }, only: %i[destroy]
+  before_action -> { authorize! @workspace, to: :can_update }, only: %i[update]
+  before_action -> { authorize! @workspace, to: :can_destroy }, only: %i[destroy]
 
   def index
     @workspaces = @organization.workspaces

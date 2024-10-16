@@ -3,11 +3,11 @@
 class VariablesController < AuthenticatedController
   before_action lambda {
     authorize! @organization, to: :can_read_varsets?
-  }, only: %i[index show]
+  }, only: %i[index]
 
   before_action lambda {
     authorize! @organization, to: :can_manage_varsets?
-  }, only: %i[new create edit update destroy]
+  }, only: %i[new create]
 
   def index
     @variables = @organization.variables
