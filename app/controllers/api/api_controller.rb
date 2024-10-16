@@ -29,7 +29,6 @@ module Api
 
     def set_default_response_format
       request.format = :json
-      Rails.logger.debug request.headers['Content-Type']
       return if request.headers['Content-Type'].present?
 
       request.headers['Content-Type'] = 'application/json'

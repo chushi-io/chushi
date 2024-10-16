@@ -10,7 +10,7 @@ describe Api::V2::WorkspacesController do
 
     it 'can create a workspace' do
       headers = auth_headers(org_token).merge(common_headers)
-      post(api_v2_organization_workspaces_path(organization.name), params: workspace_params, headers:)
+      post(api_v2_organization_workspaces_path(organization.name), params: workspace_params.to_json, headers:)
       expect(response).to have_http_status :created
       expect(response).to match_json_schema('workspace', strict: true)
     end
@@ -43,7 +43,7 @@ describe Api::V2::WorkspacesController do
 
     it 'can create a workspace' do
       headers = auth_headers(user_token).merge(common_headers)
-      post(api_v2_organization_workspaces_path(organization.name), params: workspace_params, headers:)
+      post(api_v2_organization_workspaces_path(organization.name), params: workspace_params.to_json, headers:)
       expect(response).to have_http_status :created
       expect(response).to match_json_schema('workspace', strict: true)
     end
@@ -65,7 +65,7 @@ describe Api::V2::WorkspacesController do
 
     it 'is unable to create a workspace' do
       headers = auth_headers(user_token).merge(common_headers)
-      post(api_v2_organization_workspaces_path(organization.name), params: workspace_params, headers:)
+      post(api_v2_organization_workspaces_path(organization.name), params: workspace_params.to_json, headers:)
       expect(response).to have_http_status :not_found
     end
 
@@ -90,7 +90,7 @@ describe Api::V2::WorkspacesController do
     it 'can create a workspace' do
       input = workspace_params(project.external_id)
       headers = auth_headers(user_token).merge(common_headers)
-      post(api_v2_organization_workspaces_path(organization.name), params: input, headers:)
+      post(api_v2_organization_workspaces_path(organization.name), params: input.to_json, headers:)
       expect(response).to have_http_status :created
       expect(response).to match_json_schema('workspace', strict: true)
     end
@@ -115,7 +115,7 @@ describe Api::V2::WorkspacesController do
     it 'cannot create a workspace' do
       input = workspace_params(project.external_id)
       headers = auth_headers(user_token).merge(common_headers)
-      post(api_v2_organization_workspaces_path(organization.name), params: input, headers:)
+      post(api_v2_organization_workspaces_path(organization.name), params: input.to_json, headers:)
       expect(response).to have_http_status :not_found
     end
   end
