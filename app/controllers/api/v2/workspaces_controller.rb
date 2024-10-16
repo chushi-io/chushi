@@ -31,11 +31,12 @@ module Api
 
       def create
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :can_create_workspace?
 
-        if workspace_params[:project_id]
-          @project = Project.find_by(external_id: workspace_params[:project_id])
+        if workspace_params['project_id']
+          @project = Project.where(organization_id: @org.id).find_by(external_id: workspace_params['project_id'])
           authorize! @project, to: :can_create_workspace?
+        else
+          authorize! @org, to: :can_create_workspace?
         end
 
         @workspace = @org.workspaces.new(workspace_params)
@@ -130,7 +131,8 @@ module Api
                      'terraform-version',
                      'trigger-patterns',
                      'trigger-prefixes',
-                     'working-directory'
+                     'working-directory',
+                     :project
                    ])
       end
     end

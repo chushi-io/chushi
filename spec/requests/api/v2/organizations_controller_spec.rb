@@ -62,7 +62,6 @@ describe Api::V2::OrganizationsController do
       patch(api_v2_organization_path(organization.name), params: {
         'data' => {
           'type' => 'organizations',
-          'id' => organization.name,
           'attributes' => {
             'default-execution-mode' => 'local'
           }

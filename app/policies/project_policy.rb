@@ -18,7 +18,6 @@ class ProjectPolicy < ApplicationPolicy
     allow! if using_org_token?(record.organization)
     allow! if in_owners_team?(record.organization)
     team_has_access?(['admin'])
-    # TODO: Support workspace-access?
   end
 
   protected
