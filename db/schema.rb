@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_12_005924) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_16_041804) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -377,6 +377,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_12_005924) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_default", default: false
     t.index ["external_id"], name: "index_projects_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_projects_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_projects_on_organization_id"
