@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 describe Api::V2::RunsController do
+  Sidekiq::Testing.disable!
   include JSONAPI::Deserialization
 
   context 'when a user is in the workspace "admin" team' do
