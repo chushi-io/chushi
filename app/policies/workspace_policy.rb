@@ -96,6 +96,7 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def can_force_delete?
+    allow! if using_org_token?(record.organization)
     allow! if in_owners_team?(record.organization)
     check_team_access('can-force-delete')
   end

@@ -22,6 +22,7 @@ JsonMatchers.schema_root = 'spec/support/api/schemas/v2'
 require './spec/support/unauthenticated_check'
 require './spec/support/token_authentication'
 require './spec/support/api_helpers'
+require './spec/support/examples/workspace_examples'
 
 require 'action_policy'
 require 'action_policy/rails/controller'

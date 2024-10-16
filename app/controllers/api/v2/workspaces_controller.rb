@@ -40,7 +40,7 @@ module Api
 
         @workspace = @org.workspaces.new(workspace_params)
         if @workspace.save
-          render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
+          render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash, status: :created
         else
           render json: @workspace.errors.full_messages, status: :bad_request
         end
@@ -86,6 +86,11 @@ module Api
 
         nil unless request.get?
         # Simply get the workspace tags
+      end
+
+      def destroy
+        authorize! @workspace, to: :can_force_delete?
+        head :no_content
       end
 
       private
