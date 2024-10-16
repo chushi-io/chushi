@@ -36,6 +36,7 @@ module Api
           @project = Project.where(organization_id: @org.id).find_by(external_id: workspace_params['project_id'])
           authorize! @project, to: :can_create_workspace?
         else
+          @project = Project.where(organization_id: @org.id).where(is_default: true).first
           authorize! @org, to: :can_create_workspace?
         end
 
