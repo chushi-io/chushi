@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "namespace": { "type": "string" },
+            "registry-name": { "type": "string" },
+            "created-at": { "type": "string" },
+            "updated-at": { "type": "string" },
+            "permissions": { "type": "object" }
+          },
+          "required": ["name", "namespace", "registry-name"]
+        }
+      }
+    }
+  },
+  "required": ["data"]
+}

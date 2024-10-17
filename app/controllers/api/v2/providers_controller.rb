@@ -5,7 +5,7 @@ module Api
     class ProvidersController < Api::ApiController
       def index
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
         @providers = @org.providers
 
         render json: ::ProviderSerializer.new(@providers, {}).serializable_hash
@@ -13,7 +13,7 @@ module Api
 
       def show
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
         @provider = @org.providers.where(
           namespace: params[:namespace],
           name: params[:name]
@@ -24,13 +24,13 @@ module Api
 
       def create
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :manage_modules?
+        authorize! @org, to: :can_create_provider?
 
         @provider = @org.providers.new(provider_params)
         @provider.namespace = @org.name
         @provider.registry = 'private'
         @provider.save
-        render json: ::ProviderSerializer.new(@provider, {}).serializable_hash
+        render json: ::ProviderSerializer.new(@provider, {}).serializable_hash, status: :created
       end
 
       def destroy; end
