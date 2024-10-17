@@ -3,10 +3,13 @@
 class RunCreator < ApplicationService
   attr_reader :run
 
+  # Rubocop is disabled here, otherwise
+  # the call to super causes errors on initialize
+  # rubocop:disable Lint/MissingSuper
   def initialize(run)
-    super
     @run = run
   end
+  # rubocop:enable Lint/MissingSuper
 
   def call
     ActiveRecord::Base.transaction do
@@ -41,41 +44,40 @@ class RunCreator < ApplicationService
       end
 
       task_stages.each do |stage, wstasks|
-        if wstasks.any? || (stage == 'post_plan' && run.workspace.policy_sets.any?)
-          @stage = TaskStage.new(
-            stage:,
-            status: 'pending'
-          )
+        next unless wstasks.any? || (stage == 'post_plan' && run.workspace.policy_sets.any?)
 
-          unless wstasks.empty?
-            wstasks.each do |wstask|
-              @result = TaskResult.new(
-                status: 'pending',
-                # url: wstask.run_task.url,
-                stage:,
-                task_id: wstask.run_task.external_id,
-                task_name: wstask.run_task.name,
-                task_url: wstask.run_task.url,
-                workspace_task_id: wstask.external_id,
-                workspace_task_enforcement_level: wstask.enforcement_level
-              )
-              @stage.task_results << @result
-            end
+        @stage = TaskStage.new(
+          stage:,
+          status: 'pending'
+        )
+
+        unless wstasks.empty?
+          wstasks.each do |wstask|
+            @result = TaskResult.new(
+              status: 'pending',
+              # url: wstask.run_task.url,
+              stage:,
+              task_id: wstask.run_task.external_id,
+              task_name: wstask.run_task.name,
+              task_url: wstask.run_task.url,
+              workspace_task_id: wstask.external_id,
+              workspace_task_enforcement_level: wstask.enforcement_level
+            )
+            @stage.task_results << @result
           end
+        end
 
-          unless @run.workspace.policy_sets.empty?
-            @run.workspace.policy_sets.each do |policy_set|
-              @stage.policy_evaluations << PolicyEvaluation.new(
-                policy_kind: 'opa',
-                policy_set_id: policy_set.external_id
-              )
-            end
+        unless @run.workspace.policy_sets.empty?
+          @run.workspace.policy_sets.each do |policy_set|
+            @stage.policy_evaluations << PolicyEvaluation.new(
+              policy_kind: 'opa',
+              policy_set_id: policy_set.external_id
+            )
           end
         end
         @stage.save
         @run.task_stages << @stage
       end
-
       @run.status = 'pending'
       @run.save!
 

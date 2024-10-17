@@ -14,6 +14,11 @@ module Api
 
       def create
         @workspace = Workspace.find_by(external_id: run_params['workspace_id'])
+        authorize! @workspace, to: :can_read_run?
+
+        # We don't handle runs for local workspaces
+        render json: nil, status: :bad_request and return if @workspace.execution_mode == 'local'
+
         if run_params['plan_only']
           authorize! @workspace, to: :can_queue_run?
         else
@@ -26,9 +31,9 @@ module Api
 
         begin
           RunCreator.call(@run)
-          render json: ::RunSerializer.new(@run, {}).serializable_hash
+          render json: ::RunSerializer.new(@run, {}).serializable_hash, status: :created
         rescue StandardError
-          render status: :internal_server_error
+          render json: nil, status: :internal_server_error
         end
       end
 

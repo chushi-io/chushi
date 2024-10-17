@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "actions": { "type": "object" },
+            "canceled-at": { "type": ["string", "null"]},
+            "created-at": { "type": "string" },
+            "has-changes": { "type": ["boolean", "null"] },
+            "auto-apply": { "type": "boolean" },
+            "allow-empty-apply": { "type": "boolean" },
+            "allow-config-generation": { "type": "boolean" },
+            "is-destroy": { "type": "boolean" },
+            "message": { "type": "string" },
+            "plan-only": { "type": "boolean" },
+            "source": { "type": "string" },
+            "status-timestamps": {
+              "plan-queueable-at": "2021-05-24T07:38:04+00:00"
+            },
+            "status": { "type": "string" },
+            "trigger-reason": { "type": "string" },
+            "target-addrs": { "type": ["array", "null"], "items": { "type": "string" }},
+            "permissions": { "type": "object" },
+            "refresh": { "type": "boolean" },
+            "refresh-only": { "type": "boolean" },
+            "replace-addrs": { "type":  "array", "items": { "type": ["string", "null"]}},
+            "save-plan": { "type": "boolean" },
+            "variables": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": [
+            "actions",
+            "created-at",
+            "auto-apply",
+            "allow-empty-apply",
+            "is-destroy",
+            "message",
+            "plan-only",
+            "source",
+            "status",
+            "trigger-reason",
+            "target-addrs",
+            "permissions",
+            "refresh",
+            "refresh-only",
+            "refresh-addrs",
+            "save-plan",
+            "variables"
+          ]
+        }
+      },
+      "required": ["id", "type", "attributes"]
+    }
+  },
+  "required": ["data"]
+}

@@ -12,17 +12,25 @@ class RunSerializer < ApplicationSerializer
     nil
   end
   attribute :created_at
-  attribute :has_changes
-  attribute :auto_apply
+  attribute :has_changes do |o|
+    o.has_changes || false
+  end
+  attribute :auto_apply do |o|
+    o.auto_apply || false
+  end
   attribute :allow_empty_apply do |_o|
     true
   end
   attribute :allow_config_generation do |_o|
     false
   end
-  attribute :is_destroy
+  attribute :is_destroy do |o|
+    o.is_destroy || false
+  end
   attribute :message
-  attribute :plan_only
+  attribute :plan_only do |o|
+    o.plan_only || false
+  end
   attribute :source do |_o|
     'tfe-api'
   end
@@ -30,8 +38,8 @@ class RunSerializer < ApplicationSerializer
   attribute :trigger_reason do |_o|
     'manual'
   end
-  attribute :target_addrs do |_o|
-    []
+  attribute :target_addrs do |o|
+    o.target_addrs || nil
   end
   attribute :permissions do |_o|
     {}
@@ -39,11 +47,12 @@ class RunSerializer < ApplicationSerializer
   attribute :refresh do |_o|
     false
   end
-  attribute :refresh_only do |_o|
-    false
+  attribute :refresh_only do |o|
+    o.refresh_only || false
   end
   attribute :refresh_addrs do |_o|
-    false
+    # o.refresh_addrs || []
+    []
   end
   attribute :save_plan do |_o|
     true

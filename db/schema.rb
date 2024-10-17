@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_16_041804) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_16_115309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -510,6 +510,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_16_041804) do
     t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "target_addrs"
+    t.json "refresh_addrs"
+    t.boolean "allow_empty_apply"
+    t.boolean "allow_config_generation"
     t.index ["agent_id"], name: "index_runs_on_agent_id"
     t.index ["apply_id"], name: "index_runs_on_apply_id"
     t.index ["configuration_version_id"], name: "index_runs_on_configuration_version_id"
