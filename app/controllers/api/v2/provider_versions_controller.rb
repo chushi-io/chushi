@@ -35,8 +35,8 @@ module Api
         @org = Organization.find_by(name: params[:organization_id])
         authorize! @org, to: :can_create_provider?
 
-        puts "Org authorized"
-        puts params.inspect
+        Rails.logger.debug 'Org authorized'
+        Rails.logger.debug params.inspect
         @provider = @org.providers.where(
           registry: 'private',
           namespace: @org.name,

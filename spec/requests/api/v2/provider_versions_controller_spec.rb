@@ -10,16 +10,16 @@ describe Api::V2::ProviderVersionsController do
   organization = Fabricate(:organization)
   org_token = Fabricate(:access_token, token_authable: organization)
 
-  describe 'POST  /api/v2/organizations/:organization_id/registry-providers/private/:namespace/:name/versions' do
+  describe 'POST /api/v2/organizations/:organization_id/registry-providers/private/:namespace/:name/versions' do
     it 'creates a provider version' do
       p = Fabricate(:provider, organization:, namespace: organization.name, registry: 'private')
       input = {
         data: {
           type: 'registry-provider-versions',
           attributes: {
-            "version": "3.1.1",
-            "key-id": "32966F3FB5AC1129",
-            "protocols": ["5.0"]
+            version: '3.1.1',
+            'key-id': '32966F3FB5AC1129',
+            protocols: ['5.0']
           }
         }
       }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProviderVersionShasumsUploader < CarrierWave::Uploader::Base
   storage :fog
 
@@ -9,7 +11,6 @@ class ProviderVersionShasumsUploader < CarrierWave::Uploader::Base
 
   def store_dir
     "private/#{model.provider.namespace}/#{model.provider.name}/#{model.version}"
-
   end
 
   def filename
