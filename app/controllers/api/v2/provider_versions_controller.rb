@@ -5,7 +5,7 @@ module Api
     class ProviderVersionsController < Api::ApiController
       def index
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
 
         @provider = @org.providers.where(
           registry: 'private',
@@ -18,7 +18,7 @@ module Api
 
       def show
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
 
         @provider = @org.providers.where(
           registry: 'private',
@@ -33,16 +33,18 @@ module Api
 
       def create
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :manage_modules?
+        authorize! @org, to: :can_create_provider?
 
+        puts "Org authorized"
+        puts params.inspect
         @provider = @org.providers.where(
           registry: 'private',
-          namespace: params[:namespace],
+          namespace: @org.name,
           name: params[:name]
         ).first!
 
         @version = @provider.provider_versions.create(version_params)
-        render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash
+        render json: ::ProviderVersionSerializer.new(@version, {}).serializable_hash, status: :created
       end
 
       def destroy

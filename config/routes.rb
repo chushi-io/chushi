@@ -133,11 +133,11 @@ Rails.application.routes.draw do
         delete 'registry-providers/:registry_name/:namespace/:name', action: :destroy,
                                                                      controller: :providers
         get 'registry-providers/private/:namespace/:name/versions/', action: :index,
-                                                                     controller: :provider_versions
+                                                                     controller: :provider_versions, as: :provider_versions
         post 'registry-providers/private/:namespace/:name/versions', action: :create,
                                                                      controller: :provider_versions
         get 'registry-providers/private/:namespace/:name/versions/:version', action: :show,
-                                                                             controller: :provider_versions
+                                                                             controller: :provider_versions, as: :provider_version
         delete 'registry-providers/private/:namespace/:name/versions/:provider_version', action: :destroy,
                                                                                          controller: :provider_versions
         post 'registry-providers/private/:namespace/:name/versions/:version/platforms', action: :create,
