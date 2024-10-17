@@ -2,7 +2,7 @@
 
 module Api
   module V2
-    class RegistryProviderVersionPlatformsController < Api::ApiController
+    class ProviderVersionPlatformsController < Api::ApiController
       before_action :load_organization
       before_action :load_provider
       before_action :load_version

@@ -2,13 +2,13 @@
 
 module Api
   module V2
-    class RegistryModuleVersionsController < Api::ApiController
+    class ModuleVersionsController < Api::ApiController
       def create
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :manage_modules?
+        authorize! @org, to: :can_create_module?
         @module = @org.registry_modules.where(
           # registry: "private",
-          namespace: params[:namespace],
+          namespace: @org.name,
           name: params[:name],
           provider: params[:provider]
         ).first!
@@ -18,7 +18,7 @@ module Api
         @version.source = 'tfe-api'
         @version.save
 
-        render json: ::RegistryModuleVersionSerializer.new(@version, {}).serializable_hash
+        render json: ::RegistryModuleVersionSerializer.new(@version, {}).serializable_hash, status: :created
       end
 
       def destroy

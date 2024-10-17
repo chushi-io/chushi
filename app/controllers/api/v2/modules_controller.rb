@@ -2,10 +2,10 @@
 
 module Api
   module V2
-    class RegistryModulesController < Api::ApiController
+    class ModulesController < Api::ApiController
       def index
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
         @registry_modules = @org.registry_modules
 
         render json: ::RegistryModuleSerializer.new(@registry_modules, {}).serializable_hash
@@ -13,7 +13,7 @@ module Api
 
       def show
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
         @module = @org.registry_modules.where(
           # registry: "private",
           namespace: params[:namespace],
@@ -26,13 +26,15 @@ module Api
 
       def create
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :manage_modules?
+        authorize! @org, to: :can_create_module?
         @registry_module = @org.registry_modules.new(module_params)
         @registry_module.namespace = @org.name
         @registry_module.status = 'pending'
-        @registry_module.save!
-
-        render json: ::RegistryModuleSerializer.new(@registry_module, {}).serializable_hash
+        if @registry_module.save
+          render json: ::RegistryModuleSerializer.new(@registry_module, {}).serializable_hash, status: :created
+        else
+          render json: nil, status: :internal_server_error
+        end
       end
 
       def update
@@ -40,12 +42,6 @@ module Api
       end
 
       def destroy
-        # if params[:provider]
-        # Delete just that provider?
-        # else
-        # Delete for all providers
-        # end
-
         head :not_implemented
       end
 
