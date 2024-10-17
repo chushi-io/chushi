@@ -2,7 +2,7 @@
 
 module Api
   module V2
-    class RegistryProvidersController < Api::ApiController
+    class ProvidersController < Api::ApiController
       def index
         @org = Organization.find_by(name: params[:organization_id])
         authorize! @org, to: :show?

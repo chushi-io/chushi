@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "namespace": { "type": "string" },
+            "provider": { "type": "string" },
+            "status": { "type": "string" },
+            "version-statuses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "version": { "type": "string" },
+                  "status": { "type": "string" }
+                }
+              }
+            },
+            "created-at": { "type": "string" },
+            "updated-at": { "type": "string" },
+            "registry-name": { "type": "string" },
+            "permissions": { "type": "object" }
+          },
+          "required": ["name", "namespace", "provider", "registry-name"]
+        }
+      }
+    }
+  },
+  "required": ["data"]
+}

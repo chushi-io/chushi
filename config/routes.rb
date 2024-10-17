@@ -114,40 +114,40 @@ Rails.application.routes.draw do
         get 'authentication-token', action: :get_organization_token, controller: :authentication_tokens
 
         # Routes for registry modules
-        get 'registry-modules', action: :index, controller: :registry_modules
-        post 'registry-modules', action: :create, controller: :registry_modules
-        get 'registry-modules/private/:namespace/:name/:provider', action: :show, controller: :registry_modules
-        patch 'registry-modules/private/:namespace/:name/:provider', action: :update, controller: :registry_modules
+        get 'registry-modules', action: :index, controller: :modules
+        post 'registry-modules', action: :create, controller: :modules
+        get 'registry-modules/private/:namespace/:name/:provider', action: :show, controller: :modules, as: :show_module
+        patch 'registry-modules/private/:namespace/:name/:provider', action: :update, controller: :modules
         post 'registry-modules/private/:namespace/:name/:provider/versions', action: :create,
-                                                                             controller: :registry_module_versions
-        delete 'registry-modules/private/:namespace/:name', action: :destroy, controller: :registry_modules
+                                                                             controller: :module_versions, as: :module_versions
+        delete 'registry-modules/private/:namespace/:name', action: :destroy, controller: :modules
         delete 'registry-modules/private/:namespace/:name/:provider', action: :destroy,
-                                                                      controller: :registry_modules
+                                                                      controller: :modules
         delete 'registry-modules/private/:namespace/:name/:provider/:version', action: :destroy,
-                                                                               controller: :registry_module_versions
+                                                                               controller: :module_versions
 
         # Routes for registry providers
-        get 'registry-providers', action: :index, controller: :registry_providers
-        post 'registry-providers', action: :create, controller: :registry_providers
-        get 'registry-providers/private/:namespace/:name', action: :show, controller: :registry_providers
+        get 'registry-providers', action: :index, controller: :providers
+        post 'registry-providers', action: :create, controller: :providers
+        get 'registry-providers/private/:namespace/:name', action: :show, controller: :providers
         delete 'registry-providers/:registry_name/:namespace/:name', action: :destroy,
-                                                                     controller: :registry_providers
+                                                                     controller: :providers
         get 'registry-providers/private/:namespace/:name/versions/', action: :index,
-                                                                     controller: :registry_provider_versions
+                                                                     controller: :provider_versions
         post 'registry-providers/private/:namespace/:name/versions', action: :create,
-                                                                     controller: :registry_provider_versions
+                                                                     controller: :provider_versions
         get 'registry-providers/private/:namespace/:name/versions/:version', action: :show,
-                                                                             controller: :registry_provider_versions
+                                                                             controller: :provider_versions
         delete 'registry-providers/private/:namespace/:name/versions/:provider_version', action: :destroy,
-                                                                                         controller: :registry_provider_versions
+                                                                                         controller: :provider_versions
         post 'registry-providers/private/:namespace/:name/versions/:version/platforms', action: :create,
-                                                                                        controller: :registry_provider_version_platforms, constraints: { version: %r{[^/]+} }
+                                                                                        controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
         get 'registry-providers/private/:namespace/:name/versions/:version/platforms', action: :index,
-                                                                                       controller: :registry_provider_version_platforms, constraints: { version: %r{[^/]+} }
+                                                                                       controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
         get 'registry-providers/private/:namespace/:name/versions/:version/platforms/:os/:arch', action: :show,
-                                                                                                 controller: :registry_provider_version_platforms, constraints: { version: %r{[^/]+} }
+                                                                                                 controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
         delete 'registry-providers/private/:namespace/:name/versions/:version/platforms/:os/:arch', action: :destroy,
-                                                                                                    controller: :registry_provider_version_platforms, constraints: { version: %r{[^/]+} }
+                                                                                                    controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
       end
       get 'authentication-tokens/:token_id', action: :show, controller: :authentication_tokens
       delete 'authentication-tokens/:token_id', action: :destroy, controller: :authentication_tokens
