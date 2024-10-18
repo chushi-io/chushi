@@ -151,6 +151,10 @@ class WorkspacePolicy < ApplicationPolicy
     check_team_access('can-manage-run-triggers')
   end
 
+  def is_agent?
+    agent.present? && agent.id == record.agent_pool_id
+  end
+
   protected
 
   def check_team_access(scope)
@@ -170,10 +174,6 @@ class WorkspacePolicy < ApplicationPolicy
     return local_projects.length.positive? if scopes.nil?
 
     local_projects.any? { |project_team| scopes.include?(project_team.access) }
-  end
-
-  def is_agent?
-    agent.present? && agent.id == record.agent_pool_id
   end
 
   def can_access_workspace?
