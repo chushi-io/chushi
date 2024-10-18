@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "execution-details": {
+              "type": "object"
+            },
+            "generated-configuration": {
+              "type": ["boolean", "null"]
+            },
+            "has-changes": {
+              "type": ["boolean", "null"]
+            },
+            "resource-additions": { "type": ["number", "null"] },
+            "resource-changes": { "type": ["number", "null"] },
+            "resource-destructions": { "type": ["number", "null"] },
+            "resource-imports": { "type": ["number", "null"] },
+            "status": { "type": "string" },
+            "status-timestamps": {
+              "type": "object"
+            },
+            "log-read-url": { "type":  "string" }
+          },
+          "required": ["status", "log-read-url", "has-changes"]
+        }
+      }
+    }
+  },
+  "required": ["data"]
+}

@@ -3,11 +3,9 @@
 module Api
   module V2
     class PlansController < Api::ApiController
-      skip_before_action :verify_access_token, only: [:logs]
-      skip_verify_authorized only: :logs
       def show
         @plan = Plan.find_by(external_id: params[:id])
-        authorize! @workspace, to: :can_access?
+        authorize! @plan.run.workspace, to: :can_queue_run?
 
         render json: ::PlanSerializer.new(@plan, {}).serializable_hash
       end
