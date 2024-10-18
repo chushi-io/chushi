@@ -8,18 +8,16 @@ module Api
       def show
         @plan = Plan.find_by(external_id: params[:id])
         authorize! @workspace, to: :can_access?
+
         render json: ::PlanSerializer.new(@plan, {}).serializable_hash
       end
 
       def logs
         @plan = Plan.find_by(external_id: params[:id])
-        authorize! @workspace, to: :can_access?
-        # Otherwise, return no content
-        # Check if the file is attached. If it is, simply return it
-        if @plan.plan_log_file.attached?
-          # Redirect to URL and return
-          head :found and return
-        end
+        authorize! @workspace, to: :can_read_run?
+        # If the log file has been uploaded already, we'll
+        # just redirect to the whole log file
+        redirect_to encrypt_storage_url({ id: plan.id, class: @plan.class.name, file: 'logs' }) and return if @plan.logs.present?
 
         HTTParty.get(
           "#{Chushi.timber_url}/files/#{@plan.run.id}_#{@plan.id}.log",
@@ -29,47 +27,20 @@ module Api
 
       def json_output_redacted
         @plan = Plan.find_by(external_id: params[:id])
-        authorize! @workspace, to: :can_access?
+        authorize! @workspace, to: :can_read_run?
 
-        if @plan.plan_json_file.attached?
-          render json: @plan.plan_json_file.download
+        if @plan.plan_json_file.present?
+          redirect_to encrypt_storage_url({ id: plan.id, class: @plan.class.name, file: 'tfplan.json' })
         else
-          render json: {}
+          head :no_content
         end
-      end
-
-      # Agent-only API routes
-      def upload
-        @run = Run.find_by(external_id: params[:id])
-        authorize! @run.plan
-
-        request.body.rewind
-        @run.plan.plan_file.attach(io: request.body, filename: 'plan')
-        head :ok
-      end
-
-      def upload_json
-        @run = Run.find_by(external_id: params[:id])
-        authorize! @run.plan, to: :upload?
-
-        request.body.rewind
-        @run.plan.plan_json_file.attach(io: request.body, filename: 'plan')
-        head :ok
-      end
-
-      def upload_structured
-        @run = Run.find_by(external_id: params[:id])
-        authorize! @run.plan, to: :upload?
-
-        request.body.rewind
-        @run.plan.plan_structured_file.attach(io: request.body, filename: 'plan')
-        head :ok
       end
 
       def download; end
 
       def update
         @plan = Plan.find_by(external_id: params[:id])
+        authorize! @plan.run.workspace, to: :is_agent?
 
         @plan.has_changes = params[:has_changes]
         @plan.resource_additions = params[:resource_additions]

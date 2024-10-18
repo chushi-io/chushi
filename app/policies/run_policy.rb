@@ -35,6 +35,12 @@ class RunPolicy < ApplicationPolicy
     true
   end
 
+  # Non permissions policy check. Essentially, we
+  # only allow these endpoints for agents
+  def can_process_run?
+    agent.id == record.workspace.agent_pool_id if agent.present?
+  end
+
   private
 
   def can_access_run

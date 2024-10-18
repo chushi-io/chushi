@@ -15,8 +15,7 @@ module Api
       # we query jobs for a specific agent. Otherwise, we query jobs
       def index
         skip_verify_authorized!
-        Rails.logger.debug current_agent.id
-        Rails.logger.debug params[:id]
+
         head :forbidden and return unless current_agent && current_agent.id == params[:id]
 
         @jobs = Job

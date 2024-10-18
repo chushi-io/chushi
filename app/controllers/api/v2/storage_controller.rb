@@ -53,26 +53,29 @@ module Api
         if @object['file'] == 'state'
           head :not_found and return if @version.state_file.blank?
 
-          decrypt(@version.state_file)
+          contents = decrypt(@version.state_file)
         else
           head :not_found and return if @version.state_json_file.blank?
 
-          decrypt(@version.state_json_file)
+          contents = decrypt(@version.state_json_file)
         end
+        render body: contents, layout: false
       end
 
       def read_module_version
         @version = RegistryModuleVersion.find(@object['id'])
         response.headers['Content-Disposition'] = 'attachment; filename="archive.tar.gz"'
         response.headers['Content-Type'] = 'application/gzip'
-        decrypt(@version.archive)
+        contents = decrypt(@version.archive)
+        render body: contents, layout: false
       end
 
       def read_provider_version
         @version = ProviderVersionPlatform.find(@object['id'])
         response.headers['Content-Disposition'] = "attachment; filename=\"#{@version.filename}\""
         response.headers['Content-Type'] = 'application/gzip'
-        decrypt(@version.binary)
+        contents = decrypt(@version.binary)
+        render body: contents, layout: false
       end
 
       def upload_configuration_version
@@ -161,25 +164,29 @@ module Api
       def read_tfplan_json
         head :not_found and return if @plan.plan_json_file.blank?
 
-        decrypt(@plan.plan_json_file)
+        contents = decrypt(@plan.plan_json_file)
+        render body: contents, layout: false
       end
 
       def read_structured_json
         head :not_found and return if @plan.plan_structured_file.blank?
 
-        decrypt(@plan.plan_structured_file)
+        contents = decrypt(@plan.plan_structured_file)
+        render body: contents, layout: false
       end
 
       def read_tfplan
         head :not_found and return if @plan.plan_file.blank?
 
-        decrypt(@plan.plan_file)
+        contents = decrypt(@plan.plan_file)
+        render body: contents, layout: false
       end
 
       def read_logs
         head :not_found and return if @plan.logs.blank?
 
-        decrypt(@plan.logs.url)
+        contents = decrypt(@plan.logs.url)
+        render body: contents, layout: false
       end
 
       def get_uploaded_file(path)
@@ -198,7 +205,7 @@ module Api
           contents = Vault::Rails.decrypt('transit', 'chushi_storage_contents',
                                           obj.read)
         end
-        render body: contents, layout: false
+        contents
       end
     end
   end
