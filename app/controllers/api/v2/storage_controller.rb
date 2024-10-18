@@ -52,9 +52,11 @@ module Api
         @version = StateVersion.find(@object['id'])
         if @object['file'] == 'state'
           head :not_found and return if @version.state_file.blank?
+
           contents = decrypt(@version.state_file)
         else
           head :not_found and return if @version.state_json_file.blank?
+
           contents = decrypt(@version.state_json_file)
         end
         render body: contents, layout: false
@@ -161,24 +163,28 @@ module Api
 
       def read_tfplan_json
         head :not_found and return if @plan.plan_json_file.blank?
+
         contents = decrypt(@plan.plan_json_file)
         render body: contents, layout: false
       end
 
       def read_structured_json
         head :not_found and return if @plan.plan_structured_file.blank?
+
         contents = decrypt(@plan.plan_structured_file)
         render body: contents, layout: false
       end
 
       def read_tfplan
         head :not_found and return if @plan.plan_file.blank?
+
         contents = decrypt(@plan.plan_file)
         render body: contents, layout: false
       end
 
       def read_logs
         head :not_found and return if @plan.logs.blank?
+
         contents = decrypt(@plan.logs.url)
         render body: contents, layout: false
       end

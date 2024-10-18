@@ -7,7 +7,7 @@ describe Api::V2::JobsController do
   agent_pool = Fabricate(:agent_pool, organization:)
   workspace = Fabricate(:workspace, organization:, agent_pool:)
   run = Fabricate(:run, workspace:, organization:)
-  job = Fabricate(:job, run:, workspace:, organization:, agent_pool:)
+  Fabricate(:job, run:, workspace:, organization:, agent_pool:)
   agent_token = Fabricate(:access_token, token_authable: agent_pool)
 
   it 'returns the required links' do

@@ -26,7 +26,7 @@ class JobSerializer < ApplicationSerializer
   # just leverage full log uploads for now?
   link :log_stream_url, unless: proc { |record, _params|
     %w[errored completed].include?(record.status)
-  } do |object|
+  } do |_object|
     nil
   end
 
@@ -34,17 +34,17 @@ class JobSerializer < ApplicationSerializer
   link :log_upload_url, unless: proc { |record, _params|
     %w[errored completed].include?(record.status)
   } do |object|
-    if object.operation == "plan"
-      options = { id: object.run.plan.id, class: object.run.plan.class.name }
-    else
-      options = { id: object.run.apply.id, class: object.run.apply.class.name }
-    end
+    options = if object.operation == 'plan'
+                { id: object.run.plan.id, class: object.run.plan.class.name }
+              else
+                { id: object.run.apply.id, class: object.run.apply.class.name }
+              end
     encrypt_upload_url(options)
   end
 
   # - hosted-json-plan-upload-url # To upload JSON plan format
   link :hosted_json_plan_upload_url, if: proc { |record, _params|
-    record.operation == "plan" && %w[running pending].include?(record.status)
+    record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'tfplan.json' }
     encrypt_upload_url(options)
@@ -52,7 +52,7 @@ class JobSerializer < ApplicationSerializer
 
   # - hosted-plan-upload-url # For uploading the binary plan file
   link :hosted_plan_upload_url, if: proc { |record, _params|
-    record.operation == "plan" && %w[running pending].include?(record.status)
+    record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'tfplan' }
     encrypt_upload_url(options)
@@ -60,7 +60,7 @@ class JobSerializer < ApplicationSerializer
 
   # - hosted-structured-json-upload-url # For uploading the structured output
   link :hosted_plan_upload_url, if: proc { |record, _params|
-    record.operation == "plan" && %w[running pending].include?(record.status)
+    record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'structured.json' }
     encrypt_upload_url(options)
