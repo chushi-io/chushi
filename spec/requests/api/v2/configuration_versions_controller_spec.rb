@@ -6,7 +6,7 @@ describe Api::V2::ConfigurationVersionsController do
   # Create the organization
   organization = Fabricate(:organization)
   Fabricate(:access_token, token_authable: organization)
-  organization.teams.create(name: 'owners')
+  owners_team = organization.teams.create(name: 'owners')
 
   # Create the project, workspace, and setup access
   project = Fabricate(:project, organization_id: organization.id)
@@ -49,6 +49,31 @@ describe Api::V2::ConfigurationVersionsController do
   describe 'POST /api/v2/workspaces/:id/configuration-versions' do
     it 'responds with 403 when not authenticated' do
       verify_unauthenticated('post', configuration_versions_api_v2_workspace_path(workspace.external_id))
+    end
+
+    context 'when user is in the "owners" group' do
+      user = Fabricate(:user)
+      Fabricate(:team_membership, user:, team: owners_team)
+      workspace  = Fabricate(:workspace, organization:, execution_mode: 'agent')
+      user_token = Fabricate(:access_token, token_authable: user)
+
+      it 'can create a configuration' do
+        input = {
+          data: {
+            type: 'configuration-versions',
+            attributes: {
+              'auto-queue-runs': false,
+              provisional: false,
+              speculative: true
+            }
+          }
+        }
+        post configuration_versions_api_v2_workspace_path(workspace.external_id),
+             params: input.to_json,
+             headers: auth_headers(user_token).merge(common_headers)
+        expect(response).to have_http_status :created
+        expect(response.body).to match_response_schema('configuration-version', strict: true)
+      end
     end
   end
 
