@@ -7,7 +7,7 @@ module Api
 
       def index
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :list_workspaces?
+        authorize! @org, to: :read?
 
         @workspaces = @org.workspaces
         @workspaces = @workspaces.tagged_with(params[:search][:tags].split(','), match_all: true) if params[:search] && params[:search][:tags][:tags]
@@ -25,7 +25,7 @@ module Api
       end
 
       def show
-        authorize! @workspace, to: :access?
+        authorize! @workspace, to: :can_access?
         render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
       end
 
@@ -49,7 +49,7 @@ module Api
       end
 
       def update
-        authorize! @workspace, to: :is_admin?
+        authorize! @workspace, to: :can_update?
         update_params = workspace_params.to_h
         if update_params.key?('agent_pool_id')
           @agent = @workspace.organization.agent_pools.find_by(external_id: update_params['agent_pool_id'])
