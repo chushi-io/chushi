@@ -13,7 +13,5 @@ class ProviderVersionPlatformUploader < CarrierWave::Uploader::Base
     "private/#{model.provider.namespace}/#{model.provider.name}/#{model.version}"
   end
 
-  def filename
-    model.filename
-  end
+  delegate :filename, to: :model
 end

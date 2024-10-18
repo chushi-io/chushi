@@ -7,12 +7,12 @@ module Api
       before_action :load_provider
       before_action :load_version
       def index
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
         render json: ::ProviderVersionPlatformSerializer.new(@version.provider_version_platforms, {}).serializable_hash
       end
 
       def show
-        authorize! @org, to: :show?
+        authorize! @org, to: :read?
         @platform = @version.provider_version_platforms.where(
           os: params[:os],
           arch: params[:arch]
@@ -21,9 +21,11 @@ module Api
       end
 
       def create
-        authorize! @org, to: :manage_modules?
+        authorize! @org, to: :can_create_provider?
         @platform = @version.provider_version_platforms.create(platform_params)
-        render json: ::ProviderVersionPlatformSerializer.new(@platform, {}).serializable_hash
+        output = ::ProviderVersionPlatformSerializer.new(@platform, {}).serializable_hash
+        Rails.logger.debug output
+        render json: output, status: :created
       end
 
       def destroy

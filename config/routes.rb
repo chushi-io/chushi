@@ -143,7 +143,7 @@ Rails.application.routes.draw do
         post 'registry-providers/private/:namespace/:name/versions/:version/platforms', action: :create,
                                                                                         controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
         get 'registry-providers/private/:namespace/:name/versions/:version/platforms', action: :index,
-                                                                                       controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
+                                                                                       controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }, as: :provider_version_platforms
         get 'registry-providers/private/:namespace/:name/versions/:version/platforms/:os/:arch', action: :show,
                                                                                                  controller: :provider_version_platforms, constraints: { version: %r{[^/]+} }
         delete 'registry-providers/private/:namespace/:name/versions/:version/platforms/:os/:arch', action: :destroy,

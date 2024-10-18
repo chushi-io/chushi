@@ -54,7 +54,7 @@ module Api
       private
 
       def version_params
-        map_params(%i[version key_id protocols])
+        map_params(%i[version key-id protocols])
       end
     end
   end

@@ -11,8 +11,12 @@ class ProviderVersionSerializer < ApplicationSerializer
   attribute :permissions do |_object|
     {}
   end
-  attribute :shasums_uploaded
-  attribute :shasums_sig_uploaded
+  attribute :shasums_uploaded do |object|
+    object.shasums.present?
+  end
+  attribute :shasums_sig_uploaded do |object|
+    object.shasums_sig.present?
+  end
 
   attribute :shasums_upload, unless: proc { |record, _params|
     record.shasums.present?

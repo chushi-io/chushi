@@ -24,10 +24,6 @@ describe Api::V2::ProviderVersionsController do
         }
       }
 
-      puts organization.inspect
-      puts p.inspect
-      puts input.inspect
-
       post api_v2_organization_provider_versions_path(organization.name, p.namespace, p.name),
            params: input.to_json,
            headers: auth_headers(org_token).merge(common_headers)
