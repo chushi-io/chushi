@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProviderVersionUploader < CarrierWave::Uploader::Base
+class ProviderVersionPlatformUploader < CarrierWave::Uploader::Base
   storage :fog
 
   def initialize(*)
@@ -10,12 +10,8 @@ class ProviderVersionUploader < CarrierWave::Uploader::Base
   end
 
   def store_dir
-    "private/#{model.namespace}/#{model.name}"
+    "private/#{model.provider.namespace}/#{model.provider.name}/#{model.version}"
   end
 
   delegate :filename, to: :model
-
-  def self.generate_url(_model)
-    ''
-  end
 end

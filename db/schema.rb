@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_16_115309) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_17_023016) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -407,6 +407,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_16_115309) do
     t.boolean "shasums_uploaded"
     t.boolean "shasums_sig_uploaded"
     t.string "external_id"
+    t.text "shasums"
+    t.text "shasums_sig"
     t.index ["external_id"], name: "index_provider_versions_on_external_id", unique: true
     t.index ["provider_id", "version"], name: "index_provider_versions_on_provider_id_and_version", unique: true
     t.index ["provider_id"], name: "index_provider_versions_on_provider_id"
