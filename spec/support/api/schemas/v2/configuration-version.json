@@ -16,11 +16,11 @@
           "properties": {
             "error": { "type": "string" },
             "error-message": { "type":  "string"},
-            "source": { "type": "string"},
-            "speculative": {"type": "boolean"},
+            "source": { "type": ["string", "null"]},
+            "speculative": {"type": ["boolean", "null"]},
             "status": {"type": "string"},
             "status-timestamps": { "type": "object"},
-            "provisional": { "type": "boolean"}
+            "provisional": { "type": ["boolean", "null"]}
           },
           "required": ["status"]
         },

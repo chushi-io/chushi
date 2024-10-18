@@ -11,7 +11,7 @@ module Api
 
       def create
         @workspace = Workspace.find_by(external_id: params[:id])
-        authorize! @workspace, to: :can_queue_runs?
+        authorize! @workspace, to: :can_queue_run?
 
         version = @workspace.configuration_versions.new(
           auto_queue_runs: params[:auto_queue_runs],
@@ -19,7 +19,7 @@ module Api
         )
         version.organization = @workspace.organization
         if version.save
-          render json: ::ConfigurationVersionSerializer.new(version, {}).serializable_hash
+          render json: ::ConfigurationVersionSerializer.new(version, {}).serializable_hash, status: :created
         else
           render json: version.errors.full_messages, status: :bad_request
         end
