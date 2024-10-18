@@ -13,6 +13,7 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def can_update?
+    allow! if using_org_token?(record.organization)
     allow! if in_owners_team?(record.organization)
     allow! if check_project_access?(%w[admin maintain])
     check_team_access('can-update')

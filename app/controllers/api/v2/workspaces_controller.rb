@@ -49,7 +49,7 @@ module Api
       end
 
       def update
-        authorize! @workspace, to: :is_admin?
+        authorize! @workspace, to: :can_update?
         update_params = workspace_params.to_h
         if update_params.key?('agent_pool_id')
           @agent = @workspace.organization.agent_pools.find_by(external_id: update_params['agent_pool_id'])
