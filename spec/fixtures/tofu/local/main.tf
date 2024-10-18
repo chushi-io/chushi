@@ -1,6 +1,8 @@
 terraform {
   cloud {
-    workspaces = ["fixtures-tofu-local"]
+    workspaces {
+      name = "chushi-infra-workspace-testing"
+    }
   }
 
   required_providers {
@@ -11,4 +13,3 @@ terraform {
 resource "random_string" "testing" {
   length = 16
 }
-

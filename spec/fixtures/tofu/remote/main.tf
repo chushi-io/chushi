@@ -1,7 +1,7 @@
 terraform {
   cloud {
     workspaces {
-      name = "chushi-infra-workspace-testing-agent"
+      name = "chushi-infra-workspace-testing-remote"
     }
   }
 
