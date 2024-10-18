@@ -183,7 +183,9 @@ module Api
       end
 
       def read_logs
-        head :not_found and return if @plan.logs.blank?
+        # NOTE: To satisfy the CLI, we return no_content
+        # regardless of wether the file exists or not
+        head :no_content and return if @plan.logs.blank?
 
         contents = decrypt(@plan.logs.url)
         render body: contents, layout: false
