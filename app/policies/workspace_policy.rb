@@ -3,11 +3,13 @@
 class WorkspacePolicy < ApplicationPolicy
   # Named policies
   def is_admin?
+    allow! if using_org_token?(record.organization)
     allow! if in_owners_team?(record.organization)
     allow! if check_project_access?(%w[admin])
   end
 
   def can_access?
+    allow! if using_org_token?(record.organization)
     allow! if in_owners_team?(record.organization)
     allow! if check_project_access?(nil)
   end
@@ -26,7 +28,6 @@ class WorkspacePolicy < ApplicationPolicy
   end
 
   def can_queue_run?
-    deny! if agent.present?
     allow! if in_owners_team?(record.organization)
     allow! if check_project_access?(%w[admin maintain write read])
     check_team_access('can-queue-run')
