@@ -138,6 +138,8 @@ module Api
           @plan.plan_file = file
         when 'logs'
           @plan.logs = file
+        when 'redacted.json'
+          @plan.redacted_json = file
         else
           head :bad_request
         end
@@ -156,6 +158,8 @@ module Api
           read_tfplan
         when 'logs'
           read_logs
+        when 'redacted.json'
+          read_redacted_json
         else
           head :bad_request
         end
@@ -172,6 +176,13 @@ module Api
         head :not_found and return if @plan.plan_structured_file.blank?
 
         contents = decrypt(@plan.plan_structured_file)
+        render body: contents, layout: false
+      end
+
+      def read_redacted_json
+        head :not_found and return if @plan.redacted_json.blank?
+
+        contents = decrypt(@plan.redacted_json)
         render body: contents, layout: false
       end
 
