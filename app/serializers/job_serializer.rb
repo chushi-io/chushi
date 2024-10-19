@@ -65,4 +65,12 @@ class JobSerializer < ApplicationSerializer
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'structured.json' }
     encrypt_upload_url(options)
   end
+
+  # - redacted-json-upload-url # For uploading the structured output
+  link :redacted_json_upload_url, if: proc { |record, _params|
+    record.operation == 'plan' && %w[running pending].include?(record.status)
+  } do |object|
+    options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'redacted.json' }
+    encrypt_upload_url(options)
+  end
 end
