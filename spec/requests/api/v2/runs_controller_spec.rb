@@ -5,7 +5,7 @@ require 'sidekiq/testing'
 
 describe Api::V2::RunsController do
   include JSONAPI::Deserialization
-
+  Sidekiq::Testing.fake!
 
   context 'when a user is in the workspace "admin" team' do
     organization = Fabricate(:organization)
@@ -27,8 +27,6 @@ describe Api::V2::RunsController do
     end
 
     it 'can create a plan-only run' do
-      Sidekiq::Testing.disable!
-      puts Sidekiq::Testing.disabled?
       headers = auth_headers(user_token).merge(common_headers)
       input = base_run_params(workspace, config_version, {
                                 'plan-only': true
