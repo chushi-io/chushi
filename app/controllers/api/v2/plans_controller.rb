@@ -25,7 +25,7 @@ module Api
 
       def json_output_redacted
         @plan = Plan.find_by(external_id: params[:id])
-        authorize! @workspace, to: :can_read_run?
+        authorize! @plan.run.workspace, to: :can_read_run?
 
         if @plan.plan_json_file.present?
           redirect_to encrypt_storage_url({ id: plan.id, class: @plan.class.name, file: 'tfplan.json' })
