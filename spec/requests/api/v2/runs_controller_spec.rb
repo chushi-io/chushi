@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 require 'sidekiq/testing'
-Sidekiq::Testing.disable!
+Sidekiq::Testing.fake!
 
 describe Api::V2::RunsController do
   include JSONAPI::Deserialization
