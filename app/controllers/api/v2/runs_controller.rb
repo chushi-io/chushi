@@ -5,7 +5,7 @@ module Api
     class RunsController < Api::ApiController
       before_action :load_run, except: [:create]
       def show
-        authorize! @run.workspace, to: :can_queue_run?
+        authorize! @run.workspace, to: :can_read_run?
 
         options = {}
         options[:include] = params[:include].split(',') if params[:include]

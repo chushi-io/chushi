@@ -19,6 +19,7 @@ class RunCreatedJob
         run_id: @run.id,
         status: 'pending',
         operation: 'plan',
+        locked: false,
         agent_pool_id: @run.workspace.agent_pool_id
       )
     end
