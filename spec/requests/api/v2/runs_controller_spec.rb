@@ -28,6 +28,7 @@ describe Api::V2::RunsController do
 
     it 'can create a plan-only run' do
       Sidekiq::Testing.disable!
+      puts Sidekiq::Testing.disabled?
       headers = auth_headers(user_token).merge(common_headers)
       input = base_run_params(workspace, config_version, {
                                 'plan-only': true
