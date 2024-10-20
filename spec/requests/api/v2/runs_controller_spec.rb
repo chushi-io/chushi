@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-# require 'sidekiq/testing'
+require 'sidekiq/testing'
 
 describe Api::V2::RunsController do
   include JSONAPI::Deserialization
