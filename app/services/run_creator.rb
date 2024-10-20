@@ -85,8 +85,16 @@ class RunCreator < ApplicationService
       @token.token_authable = @run
       @token.save!
 
-      RunCreatedJob.perform_async(@run.id)
-      GenerateConfigurationVersionJob.perform_async(@run.id) if @run.configuration_version.nil?
+      # TODO: We should only generate the config version
+      # job if a configuration version wasn't specified
+      # If the configuration version was created already
+      # we can create the job. If it wasn't, kick off the
+      # job to create a configuration version instead
+      if @run.configuration_version.present?
+        RunCreatedJob.perform_async(@run.id)
+      else
+        GenerateConfigurationVersionJob.perform_async(@run.id) if @run.configuration_version.nil?
+      end
     end
     true
   end
