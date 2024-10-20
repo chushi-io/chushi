@@ -5,7 +5,7 @@ require 'sidekiq/testing'
 
 describe Api::V2::RunsController do
   include JSONAPI::Deserialization
-  Sidekiq::Testing.fake!
+  Sidekiq::Testing.disable!
 
   context 'when a user is in the workspace "admin" team' do
     organization = Fabricate(:organization)
