@@ -32,7 +32,8 @@ module Api
         begin
           RunCreator.call(@run)
           render json: ::RunSerializer.new(@run, {}).serializable_hash, status: :created
-        rescue StandardError
+        rescue StandardError => error
+          Rails.logger.debug error.inspect
           render json: nil, status: :internal_server_error
         end
       end

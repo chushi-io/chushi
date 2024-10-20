@@ -18,6 +18,7 @@ describe Api::V2::RunsController do
 
     it 'fails to create for local execution mode' do
       local_workspace = Fabricate(:workspace, organization:)
+      puts local_workspace.inspect
       WorkspaceTeam.create!(workspace: local_workspace, team:, organization:, access: 'admin')
       headers = auth_headers(user_token).merge(common_headers)
       input = base_run_params(local_workspace, config_version)
