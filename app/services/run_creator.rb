@@ -92,8 +92,8 @@ class RunCreator < ApplicationService
       # job to create a configuration version instead
       if @run.configuration_version.present?
         RunCreatedJob.perform_async(@run.id)
-      else
-        GenerateConfigurationVersionJob.perform_async(@run.id) if @run.configuration_version.nil?
+      elsif @run.configuration_version.nil?
+        GenerateConfigurationVersionJob.perform_async(@run.id)
       end
     end
     true

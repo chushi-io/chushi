@@ -12,10 +12,10 @@ class ConfigurationVersionUploadedJob
 
     # TODO: We also might  not want to set it directly to
     # "plan_queued", we may eventually want "queuing"
-    if @version.auto_queue_runs
-      @version.runs.where(status: 'fetching').update(status: 'plan_queued')
-      return
-    end
+    return unless @version.auto_queue_runs
+
+    @version.runs.where(status: 'fetching').update(status: 'plan_queued')
+    nil
 
     # RunCreator
   end
