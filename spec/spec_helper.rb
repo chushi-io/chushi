@@ -24,6 +24,8 @@ require './spec/support/token_authentication'
 require './spec/support/api_helpers'
 require './spec/support/examples/workspace_examples'
 
+require 'sidekiq/testing'
+
 require 'action_policy'
 require 'action_policy/rails/controller'
 require 'action_policy/behaviour'
