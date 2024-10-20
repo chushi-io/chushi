@@ -15,5 +15,8 @@ class ConfigurationVersionUploadedJob
     return unless @version.auto_queue_runs
 
     @version.runs.where(status: 'fetching').update(status: 'plan_queued')
+    nil
+
+    # RunCreator
   end
 end

@@ -13,6 +13,14 @@ class RunCreatedJob
       RunStage::PrePlanRunningJob.perform_async(@run.id)
     else
       @run.update(status: 'plan_queued')
+      Job.create!(
+        organization_id: @run.workspace.organization_id,
+        workspace_id: @run.workspace.id,
+        run_id: @run.id,
+        status: 'pending',
+        operation: 'plan',
+        agent_pool_id: @run.workspace.agent_pool_id
+      )
     end
   end
 end
