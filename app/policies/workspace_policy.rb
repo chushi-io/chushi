@@ -11,7 +11,7 @@ class WorkspacePolicy < ApplicationPolicy
   def can_access?
     allow! if using_org_token?(record.organization)
     allow! if in_owners_team?(record.organization)
-    allow! is is_agent?
+    allow! if is_agent?
     allow! if check_project_access?(nil)
   end
 
