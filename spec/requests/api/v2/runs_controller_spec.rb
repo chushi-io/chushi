@@ -2,10 +2,10 @@
 
 require 'rails_helper'
 require 'sidekiq/testing'
-Sidekiq::Testing.fake!
 
 describe Api::V2::RunsController do
   include JSONAPI::Deserialization
+  Sidekiq::Testing.disable!
 
   context 'when a user is in the workspace "admin" team' do
     organization = Fabricate(:organization)
