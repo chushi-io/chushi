@@ -5,7 +5,7 @@ require 'rails_helper'
 require 'sidekiq/testing'
 
 describe RunCreatedJob do
-  Sidekiq::Testing.disable!
+  Sidekiq::Testing.fake!
 
   organization = Fabricate(:organization)
   workspace = Fabricate(:workspace, organization:)
