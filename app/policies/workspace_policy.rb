@@ -37,6 +37,7 @@ class WorkspacePolicy < ApplicationPolicy
   def can_read_run?
     allow! if in_owners_team?(record.organization)
     allow! if is_agent?
+    allow! if is_run_for_workspace?
     allow! if check_project_access?(nil)
     check_team_access('can-read-run')
   end
