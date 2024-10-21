@@ -30,10 +30,7 @@ module Api
         authorize! @version.workspace, to: :can_read_run?
 
         contents = @version.archive.read
-        if contents.start_with?('vault:')
-          contents = Vault::Rails.decrypt('transit', 'chushi_storage_contents',
-                                          obj.read)
-        end
+        contents = Vault::Rails.decrypt('transit', 'chushi_storage_contents', contents) if contents.start_with?('vault:')
 
         render body: contents, layout: false
       end
