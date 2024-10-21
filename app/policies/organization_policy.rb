@@ -8,7 +8,8 @@ class OrganizationPolicy < ApplicationPolicy
   def read_organization?
     (agent.present? && agent.organization_id == record.id) ||
       (user.present? && user.organizations.map(&:id).include?(record.id)) ||
-      (organization.present? && organization.id == record.id)
+      (organization.present? && organization.id == record.id) ||
+      (run.present? && run.workspace.organization_id == record.id)
   end
 
   def read?
