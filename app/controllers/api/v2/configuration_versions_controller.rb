@@ -27,7 +27,7 @@ module Api
 
       def download
         @version = ConfigurationVersion.find_by(external_id: params[:id])
-        authorize! @version.workspace, to: :can_queue_runs?
+        authorize! @version.workspace, to: :can_read_run?
 
         contents = @version.archive.read
         if contents.start_with?('vault:')
