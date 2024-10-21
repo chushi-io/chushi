@@ -43,6 +43,7 @@ class WorkspacePolicy < ApplicationPolicy
 
   def can_read_variable?
     allow! if in_owners_team?(record.organization)
+    allow! if is_agent?
     allow! if check_project_access?(nil)
     check_team_access('can-read-variable')
   end
@@ -55,6 +56,7 @@ class WorkspacePolicy < ApplicationPolicy
 
   def can_read_state_versions?
     allow! if in_owners_team?(record.organization)
+    allow! if is_run_for_workspace?
     allow! if check_project_access?(nil)
     check_team_access('can-read-state-versions')
   end
@@ -80,6 +82,7 @@ class WorkspacePolicy < ApplicationPolicy
   # Must be team member with lock / unlock
   def can_lock?
     allow! if in_owners_team?(record.organization)
+    allow! if is_run_for_workspace?
     allow! if check_project_access?(%w[admin maintain write])
     check_team_access('can-lock')
   end
@@ -87,6 +90,7 @@ class WorkspacePolicy < ApplicationPolicy
   # Must be team member with lock / unlock
   def can_unlock?
     allow! if in_owners_team?(record.organization)
+    allow! if is_run_for_workspace?
     allow! if check_project_access?(%w[admin maintain write])
     check_team_access('can-unlock')
   end
@@ -179,6 +183,12 @@ class WorkspacePolicy < ApplicationPolicy
     return local_projects.length.positive? if scopes.nil?
 
     local_projects.any? { |project_team| scopes.include?(project_team.access) }
+  end
+
+  def is_run_for_workspace?
+    return false if run.blank?
+
+    run.workspace.id == record.id
   end
 
   def can_access_workspace?
