@@ -3,13 +3,7 @@
 Doorkeeper::OpenidConnect.configure do
   issuer Chushi.domain
 
-  signing_key do
-    if ENV.key?('OIDC_PRIVATE_KEY')
-      ENV.fetch('OIDC_PRIVATE_KEY')
-    else
-      File.read(ENV.fetch('OIDC_PRIVATE_KEY_FILE', 'oidc_key.pem'))
-    end
-  end
+  signing_key Chushi.oidc_private_key
 
   subject_types_supported [:public]
 
