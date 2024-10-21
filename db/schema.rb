@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_19_015234) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_21_020858) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -297,6 +297,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_19_015234) do
     t.string "plan_json_file"
     t.string "plan_structured_file"
     t.text "redacted_json"
+    t.text "logs"
     t.index ["external_id"], name: "index_plans_on_external_id", unique: true
     t.index ["organization_id"], name: "index_plans_on_organization_id"
   end
