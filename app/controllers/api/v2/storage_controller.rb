@@ -4,7 +4,7 @@ module Api
   module V2
     class StorageController < Api::ApiController
       skip_before_action :verify_access_token
-      # skip_before_action :set_default_response_format
+      skip_before_action :set_default_response_format
 
       skip_verify_authorized
 
@@ -52,7 +52,7 @@ module Api
 
       def read_state_version
         @version = StateVersion.find(@object['id'])
-        if @object['file'] == 'state'
+        if @object['filename'] == 'state'
           head :not_found and return if @version.state_file.blank?
 
           contents = decrypt(@version.state_file)
@@ -98,7 +98,7 @@ module Api
       def upload_state_version
         @version = StateVersion.find(@object['id'])
         file = get_uploaded_file(@object['id'])
-        case @object['file']
+        case @object['filename']
         when 'state'
           @version.state_file = file
           @version.save!
@@ -131,7 +131,7 @@ module Api
       def upload_plan_files
         @plan = Plan.find(@object['id'])
         file = get_uploaded_file(@object['id'])
-        case @object['file']
+        case @object['filename']
         when 'tfplan.json'
           @plan.plan_json_file = file
         when 'structured.json'
@@ -151,7 +151,7 @@ module Api
 
       def read_plan_file
         @plan = Plan.find(@object['id'])
-        case @object['file']
+        case @object['filename']
         when 'tfplan.json'
           read_tfplan_json
         when 'structured.json'
