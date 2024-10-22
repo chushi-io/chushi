@@ -157,8 +157,12 @@ GEM
       i18n (>= 1.8.11, < 2)
     faraday (2.9.2)
       faraday-net_http (>= 2.0, < 3.2)
+    faraday-multipart (1.0.4)
+      multipart-post (~> 2)
     faraday-net_http (3.1.0)
       net-http
+    faraday-retry (2.2.1)
+      faraday (~> 2.0)
     ffi (1.17.0-aarch64-linux-gnu)
     ffi (1.17.0-arm-linux-gnu)
     ffi (1.17.0-arm64-darwin)
@@ -253,6 +257,7 @@ GEM
     multi_json (1.15.0)
     multi_xml (0.7.1)
       bigdecimal (~> 3.1)
+    multipart-post (2.4.1)
     mutex_m (0.2.0)
     net-http (0.4.1)
       uri
@@ -483,6 +488,8 @@ DEPENDENCIES
   dotenv
   fabrication
   faker (~> 3.4)
+  faraday-multipart (~> 1.0)
+  faraday-retry (~> 2.2)
   fog-aws (~> 3.27)
   fog-core (~> 2.4)
   git (~> 1.19)

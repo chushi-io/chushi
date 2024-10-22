@@ -1,5 +1,7 @@
 terraform {
   cloud {
+    organization = "chushi"
+    hostname = "cloud.chushi.io"
     workspaces {
       name = "chushi-infra-workspace-testing-agent"
     }

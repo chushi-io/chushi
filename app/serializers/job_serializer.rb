@@ -35,9 +35,9 @@ class JobSerializer < ApplicationSerializer
     %w[errored completed].include?(record.status)
   } do |object|
     options = if object.operation == 'plan'
-                { id: object.run.plan.id, class: object.run.plan.class.name }
+                { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'logs' }
               else
-                { id: object.run.apply.id, class: object.run.apply.class.name }
+                { id: object.run.apply.id, class: object.run.apply.class.name, filename: 'logs' }
               end
     encrypt_upload_url(options)
   end

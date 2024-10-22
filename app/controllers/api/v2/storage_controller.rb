@@ -4,6 +4,8 @@ module Api
   module V2
     class StorageController < Api::ApiController
       skip_before_action :verify_access_token
+      # skip_before_action :set_default_response_format
+
       skip_verify_authorized
 
       before_action :load_storage_object

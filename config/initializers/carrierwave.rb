@@ -8,4 +8,6 @@ CarrierWave.configure do |config|
     use_iam_profile: false
   }
   config.fog_public = false
+
+  config.enable_processing = false if Rails.env.test?
 end
