@@ -33,12 +33,12 @@ class ProviderVersionSerializer < ApplicationSerializer
   attribute :shasums_download, if: proc { |record, _params|
     record.shasums.present?
   } do |object|
-    encrypt_storage_url({ id: object.id, class: object.class.name, file: 'shasums' })
+    encrypt_storage_url({ id: object.id, class: object.class.name, filename: 'shasums' })
   end
 
   attribute :shasums_sig_download, if: proc { |record, _params|
     record.shasums_sig.present?
   } do |object|
-    encrypt_storage_url({ id: object.id, class: object.class.name, file: 'shasums.sig' })
+    encrypt_storage_url({ id: object.id, class: object.class.name, filename: 'shasums.sig' })
   end
 end
