@@ -9,7 +9,5 @@ CarrierWave.configure do |config|
   }
   config.fog_public = false
 
-  if Rails.env.test?
-    config.enable_processing = false
-  end
+  config.enable_processing = false if Rails.env.test?
 end

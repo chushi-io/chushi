@@ -83,6 +83,6 @@ gem 'rubocop-rspec_rails', require: false
 gem 'fabrication'
 gem 'faker', '~> 3.4'
 
-gem "faraday-retry", "~> 2.2"
+gem 'faraday-retry', '~> 2.2'
 
-gem "faraday-multipart", "~> 1.0"
+gem 'faraday-multipart', '~> 1.0'
