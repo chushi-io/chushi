@@ -10,6 +10,7 @@ module Api
 
       before_action :load_storage_object
       def show
+        Rails.logger.debug @object.to_json
         case @object['class']
         when 'StateVersion'
           read_state_version
@@ -26,6 +27,7 @@ module Api
 
       def update
         # Decode the upload object
+        Rails.logger.debug @object.to_json
         case @object['class']
         when 'ConfigurationVersion'
           upload_configuration_version
