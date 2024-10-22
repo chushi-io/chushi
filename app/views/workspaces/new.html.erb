@@ -1,29 +1,74 @@
-<div class="w-full max-w-xs">
-  <%= form_with model: @workspace do |form| %>
-    <%= form.label :name %>
-    <%= form.text_field :name, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.label :description %>
-    <%= form.text_field :description, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.label :environment %>
-    <%= form.text_field :environment, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.label :execution_mode %>
-    <%= form.select :execution_mode, ["remote", "local", "agent"], {}, class: "select select-bordered w-full max-w-xs" %>
+<nav class="mb-3" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="<%= workspaces_path(@organization.name) %>">Workspaces</a></li>
+    <li class="breadcrumb-item active">New</li>
+  </ol>
+</nav>
 
-    <%= form.label :tofu_version %>
-    <%= form.select :tofu_version, ["v1.6.2", "v1.7.0-rc1", "latest"], {}, class: "select select-bordered w-full max-w-xs" %>
+<h2 class="mb-4">Create a workspace</h2>
 
-    <%= check_box_tag(:auto_apply) %>
-    <%= label_tag(:auto_apply, "Auto Apply") %>
+<div class="row">
+  <div class="col-xl-9">
+    <%= form_with model: @workspace, class: "row g-3 mb-6" do |form| %>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :name, class: "form-control" %>
+          <label for="floatingInputGrid">Name</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :description, class: "form-control" %>
+          <label for="floatingInputGrid">Description</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :working_directory, class: "form-control" %>
+          <label for="floatingInputGrid">Working Directory</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-floating">
+          <%= form.text_field :environment, class: "form-control" %>
+          <label for="floatingInputGrid">Environment</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-4">
+        <div class="form-floating">
+          <%= form.select :execution_mode, ["local", "remote", "agent"], {}, {class: "form-select"} %>
+          <label for="floatingSelectTask">Execution Mode</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-4">
+        <div class="form-floating">
+          <%= form.select :tofu_version, ["1.6.3", "1.7.3", "1.8.3"], {}, {class: "form-select"} %>
+          <label for="floatingSelectTask">Tofu Version</label>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-check mb-0">
+          <%= form.check_box :auto_apply, class: "form-check-input" %>
+          <%= form.label :auto_apply, class: "form-check-label mb-0" %>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="form-check mb-0">
+          <%= form.check_box :allow_destroy_plan, class: "form-check-input" %>
+          <%= form.label :allow_destroy_plan, class: "form-check-label mb-0" %>
+        </div>
+      </div>
 
-    <%= check_box_tag(:allow_destroy_plan) %>
-    <%= label_tag(:allow_destroy_plan, "Allow Destroy Plan") %>
-
-    <%= form.label :source %>
-    <%= form.text_field :source, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.label :working_directory %>
-    <%= form.text_field :working_directory, class: "input input-bordered w-full max-w-xs" %>
-    <%= form.label :vcs_connection_id %>
-    <%= form.select :vcs_connection_id, @vcs_connections.map{ |conn| [conn.name, conn.id]}, {}, class: "select select-bordered w-full max-w-xs" %>
-    <%= form.submit "Create Workspace", class: "btn btn-primary btn-sm" %>
-  <% end %>
+      <div class="col-12 gy-6">
+        <div class="row g-3 justify-content-end">
+          <div class="col-auto">
+            <%= link_to "Cancel", workspaces_path(@organization.name), class: "btn btn-phoenix-primary px-5" %>
+          </div>
+          <div class="col-auto">
+            <%= form.submit "Create Workspace", class: "btn btn-primary px-5 px-sm-15" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>

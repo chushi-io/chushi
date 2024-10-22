@@ -4,7 +4,7 @@ class OrganizationsController < AuthenticatedController
   skip_before_action :set_organization!, except: [:show]
 
   before_action lambda {
-    authorize! current_user, to: :can_create_organizations
+    authorize! current_user, to: :can_create_organizations?
   }, only: %i[new create]
   def index
     @organizations = current_user.organizations

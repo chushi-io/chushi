@@ -13,9 +13,10 @@ Rails.application.routes.draw do
       resources :tokens
     end
 
-    get 'organizations', action: :index, controller: :organizations
+    get 'organizations', action: :index, controller: :organizations, as: :organizations
     post 'organizations', action: :create, controller: :organizations
-    get 'organizations/:organization', action: :show, controller: :organizations
+    get 'organizations/new', action: :new, controller: :organizations
+    get 'organizations/:organization', action: :show, controller: :organizations, as: :organization
     resources :organizations, only: [], path: '', param: :organization do
       member do
         # Application Routing

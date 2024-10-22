@@ -30,7 +30,7 @@ class WorkspacesController < AuthenticatedController
     @workspace = @organization.workspaces.new(workspace_params)
     if @workspace.save
       flash[:info] = 'Workspace created'
-      redirect_to @workspace
+      redirect_to workspace_path(@organization.name, @workspace)
     else
       flash[:error] = 'Failed creating workspace'
       render 'new'

@@ -3,7 +3,7 @@
 class RunsController < AuthenticatedController
   before_action :set_workspace
   before_action lambda {
-    authorize! @workspace, to: :access?
+    authorize! @workspace, to: :can_access?
   }, only: %i[index show]
 
   before_action lambda {
