@@ -59,7 +59,7 @@ class JobSerializer < ApplicationSerializer
   end
 
   # - hosted-structured-json-upload-url # For uploading the structured output
-  link :hosted_plan_upload_url, if: proc { |record, _params|
+  link :hosted_structured_json_upload_url, if: proc { |record, _params|
     record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'structured.json' }
