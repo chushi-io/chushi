@@ -8,8 +8,14 @@ Doorkeeper::OpenidConnect.configure do
   subject_types_supported [:public]
 
   resource_owner_from_access_token do |access_token|
-    User.find_by(id: access_token.resource_owner_id)
-    # Run.find_by(id: access_token.resource_owner_id)
+    case access_token.resource_owner_type
+    when "Run"
+      Run.find_by(id: access_token.resource_owner_id)
+    when "User"
+      User.find_by(id: access_token.resource_owner_id)
+    else
+      nil
+    end
   end
 
   auth_time_from_resource_owner do |resource_owner|
@@ -38,7 +44,6 @@ Doorkeeper::OpenidConnect.configure do
 
   subject do |resource_owner, _application|
     # Generate tokens for a run class
-    puts resource_owner.class
     if resource_owner.is_a?(Run)
       # Note that these tokens are not used to authenticate to Chushi.
       # These are only generated so as to support OIDC authentication with
