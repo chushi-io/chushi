@@ -13,4 +13,11 @@ class WellKnownController < ApplicationController
       'versions.v1': '/api/v1/versions/'
     }
   end
+
+  def app
+    render json: {
+      client: Doorkeeper::Application.find_by(name: "Chushi Frontend").uid,
+      authority: "https://#{Chushi.domain}"
+    }
+  end
 end

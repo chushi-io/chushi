@@ -8,7 +8,8 @@ Doorkeeper::OpenidConnect.configure do
   subject_types_supported [:public]
 
   resource_owner_from_access_token do |access_token|
-    Run.find_by(id: access_token.resource_owner_id)
+    User.find_by(id: access_token.resource_owner_id)
+    # Run.find_by(id: access_token.resource_owner_id)
   end
 
   auth_time_from_resource_owner do |resource_owner|
@@ -36,12 +37,23 @@ Doorkeeper::OpenidConnect.configure do
   end
 
   subject do |resource_owner, _application|
-    organization = resource_owner.workspace.organization.name
-    project = 'default'
-    project = resource_owner.workspace.project.external_id unless resource_owner.workspace.project.nil?
-    workspace = resource_owner.workspace.name
-    operation = 'plan'
-    "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"
+    # Generate tokens for a run class
+    puts resource_owner.class
+    if resource_owner.is_a?(Run)
+      # Note that these tokens are not used to authenticate to Chushi.
+      # These are only generated so as to support OIDC authentication with
+      # external cloud providers
+      organization = resource_owner.workspace.organization.name
+      project = 'default'
+      project = resource_owner.workspace.project.external_id unless resource_owner.workspace.project.nil?
+      workspace = resource_owner.workspace.name
+      operation = 'plan'
+      "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"
+    else
+      # Generate default tokens for a user
+      puts resource_owner.inspect
+      resource_owner.id
+    end
   end
 
   # Protocol to use when generating URIs for the discovery endpoint,
@@ -55,12 +67,9 @@ Doorkeeper::OpenidConnect.configure do
 
   # Example claims:
   claims do
-    claim :workspace, response: %i[id_token user_info], &:id
-
-    claim :project, response: %i[id_token user_info], &:agent_id
-
-    claim :organization, response: %i[id_token user_info], &:organization_id
-
+    claim :email do |resource_owner|
+      resource_owner.email
+    end
     #   normal_claim :_foo_ do |resource_owner|
     #     resource_owner.foo
     #   end

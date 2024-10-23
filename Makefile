@@ -6,3 +6,8 @@ rspec:
 
 rubocop:
 	bundle exec rubocop
+
+.PHONY: ui
+
+ui:
+	cd ui && npm run build && cp -r ./build/* ../public/
