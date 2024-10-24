@@ -4,6 +4,8 @@ import Organizations from "./pages/organizations/index";
 import Organization from "./pages/organizations/show";
 import Workspaces from "./pages/workspaces/index";
 import Workspace from "./pages/workspaces/show";
+import Runs from "./pages/runs/index";
+import Run from "./pages/runs/show";
 
 const router = createBrowserRouter([
   {
@@ -27,9 +29,20 @@ const router = createBrowserRouter([
         element: <Workspaces.Page />,
         loader: Workspaces.Loader
       }, {
-        path: "workspaces/:name",
-        element: <Workspace.Page />,
-        loader: Workspace.Loader
+        path: ":workspaceName",
+        children: [{
+          path: "",
+          loader: Workspace.Loader,
+          element: <Workspace.Page />
+        }, {
+          path: "runs",
+          loader: Runs.Loader,
+          element: <Runs.Page />
+        }, {
+          path: "runs/:runId",
+          loader: Run.Loader,
+          element: <Run.Page />
+        }]
       }]
     }]
   }

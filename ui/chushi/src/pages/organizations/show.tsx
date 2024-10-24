@@ -9,7 +9,7 @@ const Page = () => {
   )
 }
 
-export const Loader = async ({ params }: { params: any}): Promise<Organization[]> => {
+const Loader = async ({ params }: { params: any}): Promise<Organization[]> => {
   const { data: organizations } = await apiClient.get(`/api/v2/organizations/${params.organizationName}`)
   return organizations as Organization[];
 }

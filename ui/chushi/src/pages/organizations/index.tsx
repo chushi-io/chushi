@@ -40,7 +40,7 @@ const Page = () => {
   )
 }
 
-export const Loader = async (_args: any, _handlerCtx?: unknown): Promise<Organization[]> => {
+const Loader = async (_args: any, _handlerCtx?: unknown): Promise<Organization[]> => {
   const { data: organizations } = await apiClient.get('/api/v2/organizations')
   return organizations as Organization[];
 }

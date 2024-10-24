@@ -7,9 +7,9 @@ const Page = () => {
   let { organizationName } = useParams();
 
   const items = [
-    { title: 'Workspaces', href: '#' },
+    { title: 'Workspaces', href: `organizations/${organizationName}/workspaces` },
   ].map((item, index) => (
-    <Anchor href={item.href} key={index}>
+    <Anchor to={item.href} key={index} component={Link}>
       {item.title}
     </Anchor>
   ));
@@ -18,7 +18,7 @@ const Page = () => {
   const rows = workspaces.map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>
-        <Link to={`/${organizationName}/workspaces/${element.name}`}>{element.name}</Link>
+        <Link to={`/${organizationName}/${element.name}`}>{element.name}</Link>
       </Table.Td>
       {/*<Table.Td>{element.email}</Table.Td>*/}
       {/*<Table.Td>{element.createdAt}</Table.Td>*/}
@@ -43,7 +43,7 @@ const Page = () => {
   )
 }
 
-export const Loader = async ({ params }: { params: any}): Promise<Workspace[]> => {
+const Loader = async ({ params }: { params: any}): Promise<Workspace[]> => {
   const { data: workspaces } = await apiClient.get(`/api/v2/organizations/${params.organizationName}/workspaces`)
   return workspaces as Workspace[];
 }
