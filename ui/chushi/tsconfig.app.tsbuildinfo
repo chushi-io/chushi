@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/router.tsx","./src/main.tsx","./src/vite-env.d.ts"],"version":"5.6.3"}
+{"root":["./src/app.tsx","./src/client.tsx","./src/router.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/applayout.tsx","./src/pages/organizations/index.tsx","./src/pages/organizations/show.tsx","./src/pages/workspaces/index.tsx","./src/pages/workspaces/show.tsx","./src/types/organization.tsx","./src/types/workspace.tsx","./src/types/index.tsx"],"version":"5.6.3"}

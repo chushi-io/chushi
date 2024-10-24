@@ -61,7 +61,7 @@ module Api
     end
 
     def is_organization
-      @access_token.token_authable_type == 'Organization'
+      @access_token&.token_authable_type == 'Organization'
     end
 
     def current_organization
@@ -81,25 +81,25 @@ module Api
     end
 
     def current_team
-      return unless @access_token.token_authable_type == 'Team'
+      return unless @access_token&.token_authable_type == 'Team'
 
       Team.find(@access_token.token_authable_id)
     end
 
     def current_task
-      return unless @access_token.token_authable_type == 'RunTask'
+      return unless @access_token&.token_authable_type == 'RunTask'
 
       RunTask.find(@access_token.token_authable_id)
     end
 
     def current_run
-      return unless @access_token.token_authable_type == 'Run'
+      return unless @access_token&.token_authable_type == 'Run'
 
       Run.find(@access_token.token_authable_id)
     end
 
     def current_agent
-      return unless @access_token.token_authable_type == 'AgentPool'
+      return unless @access_token&.token_authable_type == 'AgentPool'
 
       AgentPool.find(@access_token.token_authable_id)
     end
