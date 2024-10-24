@@ -67,4 +67,38 @@ describe Api::V2::RunsController do
       expect(body['task-stage_ids'].length).to be 1
     end
   end
+
+  context 'generates valid OIDC tokens' do
+    organization = Fabricate(:organization)
+    agent_pool = Fabricate(:agent_pool, organization:)
+    workspace = Fabricate(:workspace, organization:, execution_mode: 'agent', agent_pool:)
+    run = Fabricate(:run, organization:, workspace:)
+    agent_pool_token = Fabricate(:access_token, token_authable: agent_pool)
+    Doorkeeper::Application.create!(name: "Run OIDC", redirect_uri: "https://localhost:3000")
+
+    it 'when using a default project' do
+      headers = auth_headers(agent_pool_token).merge(common_headers)
+      get oidc_token_api_v2_run_path(run.external_id), headers: headers
+
+      expect(response).to have_http_status :ok
+      body = response.parsed_body
+      expect(body['token']).to_not be_nil
+      decoded_token = JWT.decode(body['token'], nil, false)
+      expect(decoded_token[0]['sub']).to eq("organization:#{organization.name}:project:default:workspace:#{workspace.name}:run_phase:plan")
+    end
+
+    it 'when using a custom project' do
+      headers = auth_headers(agent_pool_token).merge(common_headers)
+      workspace.project = Fabricate(:project, organization:)
+      workspace.save!
+      get oidc_token_api_v2_run_path(run.external_id), headers: headers
+
+      expect(response).to have_http_status :ok
+      body = response.parsed_body
+      expect(body['token']).to_not be_nil
+      decoded_token = JWT.decode(body['token'], nil, false)
+      expect(decoded_token[0]['sub']).to eq("organization:#{organization.name}:project:#{workspace.project.external_id}:workspace:#{workspace.name}:run_phase:plan")
+    end
+  end
+
 end

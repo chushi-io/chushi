@@ -50,7 +50,7 @@ module Api
       end
 
       def index
-        render json: nil, status: :not_found and return unless is_user
+        render json: nil, status: :not_found and return unless current_user.present?
 
         @organizations = current_user.organizations
         render json: ::OrganizationSerializer.new(@organizations, {}).serializable_hash

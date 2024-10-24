@@ -5,44 +5,46 @@ Rails.application.routes.draw do
   use_doorkeeper
   use_doorkeeper_openid_connect
   devise_for :users
+  get '.well-known/app.json', controller: :well_known, action: :app
   get '.well-known/terraform.json', controller: :well_known, action: :terraform
   get 'github/setup', controller: :github, action: :setup
 
-  scope 'app' do
-    namespace :settings do
-      resources :tokens
-    end
-
-    get 'organizations', action: :index, controller: :organizations
-    post 'organizations', action: :create, controller: :organizations
-    get 'organizations/:organization', action: :show, controller: :organizations
-    resources :organizations, only: [], path: '', param: :organization do
-      member do
-        # Application Routing
-        resources :workspaces do
-          resources :runs
-        end
-
-        resources :agent_pools
-        resources :applies
-        resources :configuration_versions
-        resources :plans
-        resources :policies
-        resources :policy_sets
-        resources :projects
-        resources :registry_modules, path: 'modules'
-        resources :providers
-        resources :runs
-        resources :run_tasks
-        resources :state_versions
-        resources :teams
-        resources :users
-        resources :variables
-        resources :variable_sets
-        resources :vcs_connections
-      end
-    end
-  end
+  get 'app/*_', controller: :application, action: :index
+  # scope 'app' do
+  #   namespace :settings do
+  #     resources :tokens
+  #   end
+  #
+  #   get 'organizations', action: :index, controller: :organizations
+  #   post 'organizations', action: :create, controller: :organizations
+  #   get 'organizations/:organization', action: :show, controller: :organizations
+  #   resources :organizations, only: [], path: '', param: :organization do
+  #     member do
+  #       # Application Routing
+  #       resources :workspaces do
+  #         resources :runs
+  #       end
+  #
+  #       resources :agent_pools
+  #       resources :applies
+  #       resources :configuration_versions
+  #       resources :plans
+  #       resources :policies
+  #       resources :policy_sets
+  #       resources :projects
+  #       resources :registry_modules, path: 'modules'
+  #       resources :providers
+  #       resources :runs
+  #       resources :run_tasks
+  #       resources :state_versions
+  #       resources :teams
+  #       resources :users
+  #       resources :variables
+  #       resources :variable_sets
+  #       resources :vcs_connections
+  #     end
+  #   end
+  # end
 
   # Registry Routes
   namespace :registry, defaults: { format: :json } do
