@@ -1,6 +1,6 @@
 import {Workspace} from "../../types";
 import {apiClient} from "../../Client.tsx";
-import {Anchor, Breadcrumbs, Container, Table} from "@mantine/core";
+import {Alert, Anchor, Badge, Breadcrumbs, Container, Table} from "@mantine/core";
 import {Link, useLoaderData, useParams} from "react-router-dom";
 
 const Page = () => {
@@ -20,10 +20,24 @@ const Page = () => {
       <Table.Td>
         <Link to={`/${organizationName}/${element.name}`}>{element.name}</Link>
       </Table.Td>
-      {/*<Table.Td>{element.email}</Table.Td>*/}
+      <Table.Td>
+        <Badge color={"blue"}>TBD</Badge>
+      </Table.Td>
+      <Table.Td>
+        {element.terraformVersion}
+      </Table.Td>
       {/*<Table.Td>{element.createdAt}</Table.Td>*/}
     </Table.Tr>
   ));
+
+  if (workspaces.length == 0) {
+    return (
+      <Alert variant="light" color="blue">
+        Oops, we don't have any workspaces yet! <Link to={`/${organizationName}/workspaces/new`}>Create one now</Link>
+      </Alert>
+    )
+  }
+
   return (
     <Container>
       <Breadcrumbs separator=">" separatorMargin="md" mt="xs">
@@ -33,7 +47,8 @@ const Page = () => {
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Name</Table.Th>
-            {/*<Table.Th>Email</Table.Th>*/}
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Tofu Version</Table.Th>
             {/*<Table.Th>Created At</Table.Th>*/}
           </Table.Tr>
         </Table.Thead>

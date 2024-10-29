@@ -1,6 +1,6 @@
 import { Organization } from "../../types";
 import {Link, useLoaderData} from "react-router-dom";
-import {Anchor, Breadcrumbs, Container, Table} from "@mantine/core";
+import {Anchor, Breadcrumbs, Button, Container, Table} from "@mantine/core";
 import {apiClient} from "../../Client.tsx";
 const Page = () => {
   const items = [
@@ -36,6 +36,7 @@ const Page = () => {
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
+      <Button to={"/organizations/new"} component={Link}>New Organization</Button>
     </Container>
   )
 }

@@ -13,9 +13,11 @@
   "dependencies": {
     "@mantine/core": "^7.13.3",
     "@mantine/hooks": "^7.13.3",
+    "@tabler/icons-react": "^3.20.0",
     "axios": "^1.7.7",
     "deserialize-json-api": "^2.0.0",
     "json-api-deserialize": "^0.0.4",
+    "jsonapi-serializer": "^3.6.9",
     "oidc-client-ts": "^3.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
+    "@types/jsonapi-serializer": "^3.6.8",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",

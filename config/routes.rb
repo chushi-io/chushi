@@ -10,41 +10,6 @@ Rails.application.routes.draw do
   get 'github/setup', controller: :github, action: :setup
 
   get 'app/*_', controller: :application, action: :index
-  # scope 'app' do
-  #   namespace :settings do
-  #     resources :tokens
-  #   end
-  #
-  #   get 'organizations', action: :index, controller: :organizations
-  #   post 'organizations', action: :create, controller: :organizations
-  #   get 'organizations/:organization', action: :show, controller: :organizations
-  #   resources :organizations, only: [], path: '', param: :organization do
-  #     member do
-  #       # Application Routing
-  #       resources :workspaces do
-  #         resources :runs
-  #       end
-  #
-  #       resources :agent_pools
-  #       resources :applies
-  #       resources :configuration_versions
-  #       resources :plans
-  #       resources :policies
-  #       resources :policy_sets
-  #       resources :projects
-  #       resources :registry_modules, path: 'modules'
-  #       resources :providers
-  #       resources :runs
-  #       resources :run_tasks
-  #       resources :state_versions
-  #       resources :teams
-  #       resources :users
-  #       resources :variables
-  #       resources :variable_sets
-  #       resources :vcs_connections
-  #     end
-  #   end
-  # end
 
   # Registry Routes
   namespace :registry, defaults: { format: :json } do
@@ -79,14 +44,15 @@ Rails.application.routes.draw do
       get 'organizations', action: :index, controller: :organizations
       get 'object/:key', action: :show, controller: :storage, as: :get_storage
       put 'object/:key', action: :update, controller: :storage, as: :upload_storage
+      post 'organizations', action: :create, controller: :organizations
       scope '/organizations/:organization_id', as: :organization do
-        get '', action: :show, controller: 'organizations'
-        patch '', action: :update, controller: 'organizations'
-        get 'entitlement-set', action: :entitlements, controller: 'organizations'
-        get 'workspaces', action: :index, controller: 'workspaces'
-        get 'workspaces/:id', action: :show, controller: 'workspaces'
-        get 'runs/queue', action: :queue, controller: 'organizations'
-        match 'tags', via: %i[get post delete], controller: 'organizations'
+        get '', action: :show, controller: :organizations
+        patch '', action: :update, controller: :organizations
+        get 'entitlement-set', action: :entitlements, controller: :organizations
+        get 'workspaces', action: :index, controller: :workspaces
+        get 'workspaces/:id', action: :show, controller: :workspaces
+        get 'runs/queue', action: :queue, controller: :organizations
+        match 'tags', via: %i[get post delete], controller: :organizations
 
         get 'agent-pools', action: :index, controller: 'agents'
         post 'agent-pools', action: :create, controller: 'agents'

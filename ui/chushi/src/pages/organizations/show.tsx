@@ -14,7 +14,4 @@ const Loader = async ({ params }: { params: any}): Promise<Organization[]> => {
   return organizations as Organization[];
 }
 
-export default {
-  Page,
-  Loader
-}
+export default { Page, Loader }

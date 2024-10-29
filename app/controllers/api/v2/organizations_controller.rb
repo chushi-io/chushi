@@ -64,6 +64,27 @@ module Api
         render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
       end
 
+      def create
+        authorize! current_user, to: :can_create_organizations?
+
+        org_input = org_params
+        org_input['organization_type'] = org_input['type']
+        puts org_input.inspect
+
+        @organization = Organization.new(org_input.except('type'))
+        @organization.users << current_user
+        @owner_team = Team.new(name: 'owners', visibility: 'organization')
+        @owner_team.users << current_user
+        @organization.teams << @owner_team
+        @organization.projects << Project.new(name: 'Default Project', is_default: true)
+
+        if @organization.save
+          render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash, status: :created
+        else
+          render json: @organization.errors.full_messages, status: :bad_request
+        end
+      end
+
       def update
         @organization = Organization
                         .where(name: params[:organization_id])
@@ -101,6 +122,7 @@ module Api
         map_params([
                      :name,
                      :email,
+                     :type,
                      'default-execution-mode'
                    ])
       end
