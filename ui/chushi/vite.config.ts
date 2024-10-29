@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   base: "/app/",
   build: {
-    outDir: '../../public/app',
     emptyOutDir: true, // also necessary
     minify: false
   }

@@ -5,7 +5,7 @@ module Api
     class AccountDetailsController < Api::ApiController
       skip_verify_authorized
       def show
-        head :unauthorized unless current_user.present?
+        head :unauthorized if current_user.blank?
 
         render json: ::UserSerializer.new(current_user, {}).serializable_hash
       end

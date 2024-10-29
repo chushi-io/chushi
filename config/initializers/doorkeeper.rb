@@ -10,7 +10,6 @@ Doorkeeper.configure do
     current_user || warden.authenticate!(scope: :user)
   end
 
-
   # If you didn't skip applications controller from Doorkeeper routes in your application routes.rb
   # file then you need to declare this block in order to restrict access to the web interface for
   # adding oauth authorized applications. In other case it will return 403 Forbidden response
@@ -242,7 +241,7 @@ Doorkeeper.configure do
   # For more information go to
   # https://doorkeeper.gitbook.io/guides/ruby-on-rails/scopes
   #
-  default_scopes  :public, :openid
+  default_scopes :public, :openid
   # optional_scopes :write, :update
 
   # Allows to restrict only certain scopes for grant_type.
@@ -366,7 +365,7 @@ Doorkeeper.configure do
   #   https://datatracker.ietf.org/doc/html/rfc6819#section-4.4.3
   #
   # grant_flows %w[authorization_code client_credentials]
-  grant_flows %w(authorization_code implicit_oidc)
+  grant_flows %w[authorization_code implicit_oidc]
   # Allows to customize OAuth grant flows that +each+ application support.
   # You can configure a custom block (or use a class respond to `#call`) that must
   # return `true` in case Application instance supports requested OAuth grant flow

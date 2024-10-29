@@ -78,7 +78,7 @@ module Api
         render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
       end
 
-      def runs;
+      def runs
         authorize! @workspace, to: :can_read_run?
         @runs = @workspace.runs
         render json: ::RunSerializer.new(@runs, {}).serializable_hash

@@ -9,12 +9,10 @@ Doorkeeper::OpenidConnect.configure do
 
   resource_owner_from_access_token do |access_token|
     case access_token.resource_owner_type
-    when "Run"
+    when 'Run'
       Run.find_by(id: access_token.resource_owner_id)
-    when "User"
+    when 'User'
       User.find_by(id: access_token.resource_owner_id)
-    else
-      nil
     end
   end
 
@@ -56,7 +54,6 @@ Doorkeeper::OpenidConnect.configure do
       "organization:#{organization}:project:#{project}:workspace:#{workspace}:run_phase:#{operation}"
     else
       # Generate default tokens for a user
-      puts resource_owner.inspect
       resource_owner.id
     end
   end
@@ -72,9 +69,7 @@ Doorkeeper::OpenidConnect.configure do
 
   # Example claims:
   claims do
-    claim :email do |resource_owner|
-      resource_owner.email
-    end
+    claim :email, &:email
     #   normal_claim :_foo_ do |resource_owner|
     #     resource_owner.foo
     #   end

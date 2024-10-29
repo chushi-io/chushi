@@ -15,7 +15,7 @@ class WellKnownController < ApplicationController
   end
 
   def app
-    application = Doorkeeper::Application.find_by(name: "Chushi Frontend")
+    application = Doorkeeper::Application.find_by(name: 'Chushi Frontend')
     render json: {
       client: application.uid,
       authority: "https://#{Chushi.domain}",

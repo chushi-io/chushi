@@ -50,7 +50,7 @@ module Api
       end
 
       def index
-        render json: nil, status: :not_found and return unless current_user.present?
+        render json: nil, status: :not_found and return if current_user.blank?
 
         @organizations = current_user.organizations
         render json: ::OrganizationSerializer.new(@organizations, {}).serializable_hash
@@ -69,7 +69,6 @@ module Api
 
         org_input = org_params
         org_input['organization_type'] = org_input['type']
-        puts org_input.inspect
 
         @organization = Organization.new(org_input.except('type'))
         @organization.users << current_user

@@ -3,7 +3,9 @@
 class RunTaskSerializer < ApplicationSerializer
   set_type :tasks
 
-  attribute :category do |o| 'task' end
+  attribute :category do |_o|
+    'task'
+  end
   attribute :name
   attribute :url
   attribute :description
