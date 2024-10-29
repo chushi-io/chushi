@@ -31,6 +31,7 @@ export default () => {
     { icon: IconGauge, label: 'Agents', href: `/${organization}/agent-pools` },
     { icon: IconGauge, label: 'Organizations', href: '/organizations'  },
     { icon: IconGauge, label: 'Policy Sets', href: `/${organization}/policy-sets` },
+    { icon: IconGauge, label: 'Policies', href: `/${organization}/policies` },
     { icon: IconGauge, label: 'Run Tasks', href: `/${organization}/tasks` },
     { icon: IconGauge, label: 'Projects', href: `/${organization}/projects` },
   ];

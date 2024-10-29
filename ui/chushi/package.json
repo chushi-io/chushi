@@ -8,13 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "watch": "watch 'npm run build' src"
+    "devbuild": "NODE_ENV=development vite build --watch --config vite.dev.config.ts --mode development"
   },
   "dependencies": {
     "@mantine/core": "^7.13.3",
     "@mantine/hooks": "^7.13.3",
     "@tabler/icons-react": "^3.20.0",
+    "@uiw/react-codemirror": "^4.23.6",
     "axios": "^1.7.7",
+    "codemirror": "^6.0.1",
     "deserialize-json-api": "^2.0.0",
     "json-api-deserialize": "^0.0.4",
     "jsonapi-serializer": "^3.6.9",

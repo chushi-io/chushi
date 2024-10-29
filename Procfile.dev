@@ -1,4 +1,4 @@
 server: rails s
 sidekiq: bundle exec sidekiq -q default
 proxy: ngrok http --domain=$NGROK_DOMAIN --log=stdout 3000
-ui: cd ui/chushi && npm run watch
+ui: cd ui/chushi && npm run devbuild

@@ -69,6 +69,9 @@ Rails.application.routes.draw do
         get 'varsets', action: :index, controller: :variable_sets
         post 'varsets', action: :create, controller: :variable_sets
 
+        get 'policies', action: :index, controller: :policies
+        post 'policies', action: :create, controller: :policies
+
         post 'organization-memberships', action: :create, controller: :organization_memberships
         get 'organization-memberships', action: :index, controller: :organization_memberships
 
@@ -187,6 +190,13 @@ Rails.application.routes.draw do
           get 'authentication-tokens', action: :get_agent_tokens, controller: :authentication_tokens
           post 'authentication-tokens', action: :create_agent_token, controller: :authentication_tokens
           get 'jobs', action: :index, controller: :jobs
+        end
+      end
+
+      resources :policies, except: %i[index create] do
+        member do
+          put 'upload', action: :upload
+          get 'download', action: :download
         end
       end
       resources :run_tasks, path: 'tasks', except: %i[index create]

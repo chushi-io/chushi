@@ -16,6 +16,9 @@ import NewProject from "./pages/projects/new";
 import RunTasks from "./pages/run-tasks/index";
 import RunTask from "./pages/run-tasks/show";
 import NewRunTask from "./pages/run-tasks/new";
+import Policies from "./pages/policies/index";
+import Policy from "./pages/policies/show";
+import NewPolicy from "./pages/policies/new";
 
 const router = createBrowserRouter([
   {
@@ -101,6 +104,21 @@ const router = createBrowserRouter([
           path: ":runTaskId",
           element: <RunTask.Page />,
           loader: RunTask.Loader
+        }]
+      }, {
+        path: "policies",
+        children: [{
+          path: "",
+          element: <Policies.Page />,
+          loader: Policies.Loader
+        }, {
+          path: "new",
+          element: <NewPolicy.Page />,
+          action: NewPolicy.Action
+        }, {
+          path: ":policyId",
+          element: <Policy.Page />,
+          loader: Policy.Loader
         }]
       }]
     }]
