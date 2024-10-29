@@ -7,10 +7,7 @@ Doorkeeper.configure do
 
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
-    raise "Please configure doorkeeper resource_owner_authenticator block located in #{__FILE__}"
-    # Put your resource owner authentication logic here.
-    # Example implementation:
-    #   User.find_by(id: session[:user_id]) || redirect_to(new_user_session_url)
+    current_user || warden.authenticate!(scope: :user)
   end
 
   # If you didn't skip applications controller from Doorkeeper routes in your application routes.rb
@@ -79,7 +76,7 @@ Doorkeeper.configure do
   # want to use API mode that will skip all the views management and change the way how
   # Doorkeeper responds to a requests.
   #
-  api_only
+  # api_only
 
   # Enforce token request content type to application/x-www-form-urlencoded.
   # It is not enabled by default to not break prior versions of the gem.
@@ -244,7 +241,7 @@ Doorkeeper.configure do
   # For more information go to
   # https://doorkeeper.gitbook.io/guides/ruby-on-rails/scopes
   #
-  # default_scopes  :public
+  default_scopes :public, :openid
   # optional_scopes :write, :update
 
   # Allows to restrict only certain scopes for grant_type.
@@ -368,7 +365,7 @@ Doorkeeper.configure do
   #   https://datatracker.ietf.org/doc/html/rfc6819#section-4.4.3
   #
   # grant_flows %w[authorization_code client_credentials]
-
+  grant_flows %w[authorization_code implicit_oidc]
   # Allows to customize OAuth grant flows that +each+ application support.
   # You can configure a custom block (or use a class respond to `#call`) that must
   # return `true` in case Application instance supports requested OAuth grant flow
@@ -468,6 +465,10 @@ Doorkeeper.configure do
   # skip_authorization do |resource_owner, client|
   #   client.superapp? or resource_owner.admin?
   # end
+
+  skip_authorization do
+    true
+  end
 
   # Configure custom constraints for the Token Introspection request.
   # By default this configuration option allows to introspect a token by another

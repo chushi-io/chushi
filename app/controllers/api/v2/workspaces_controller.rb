@@ -11,9 +11,7 @@ module Api
 
         @workspaces = @org.workspaces
         @workspaces = @workspaces.tagged_with(params[:search][:tags].split(','), match_all: true) if params[:search] && params[:search][:tags][:tags]
-        render json: ::WorkspaceSerializer.new(@workspaces, {
-                                                 params: { policy: policy_for(@workspaces) }
-                                               }).serializable_hash
+        render json: ::WorkspaceSerializer.new(@workspaces, {}).serializable_hash
       end
 
       def lock
@@ -80,7 +78,11 @@ module Api
         render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
       end
 
-      def runs; end
+      def runs
+        authorize! @workspace, to: :can_read_run?
+        @runs = @workspace.runs
+        render json: ::RunSerializer.new(@runs, {}).serializable_hash
+      end
 
       def tags
         authorize! @workspace, to: :read?

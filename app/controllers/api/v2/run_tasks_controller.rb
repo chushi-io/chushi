@@ -8,12 +8,12 @@ module Api
         authorize! @org, to: :can_read_run_tasks?
 
         @tasks = @org.run_tasks
-        render ::RunTaskSerializer.new(@tasks, {}).serializable_hash
+        render json: ::RunTaskSerializer.new(@tasks, {}).serializable_hash
       end
 
       def show
         @task = RunTask.find_by(external_id: params[:id])
-        authorize! @org, to: :can_read_run_tasks?
+        authorize! @task.organization, to: :can_read_run_tasks?
         render json: ::RunTaskSerializer.new(@task, {}).serializable_hash
       end
 

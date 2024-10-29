@@ -13,19 +13,12 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development"
 
-
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config curl
-
-RUN curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh  && \
-    bash nodesource_setup.sh && \
-    apt install -y nodejs
-RUN npm i -D daisyui@latest flowbite
-RUN npm install -g yarn
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -40,7 +33,15 @@ COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN CI=1 SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+#RUN CI=1 SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# Build the ui portion
+FROM node:23-alpine as ui
+WORKDIR /app
+COPY ./ui/chushi/package*.json ./
+RUN npm ci
+COPY ./ui/chushi ./
+RUN npm run build
 
 
 # Final stage for app image
@@ -54,6 +55,7 @@ RUN apt-get update -qq && \
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
+COPY --from=ui /app/dist /rails/public/app
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \

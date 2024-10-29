@@ -264,7 +264,7 @@ describe WorkspacePolicy, type: :policy do
       team = Fabricate(:team, organization:)
       TeamMembership.create!(team:, user:)
       TeamProject.create!(project:, team:, organization:, access:)
-      # puts workspace.project.team_projects.inspect
+
       permissions.each do |val, expected|
         it "has permission #{val} set to #{expected}" do
           policy = described_class.new(workspace, user:)

@@ -50,7 +50,7 @@ module Api
       end
 
       def index
-        render json: nil, status: :not_found and return unless is_user
+        render json: nil, status: :not_found and return if current_user.blank?
 
         @organizations = current_user.organizations
         render json: ::OrganizationSerializer.new(@organizations, {}).serializable_hash
@@ -62,6 +62,26 @@ module Api
                         .first!
         authorize! @organization, to: :read?
         render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash
+      end
+
+      def create
+        authorize! current_user, to: :can_create_organizations?
+
+        org_input = org_params
+        org_input['organization_type'] = org_input['type']
+
+        @organization = Organization.new(org_input.except('type'))
+        @organization.users << current_user
+        @owner_team = Team.new(name: 'owners', visibility: 'organization')
+        @owner_team.users << current_user
+        @organization.teams << @owner_team
+        @organization.projects << Project.new(name: 'Default Project', is_default: true)
+
+        if @organization.save
+          render json: ::OrganizationSerializer.new(@organization, {}).serializable_hash, status: :created
+        else
+          render json: @organization.errors.full_messages, status: :bad_request
+        end
       end
 
       def update
@@ -101,6 +121,7 @@ module Api
         map_params([
                      :name,
                      :email,
+                     :type,
                      'default-execution-mode'
                    ])
       end

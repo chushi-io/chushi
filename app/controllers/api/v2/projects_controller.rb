@@ -5,7 +5,7 @@ module Api
     class ProjectsController < Api::ApiController
       def index
         @org = Organization.find_by(name: params[:organization_id])
-        authorize! @org, to: :access?
+        authorize! @org, to: :read?
 
         @projects = @org.projects
         render json: ::ProjectSerializer.new(@projects, {}).serializable_hash
@@ -17,7 +17,7 @@ module Api
           skip_verify_authorized!
           head :not_found and return
         end
-        authorize! @org, to: :read?
+        authorize! @project.organization, to: :read?
         render json: ::ProjectSerializer.new(@project, {}).serializable_hash
       end
 

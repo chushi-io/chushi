@@ -8,6 +8,7 @@ module Api
     prepend_before_action :set_default_response_format
 
     before_action :verify_access_token
+    # before_action :doorkeeper_authorize!
 
     authorize :user, through: :current_user
     authorize :organization, through: :current_organization
@@ -41,21 +42,26 @@ module Api
     end
 
     def verify_access_token
-      token = request.headers['Authorization'].to_s.split.last
-      render json: nil, status: :forbidden and return if token.nil?
+      if valid_doorkeeper_token?
+        doorkeeper_authorize!
+      else
 
-      token_chunks = token.split('.')
+        token = request.headers['Authorization'].to_s.split.last
+        render json: nil, status: :forbidden and return if token.nil?
 
-      @access_token = AccessToken.find_by(external_id: "at-#{token_chunks[0]}")
-      render json: nil, status: :forbidden and return if @access_token.nil?
-      render json: nil, status: :forbidden and return if @access_token.token != token_chunks[1]
-      return unless @access_token.expired_at.present? && @access_token.expired_at.after?(Time.zone.now)
+        token_chunks = token.split('.')
 
-      render json: nil, status: :forbidden
+        @access_token = AccessToken.find_by(external_id: "at-#{token_chunks[0]}")
+        render json: nil, status: :forbidden and return if @access_token.nil?
+        render json: nil, status: :forbidden and return if @access_token.token != token_chunks[1]
+        return unless @access_token.expired_at.present? && @access_token.expired_at.after?(Time.zone.now)
+
+        render json: nil, status: :forbidden
+      end
     end
 
     def is_organization
-      @access_token.token_authable_type == 'Organization'
+      @access_token&.token_authable_type == 'Organization'
     end
 
     def current_organization
@@ -64,42 +70,46 @@ module Api
       Organization.find(@access_token.token_authable_id)
     end
 
-    def is_user
-      @access_token.token_authable_type == 'User'
-    end
-
     def current_user
-      return unless is_user
+      if @access_token.present?
+        return nil unless @access_token.token_authable_type == 'User'
 
-      User.find(@access_token.token_authable_id)
+        return User.find(@access_token.token_authable_id)
+      end
+
+      current_resource_owner
     end
 
     def current_team
-      return unless @access_token.token_authable_type == 'Team'
+      return unless @access_token&.token_authable_type == 'Team'
 
       Team.find(@access_token.token_authable_id)
     end
 
     def current_task
-      return unless @access_token.token_authable_type == 'RunTask'
+      return unless @access_token&.token_authable_type == 'RunTask'
 
       RunTask.find(@access_token.token_authable_id)
     end
 
     def current_run
-      return unless @access_token.token_authable_type == 'Run'
+      return unless @access_token&.token_authable_type == 'Run'
 
       Run.find(@access_token.token_authable_id)
     end
 
     def current_agent
-      return unless @access_token.token_authable_type == 'AgentPool'
+      return unless @access_token&.token_authable_type == 'AgentPool'
 
       AgentPool.find(@access_token.token_authable_id)
     end
 
     def map_params(attributes)
       jsonapi_deserialize(params, only: attributes).transform_keys { |key| key.gsub('-', '_') }
+    end
+
+    def current_resource_owner
+      User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
     end
   end
 end
