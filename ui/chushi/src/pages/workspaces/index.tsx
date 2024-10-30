@@ -18,7 +18,7 @@ const Page = () => {
   const rows = workspaces.map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>
-        <Link to={`/${organizationName}/${element.name}`}>{element.name}</Link>
+        <Link to={`/${organizationName}/workspaces/${element.name}`}>{element.name}</Link>
       </Table.Td>
       <Table.Td>
         <Badge color={"blue"}>TBD</Badge>

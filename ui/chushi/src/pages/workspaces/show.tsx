@@ -1,16 +1,34 @@
-import {Link, useLoaderData, useParams} from "react-router-dom";
+import {Link, useLoaderData, useNavigate, useParams} from "react-router-dom";
 import {Run, Workspace} from "../../types";
-import {apiClient} from "../../Client.tsx";
-import {Anchor, Badge, Breadcrumbs, Button, Container, Grid, Menu, Table, Tabs} from "@mantine/core";
+import {apiClient} from "../../Client";
+import {
+  Anchor,
+  Badge,
+  Breadcrumbs,
+  Button,
+  Container,
+  Grid,
+  Menu,
+  Modal,
+  Select,
+  Table,
+  Tabs,
+  TextInput
+} from "@mantine/core";
 import {useEffect, useState} from "react";
+import {useDisclosure} from "@mantine/hooks";
+import {RunSerializer} from "../../types/Run";
 
 const Page = () => {
+  let navigate = useNavigate()
+  const [opened, { open, close }] = useDisclosure(false);
+
   let { organizationName, workspaceName } = useParams();
   const workspace = useLoaderData() as Workspace
 
   const items = [
     { title: 'Workspaces', href: `/${organizationName}/workspaces` },
-    { title: workspaceName, href: `/${organizationName}/${workspaceName}` },
+    { title: workspaceName, href: `/${organizationName}/workspaces/${workspaceName}` },
   ].map((item, index) => (
     <Anchor to={item.href} key={index} component={Link}>
       {item.title}
@@ -41,7 +59,7 @@ const Page = () => {
 
             </Menu.Dropdown>
           </Menu>
-          <Button>Create Run</Button>
+          <Button onClick={open}>Create Run</Button>
         </Grid.Col>
       </Grid>
 
@@ -74,6 +92,30 @@ const Page = () => {
           <AccessTab />
         </Tabs.Panel>
       </Tabs>
+
+      <Modal opened={opened} onClose={close} title="Create a run">
+        <TextInput
+          label="Message"
+          name={"message"}
+        />
+        <Select
+          label="Type"
+          data={['plan', 'apply', 'refresh']}
+        />
+        <Button onClick={() => {
+          let runInput: Partial<Run> = {
+            message: "Testing from run",
+            planOnly: false,
+            refreshOnly: false,
+            workspace: { id: workspace.id }
+          }
+          let data = RunSerializer.serialize(runInput)
+          apiClient.post('/api/v2/runs', data ).then(res => {
+            console.log(res)
+            navigate(`/${organizationName}/workspaces/${workspace.name}/runs/${res.data.id}`)
+          })
+        }}>Create</Button>
+      </Modal>
     </Container>
   )
 }

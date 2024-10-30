@@ -1,6 +1,11 @@
 import type { Organization } from "./Organization"
 import type { Workspace } from "./Workspace.tsx"
-import type { Run } from "./Run.tsx"
+import type {
+  Run,
+  TaskStage,
+  TaskResult,
+  PolicyEvaluation
+} from "./Run.tsx"
 import type { AgentPool } from "./AgentPool.tsx";
 import type { Policy } from "./Policy.tsx";
 import type { Project } from "./Project.tsx";
@@ -11,7 +16,10 @@ export type {
   Organization,
   Project,
   Policy,
+  PolicyEvaluation,
   Run,
   RunTask,
+  TaskResult,
+  TaskStage,
   Workspace
 };

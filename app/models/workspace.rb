@@ -23,6 +23,9 @@ class Workspace < ApplicationRecord
   has_many :workspace_teams
   has_many :teams, through: :workspace_teams
 
+  belongs_to :current_configuration_version, class_name: 'ConfigurationVersion', optional: true
+  belongs_to :current_state_version, class_name: 'StateVersion', optional: true
+
   belongs_to :agent_pool, optional: true
 
   before_create -> { generate_id('ws') }

@@ -8,8 +8,8 @@
     font-size: var(--mantine-font-size-sm);
     margin-right: var(--mantine-spacing-md);
     font-weight: 500;
-    height: rem(44px);
-    line-height: rem(44px);
+    height: rem(35px);
+    line-height: rem(35px);
 
     &:hover {
         background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
