@@ -25,13 +25,12 @@ module Api
           authorize! @workspace, to: :can_queue_apply?
         end
 
-
         @run = @workspace.organization.runs.new(run_params)
-        if run_params['configuration_version_id']
-          @run.configuration_version = ConfigurationVersion.find_by(external_id: run_params['configuration_version_id'])
-        else
-          @run.configuration_version = @run.workspace.current_configuration_version
-        end
+        @run.configuration_version = if run_params['configuration_version_id']
+                                       ConfigurationVersion.find_by(external_id: run_params['configuration_version_id'])
+                                     else
+                                       @run.workspace.current_configuration_version
+                                     end
         @run.workspace = @workspace
 
         begin
