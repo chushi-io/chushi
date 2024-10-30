@@ -182,6 +182,7 @@ Rails.application.routes.draw do
           get 'run-events', action: :events, controller: :runs
           get 'oidc-token', action: :token
           post 'authentication-token', action: :create_run_token, controller: :authentication_tokens
+          get 'task-stages', action: :index, controller: :task_stages
         end
       end
       # resources :agents

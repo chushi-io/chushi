@@ -46,7 +46,11 @@ const router = createBrowserRouter([
         element: <Workspaces.Page />,
         loader: Workspaces.Loader
       }, {
-        path: ":workspaceName",
+        path: ":workspaceName/runs/:runId",
+        loader: Run.Loader,
+        element: <Run.Page />
+      }, {
+        path: "workspaces/:workspaceName",
         children: [{
           path: "",
           loader: Workspace.Loader,

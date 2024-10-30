@@ -8,5 +8,5 @@ export interface AgentPool {
 }
 
 export const AgentSerializer = new Serializer('agent-pools', {
-  attributes: ['name', 'organization-scoped']
+  attributes: ['name', 'organizationScoped']
 });
