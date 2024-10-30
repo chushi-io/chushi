@@ -51,9 +51,13 @@ class WorkspaceSerializer < ApplicationSerializer
 
   attribute :working_directory
 
-  # has_one :current_state_version, serializer: StateVersionSerializer, id_method_name: :external_id do |object|
-  #   object.current_state_version
-  # end
+  has_one :current_state_version, serializer: StateVersionSerializer, id_method_name: :external_id do |object|
+    object.current_state_version
+  end
+
+  has_one :current_configuration_version, serializer: ConfigurationVersionSerializer, id_method_name: :external_id do |object|
+    object.current_configuration_version
+  end
 
   belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id, &:agent_pool
   belongs_to :project, serializer: ProjectSerializer, id_method_name: :external_id, &:project
