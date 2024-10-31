@@ -9,6 +9,7 @@ export interface Run {
   refreshOnly: boolean;
   workspace: Partial<Workspace>;
   taskStages: Partial<TaskStage>[];
+  plan: Plan;
 }
 
 export interface TaskStage {
@@ -43,6 +44,10 @@ export interface PolicyEvaluation {
   statusTimestamps: object;
 }
 
+export interface Plan {
+  id: string;
+  logReadUrl: string;
+}
 
 export const RunSerializer = new Serializer('runs', {
   attributes: [

@@ -15,6 +15,7 @@ const Page = () => {
   ));
 
   const workspaces = useLoaderData() as Workspace[]
+  console.log(workspaces)
   const rows = workspaces.map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>

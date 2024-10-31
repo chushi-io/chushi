@@ -4,7 +4,8 @@ import type {
   Run,
   TaskStage,
   TaskResult,
-  PolicyEvaluation
+  PolicyEvaluation,
+  Plan
 } from "./Run.tsx"
 import type { AgentPool } from "./AgentPool.tsx";
 import type { Policy } from "./Policy.tsx";
@@ -14,6 +15,7 @@ import type { RunTask } from "./RunTask.tsx";
 export type {
   AgentPool,
   Organization,
+  Plan,
   Project,
   Policy,
   PolicyEvaluation,

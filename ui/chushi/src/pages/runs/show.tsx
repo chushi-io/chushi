@@ -2,6 +2,8 @@ import {Run, TaskStage} from "../../types";
 import {apiClient} from "../../Client";
 import {useLoaderData} from "react-router-dom";
 import {Accordion} from "@mantine/core";
+import {useEffect, useState} from "react";
+import axios from "axios";
 
 const Page = () => {
   // let { organizationName, workspaceName } = useParams();
@@ -22,7 +24,7 @@ const Page = () => {
   items.push(
     <Accordion.Item value={"plan"}>
       <Accordion.Control>Plan</Accordion.Control>
-      <Accordion.Panel>Plan information</Accordion.Panel>
+      <RunPlanPanel run={run} />
     </Accordion.Item>
   )
 
@@ -83,6 +85,32 @@ const Page = () => {
       </Accordion>
     </>
   )
+}
+
+const RunPlanPanel = ({ run }: { run: Run}) => {
+  const logReadUrl = run.plan.logReadUrl
+  console.log(logReadUrl)
+
+  const [logs, setLogs] = useState("")
+  const getLogs = async () => {
+    try {
+      const res = await axios.get(logReadUrl);
+      setLogs(res.data)
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  useEffect(() => {
+    const intervalCall = setInterval(() => {
+      getLogs();
+    }, 3000);
+    return () => {
+      // clean up
+      clearInterval(intervalCall);
+    };
+  }, []);
+
+  return <Accordion.Panel>{logs}</Accordion.Panel>
 }
 
 const Loader = async ({params}: { params: any}): Promise<{run: Run, taskStages: TaskStage[]}> => {
