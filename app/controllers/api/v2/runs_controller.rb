@@ -9,6 +9,7 @@ module Api
 
         options = {}
         options[:include] = params[:include].split(',') if params[:include]
+        Rails.logger.debug options.inspect
         render json: ::RunSerializer.new(@run, options).serializable_hash
       end
 
@@ -29,7 +30,7 @@ module Api
         @run.configuration_version = if run_params['configuration_version_id']
                                        ConfigurationVersion.find_by(external_id: run_params['configuration_version_id'])
                                      else
-                                       @run.workspace.current_configuration_version
+                                       @workspace.current_configuration_version
                                      end
         @run.workspace = @workspace
 

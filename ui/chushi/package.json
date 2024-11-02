@@ -17,15 +17,15 @@
     "@uiw/react-codemirror": "^4.23.6",
     "axios": "^1.7.7",
     "codemirror": "^6.0.1",
-    "deserialize-json-api": "^2.0.0",
-    "json-api-deserialize": "^0.0.4",
+    "deserialize-json-api": "github:chushi-io/deserialize-json-api#rwittman/fix-included-undefined",
     "jsonapi-serializer": "^3.6.9",
     "oidc-client-ts": "^3.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-oidc-context": "^3.2.0",
     "react-router": "^6.27.0",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "terminal.css": "^0.7.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

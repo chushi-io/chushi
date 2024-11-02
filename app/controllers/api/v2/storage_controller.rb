@@ -145,7 +145,7 @@ module Api
         when 'redacted.json'
           @plan.redacted_json = file
         else
-          head :bad_request
+          head :bad_request and return
         end
         @plan.save!
         head :created
@@ -202,7 +202,7 @@ module Api
         # regardless of wether the file exists or not
         head :no_content and return if @plan.logs.blank?
 
-        contents = decrypt(@plan.logs.url)
+        contents = decrypt(@plan.logs)
         render body: contents, layout: false
       end
 

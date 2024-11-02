@@ -1,5 +1,6 @@
 import axios from "axios";
-import {deserialize} from "json-api-deserialize";
+// @ts-ignore
+import {deserialize} from "deserialize-json-api";
 
 const newApiClient = () => {
   let client = axios.create({
@@ -10,12 +11,13 @@ const newApiClient = () => {
   client.interceptors.response.use((response) => {
     return {
       ...response,
-      ...deserialize(response.data),
+      ...deserialize(response.data, { transformKeys: "camelCase" }),
     };
   }, (error) => {
     return Promise.reject(error);
   });
   return client
 }
+
 
 export const apiClient = newApiClient();

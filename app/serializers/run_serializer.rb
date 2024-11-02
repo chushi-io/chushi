@@ -62,9 +62,16 @@ class RunSerializer < ApplicationSerializer
   end
 
   belongs_to :workspace, serializer: WorkspaceSerializer, id_method_name: :external_id, &:workspace
-  has_one :configuration_version, key: 'configuration-version', serializer: ConfigurationVersionSerializer,
+  has_one :configuration_version, if: proc { |record|
+    record.configuration_version.present?
+  }, key: 'configuration-version', serializer: ConfigurationVersionSerializer,
                                   id_method_name: :external_id, &:configuration_version
-  has_one :plan, serializer: PlanSerializer, id_method_name: :external_id, &:plan
-  has_one :apply, serializer: ApplySerializer, id_method_name: :external_id, &:apply
+
+  has_one :plan, if: proc { |record|
+    record.plan.present?
+  }, serializer: PlanSerializer, id_method_name: :external_id, &:plan
+  has_one :apply, if: proc { |record|
+    record.apply.present?
+  }, serializer: ApplySerializer, id_method_name: :external_id, &:apply
   has_many :task_stages, serializer: TaskStageSerializer, id_method_name: :external_id, &:task_stages
 end
