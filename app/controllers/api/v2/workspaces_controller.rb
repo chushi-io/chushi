@@ -11,7 +11,9 @@ module Api
 
         @workspaces = @org.workspaces
         @workspaces = @workspaces.tagged_with(params[:search][:tags].split(','), match_all: true) if params[:search] && params[:search][:tags][:tags]
-        render json: ::WorkspaceSerializer.new(@workspaces, {}).serializable_hash
+        options = {}
+        options[:include] = params[:include].split(',') if params[:include]
+        render json: ::WorkspaceSerializer.new(@workspaces, options).serializable_hash
       end
 
       def lock
@@ -24,7 +26,9 @@ module Api
 
       def show
         authorize! @workspace, to: :can_access?
-        render json: ::WorkspaceSerializer.new(@workspace, {}).serializable_hash
+        options = {}
+        options[:include] = params[:include].split(',') if params[:include]
+        render json: ::WorkspaceSerializer.new(@workspace, options).serializable_hash
       end
 
       def create

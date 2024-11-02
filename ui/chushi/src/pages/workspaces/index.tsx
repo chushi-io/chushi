@@ -60,7 +60,11 @@ const Page = () => {
 }
 
 const Loader = async ({ params }: { params: any}): Promise<Workspace[]> => {
-  const { data: workspaces } = await apiClient.get(`/api/v2/organizations/${params.organizationName}/workspaces`)
+  const { data: workspaces } = await apiClient.get(`/api/v2/organizations/${params.organizationName}/workspaces`, {
+    params: {
+      include: "organization,project"
+    }
+  })
   return workspaces as Workspace[];
 }
 

@@ -44,6 +44,10 @@ export interface PolicyEvaluation {
   statusTimestamps: object;
 }
 
+export interface RunEvent {
+  id: string;
+}
+
 export interface Plan {
   id: string;
   logReadUrl: string;

@@ -171,7 +171,11 @@ const AccessTab = () => {
 }
 
 const Loader = async({params}: { params: any}): Promise<Workspace> => {
-  const { data: workspace } = await apiClient.get(`/api/v2/organizations/${params.organizationName}/workspaces/${params.workspaceName}`)
+  const { data: workspace } = await apiClient.get(`/api/v2/organizations/${params.organizationName}/workspaces/${params.workspaceName}`, {
+    params: {
+      include: "current_configuration_version,current_state_version"
+    }
+  })
   return workspace
 }
 

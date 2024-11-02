@@ -9,7 +9,7 @@ module Api
 
         options = {}
         options[:include] = params[:include].split(',') if params[:include]
-        puts options.inspect
+        Rails.logger.debug options.inspect
         render json: ::RunSerializer.new(@run, options).serializable_hash
       end
 

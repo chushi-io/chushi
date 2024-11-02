@@ -51,11 +51,18 @@ class WorkspaceSerializer < ApplicationSerializer
 
   attribute :working_directory
 
-  has_one :current_state_version, serializer: StateVersionSerializer, id_method_name: :external_id, &:current_state_version
+  has_one :current_state_version, if: proc { |record|
+    record.current_state_version.present?
+  }, serializer: StateVersionSerializer, id_method_name: :external_id, &:current_state_version
 
-  has_one :current_configuration_version, serializer: ConfigurationVersionSerializer, id_method_name: :external_id, &:current_configuration_version
+  has_one :current_configuration_version, if: proc { |record|
+    record.current_configuration_version.present?
+  }, serializer: ConfigurationVersionSerializer, id_method_name: :external_id, &:current_configuration_version
 
   belongs_to :agent_pool, serializer: AgentPoolSerializer, id_method_name: :external_id, &:agent_pool
-  belongs_to :project, serializer: ProjectSerializer, id_method_name: :external_id, &:project
+  belongs_to :project, if: proc { |record|
+    record.project.present?
+  }, serializer: ProjectSerializer, id_method_name: :external_id, &:project
+  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
   # attribute :setting_overwrites do |object| {} end
 end

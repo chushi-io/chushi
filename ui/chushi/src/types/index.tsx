@@ -2,6 +2,7 @@ import type { Organization } from "./Organization"
 import type { Workspace } from "./Workspace.tsx"
 import type {
   Run,
+  RunEvent,
   TaskStage,
   TaskResult,
   PolicyEvaluation,
@@ -20,6 +21,7 @@ export type {
   Policy,
   PolicyEvaluation,
   Run,
+  RunEvent,
   RunTask,
   TaskResult,
   TaskStage,
