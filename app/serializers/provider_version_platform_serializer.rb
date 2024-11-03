@@ -20,12 +20,12 @@ class ProviderVersionPlatformSerializer < ApplicationSerializer
   link :provider_binary_upload, unless: proc { |record, _params|
     record.binary.present?
   } do |object|
-    encrypt_upload_url({ id: object.id, class: object.class.name })
+    EncryptedStorage.upload_url({ id: object.id, class: object.class.name })
   end
 
   link :provider_binary_download, if: proc { |record, _params|
     record.binary.present?
   } do |object|
-    encrypt_storage_url({ id: object.id, class: object.class.name })
+    EncryptedStorage.storage_url({ id: object.id, class: object.class.name })
   end
 end

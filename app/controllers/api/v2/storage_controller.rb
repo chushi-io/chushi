@@ -60,11 +60,11 @@ module Api
         if @object['filename'] == 'state'
           head :not_found and return if @version.state_file.blank?
 
-          contents = decrypt(@version.state_file)
+          contents = EncryptedStorage.decrypt(@version.state_file.read)
         else
           head :not_found and return if @version.state_json_file.blank?
 
-          contents = decrypt(@version.state_json_file)
+          contents = EncryptedStorage.decrypt(@version.state_json_file.read)
         end
         render body: contents, layout: false
       end
@@ -73,7 +73,7 @@ module Api
         @version = RegistryModuleVersion.find(@object['id'])
         response.headers['Content-Disposition'] = 'attachment; filename="archive.tar.gz"'
         response.headers['Content-Type'] = 'application/gzip'
-        contents = decrypt(@version.archive)
+        contents = EncryptedStorage.decrypt(@version.archive.read)
         render body: contents, layout: false
       end
 
@@ -81,8 +81,8 @@ module Api
         @version = ProviderVersionPlatform.find(@object['id'])
         response.headers['Content-Disposition'] = "attachment; filename=\"#{@version.filename}\""
         response.headers['Content-Type'] = 'application/gzip'
-        contents = decrypt(@version.binary)
-        render body: contents, layout: false
+
+        render body: EncryptedStorage.decrypt(@version.binary.read), layout: false
       end
 
       def upload_configuration_version
@@ -200,35 +200,32 @@ module Api
       def read_tfplan_json
         head :not_found and return if @plan.plan_json_file.blank?
 
-        contents = decrypt(@plan.plan_json_file)
-        render body: contents, layout: false
+        render body: EncryptedStorage.decrypt(@plan.plan_json_file.read), layout: false
       end
 
       def read_structured_json
         head :not_found and return if @plan.plan_structured_file.blank?
 
-        contents = decrypt(@plan.plan_structured_file)
-        render body: contents, layout: false
+        render body: EncryptedStorage.decrypt(@plan.plan_structured_file.read), layout: false
       end
 
       def read_redacted_json
         head :not_found and return if @plan.redacted_json.blank?
 
-        contents = decrypt(@plan.redacted_json)
+        contents = EncryptedStorage.decrypt(@plan.redacted_json.read)
         render body: contents, layout: false
       end
 
       def read_tfplan
         head :not_found and return if @plan.plan_file.blank?
 
-        contents = decrypt(@plan.plan_file)
-        render body: contents, layout: false
+        render body: EncryptedStorage.decrypt(@plan.plan_file.read), layout: false
       end
 
       def read_logs(obj)
         head :no_content and return if obj.blank?
 
-        contents = decrypt(obj)
+        contents = EncryptedStorage.decrypt(obj.read)
         if params[:limit] && params[:offset]
           start = params[:offset].to_i
           end_index = params[:offset].to_i + params[:limit].to_i
@@ -242,19 +239,10 @@ module Api
         request.body.rewind
         tempfile = Tempfile.new(path)
         tempfile.binmode
-        tempfile << Vault::Rails.encrypt('transit', 'chushi_storage_contents', request.body.read)
+        tempfile << EncryptedStorage.encrypt(request.body.read)
         tempfile.rewind
 
         tempfile
-      end
-
-      def decrypt(obj)
-        contents = obj.read
-        if contents.start_with?('vault:')
-          contents = Vault::Rails.decrypt('transit', 'chushi_storage_contents',
-                                          obj.read)
-        end
-        contents
       end
     end
   end

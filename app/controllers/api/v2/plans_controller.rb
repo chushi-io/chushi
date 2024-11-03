@@ -15,7 +15,7 @@ module Api
         authorize! @workspace, to: :can_read_run?
         # If the log file has been uploaded already, we'll
         # just redirect to the whole log file
-        redirect_to encrypt_storage_url({ id: plan.id, class: @plan.class.name, filename: 'logs' }) and return if @plan.logs.present?
+        redirect_to EncryptedStorage.storage_url({ id: plan.id, class: @plan.class.name, filename: 'logs' }) and return if @plan.logs.present?
 
         HTTParty.get(
           "#{Chushi.timber_url}/files/#{@plan.run.id}_#{@plan.id}.log",
@@ -28,7 +28,7 @@ module Api
         authorize! @plan.run.workspace, to: :can_read_run?
 
         if @plan.plan_json_file.present?
-          redirect_to encrypt_storage_url({ id: @plan.id, class: @plan.class.name, filename: 'tfplan.json' })
+          redirect_to EncryptedStorage.storage_url({ id: @plan.id, class: @plan.class.name, filename: 'tfplan.json' })
         else
           head :no_content
         end
