@@ -39,7 +39,7 @@ class JobSerializer < ApplicationSerializer
               else
                 { id: object.run.apply.id, class: object.run.apply.class.name, filename: 'logs' }
               end
-    encrypt_upload_url(options)
+    EncryptedStorage.upload_url(options)
   end
 
   # - hosted-json-plan-upload-url # To upload JSON plan format
@@ -47,7 +47,7 @@ class JobSerializer < ApplicationSerializer
     record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'tfplan.json' }
-    encrypt_upload_url(options)
+    EncryptedStorage.upload_url(options)
   end
 
   # - hosted-plan-upload-url # For uploading the binary plan file
@@ -55,7 +55,7 @@ class JobSerializer < ApplicationSerializer
     record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'tfplan' }
-    encrypt_upload_url(options)
+    EncryptedStorage.upload_url(options)
   end
 
   # - hosted-plan-download-url # For downloading the binary plan file
@@ -63,7 +63,7 @@ class JobSerializer < ApplicationSerializer
     record.operation == 'apply' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'tfplan' }
-    encrypt_storage_url(options)
+    EncryptedStorage.storage_url(options)
   end
 
   # - hosted-structured-json-upload-url # For uploading the structured output
@@ -71,7 +71,7 @@ class JobSerializer < ApplicationSerializer
     record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'structured.json' }
-    encrypt_upload_url(options)
+    EncryptedStorage.upload_url(options)
   end
 
   # - redacted-json-upload-url # For uploading the structured output
@@ -79,6 +79,6 @@ class JobSerializer < ApplicationSerializer
     record.operation == 'plan' && %w[running pending].include?(record.status)
   } do |object|
     options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'redacted.json' }
-    encrypt_upload_url(options)
+    EncryptedStorage.upload_url(options)
   end
 end

@@ -57,7 +57,7 @@ module Registry
 
         if @version.archive.present?
           response.headers['X-Terraform-Get'] =
-            "#{encrypt_storage_url({ id: @version.id, class: @version.class.name })}?archive=tar.gz"
+            "#{EncryptedStorage.storage_url({ id: @version.id, class: @version.class.name })}?archive=tar.gz"
           head :no_content
         else
           head :not_found

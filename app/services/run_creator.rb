@@ -18,12 +18,13 @@ class RunCreator < ApplicationService
         status: 'pending'
       )
       @run.plan = @plan
-      if @run.plan_only == false || @run.save_plan
-        @apply = @run.organization.applies.create!(
-          execution_mode: @run.workspace.execution_mode
-        )
-        @run.apply = @apply
-      end
+      # For now we'll just create applies right along
+      # if @run.plan_only == false || @run.save_plan
+      @apply = @run.organization.applies.create!(
+        execution_mode: @run.workspace.execution_mode
+      )
+      @run.apply = @apply
+      # end
 
       # TODO: This is incorrect. We don't create a
       # "task_stage" per workspace task. For any of the

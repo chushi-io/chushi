@@ -14,7 +14,7 @@ class ConfigurationVersionSerializer < ApplicationSerializer
   attribute :upload_url, unless: proc { |record, _params|
     record.archive.present?
   } do |object|
-    encrypt_upload_url({ id: object.id, class: object.class.name })
+    EncryptedStorage.upload_url({ id: object.id, class: object.class.name })
   end
 
   # link :self, :url
