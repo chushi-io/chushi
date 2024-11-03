@@ -12,7 +12,6 @@ class ProcessPlanJob
       Vault::Rails.decrypt('transit', 'chushi_storage_contents', @plan.redacted_json.read)
     )
 
-    puts @parsed_json['resource_changes']
     if @parsed_json['resource_changes'].length == 0
       @plan.update(has_changes: false)
       @plan.run.update(has_changes: false, status: 'planned_and_finished')
@@ -24,17 +23,31 @@ class ProcessPlanJob
     destructions = 0
     imports = 0
 
+    # 	ActionNoop Action = "no-op"
+    #
+    # 	// ActionCreate denotes a create operation.
+    # 	ActionCreate Action = "create"
+    #
+    # 	// ActionRead denotes a read operation.
+    # 	ActionRead Action = "read"
+    #
+    # 	// ActionUpdate denotes an update operation.
+    # 	ActionUpdate Action = "update"
+    #
+    # 	// ActionDelete denotes a delete operation.
+    # 	ActionDelete Action = "delete"
     @parsed_json['resource_changes'].each do |change|
       actions = change['change']['actions']
-      puts actions
       if actions.include?('create')
         additions += 1
-      elsif actions.incldue?('delete')
+      elsif actions.incldue?('update')
         changes += 1
-      elsif actions.include?('')
+      elsif actions.include?('delete')
         destructions += 1
-      elsif actions.include?('')
-        imports += 0
+      end
+
+      if change['change']['importing']
+        imports += 1
       end
     end
 
@@ -46,7 +59,6 @@ class ProcessPlanJob
       resource_imports: imports
     }
 
-    puts update_attrs
     @plan.update(update_attrs)
     @plan.run.update(
       has_changes: true,
