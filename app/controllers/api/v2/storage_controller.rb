@@ -20,7 +20,6 @@ module Api
         when 'ProviderVersionPlatform'
           read_provider_version
         when 'Apply'
-          Rails.logger.debug 'reading apply file'
           read_apply_file
         else
           head :bad_request

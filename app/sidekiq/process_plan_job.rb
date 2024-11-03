@@ -21,19 +21,6 @@ class ProcessPlanJob
     destructions = 0
     imports = 0
 
-    # 	ActionNoop Action = "no-op"
-    #
-    # 	// ActionCreate denotes a create operation.
-    # 	ActionCreate Action = "create"
-    #
-    # 	// ActionRead denotes a read operation.
-    # 	ActionRead Action = "read"
-    #
-    # 	// ActionUpdate denotes an update operation.
-    # 	ActionUpdate Action = "update"
-    #
-    # 	// ActionDelete denotes a delete operation.
-    # 	ActionDelete Action = "delete"
     @parsed_json['resource_changes'].each do |change|
       actions = change['change']['actions']
       # Not accounted for here is "no-op"?
