@@ -8,9 +8,7 @@ class JobFinishedJob
     if @job.operation == 'plan'
       if @job.status == 'completed'
         @job.run.plan.update(status: 'finished')
-        if @job.run.plan_only
-          @job.run.update(status: 'planned_and_finished')
-        end
+        @job.run.update(status: 'planned_and_finished') if @job.run.plan_only
         # Leaving this here for now. But we're most likely going
         # to want to set planned_and_saved after the ProcessPlanJob
         # finishes, recording the expected changes

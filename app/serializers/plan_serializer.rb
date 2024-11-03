@@ -21,4 +21,3 @@ class PlanSerializer < ApplicationSerializer
     encrypt_storage_url({ id: object.id, class: object.class.name, filename: 'logs' })
   end
 end
-

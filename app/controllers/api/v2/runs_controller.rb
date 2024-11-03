@@ -37,16 +37,14 @@ module Api
 
         if @run.message.nil?
           user_agent = request.headers['User-Agent']
-          if user_agent.start_with?('OpenTofu')
-            @run.message = "Triggered by CLI"
-          end
+          @run.message = 'Triggered by CLI' if user_agent.start_with?('OpenTofu')
         end
 
         begin
           RunCreator.call(@run)
           render json: ::RunSerializer.new(@run, {}).serializable_hash, status: :created
-        rescue StandardError => error
-          Rails.logger.error error
+        rescue StandardError => e
+          Rails.logger.error e
           render json: nil, status: :internal_server_error
         end
       end
@@ -110,21 +108,21 @@ module Api
 
       def run_params
         map_params(%i[
-          allow-empty-apply
-          allow-config-generation
-          auto-apply
-          debugging-mode
-          is-destroy
-          message
-          refresh
-          refresh-only
-          replace-addrs
-          target-addrs
-          plan-only
-          save-plan
-          workspace
-          configuration-version
-        ])
+                     allow-empty-apply
+                     allow-config-generation
+                     auto-apply
+                     debugging-mode
+                     is-destroy
+                     message
+                     refresh
+                     refresh-only
+                     replace-addrs
+                     target-addrs
+                     plan-only
+                     save-plan
+                     workspace
+                     configuration-version
+                   ])
       end
     end
   end

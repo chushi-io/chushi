@@ -20,7 +20,7 @@ module Api
         when 'ProviderVersionPlatform'
           read_provider_version
         when 'Apply'
-          puts "reading apply file"
+          Rails.logger.debug 'reading apply file'
           read_apply_file
         else
           head :bad_request
@@ -153,9 +153,7 @@ module Api
         end
         @plan.save!
 
-        if @object['filename'] == 'redacted.json'
-          ProcessPlanJob.perform_async(@plan.id)
-        end
+        ProcessPlanJob.perform_async(@plan.id) if @object['filename'] == 'redacted.json'
         head :created
       end
 
@@ -229,7 +227,7 @@ module Api
       end
 
       def read_logs(obj)
-        head :no_content and return unless obj.present?
+        head :no_content and return if obj.blank?
 
         contents = decrypt(obj)
         if params[:limit] && params[:offset]

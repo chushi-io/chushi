@@ -13,8 +13,6 @@ class RunCreator < ApplicationService
 
   def call
     ActiveRecord::Base.transaction do
-
-
       @plan = @run.organization.plans.create!(
         execution_mode: @run.workspace.execution_mode,
         status: 'pending'

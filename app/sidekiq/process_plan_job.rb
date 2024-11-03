@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProcessPlanJob
   include Sidekiq::Job
 
@@ -6,7 +8,7 @@ class ProcessPlanJob
     @plan = Plan.find(args.first)
 
     # This should only ever be triggered after uploading a JSON file
-    return unless @plan.redacted_json.present?
+    return if @plan.redacted_json.blank?
 
     @parsed_json = ActiveSupport::JSON.decode(
       Vault::Rails.decrypt('transit', 'chushi_storage_contents', @plan.redacted_json.read)
@@ -71,7 +73,7 @@ class ProcessPlanJob
     @plan.update(update_attrs)
     @plan.run.update(
       has_changes: true,
-      status: "planned_and_saved"
+      status: 'planned_and_saved'
     )
   end
 end

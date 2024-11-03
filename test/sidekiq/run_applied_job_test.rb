@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 class RunAppliedJobTest < Minitest::Test
   def test_example

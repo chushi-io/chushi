@@ -5,7 +5,7 @@ class ProcessStateVersionJob
 
   def perform(*args)
     @version = StateVersion.find(args.first)
-    unless @version.state_json_file.present?
+    if @version.state_json_file.blank?
       Rails.logger.debug 'State version has not been uploaded'
       raise ActiveRecord::RecordNotFound
     end
