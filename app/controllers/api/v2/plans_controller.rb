@@ -28,7 +28,7 @@ module Api
         authorize! @plan.run.workspace, to: :can_read_run?
 
         if @plan.plan_json_file.present?
-          redirect_to encrypt_storage_url({ id: plan.id, class: @plan.class.name, filename: 'tfplan.json' })
+          redirect_to encrypt_storage_url({ id: @plan.id, class: @plan.class.name, filename: 'tfplan.json' })
         else
           head :no_content
         end

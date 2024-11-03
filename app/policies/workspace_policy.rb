@@ -72,6 +72,10 @@ class WorkspacePolicy < ApplicationPolicy
   def can_create_state_versions?
     allow! if in_owners_team?(record.organization)
     allow! if check_project_access?(%w[admin maintain write])
+    # TODO: This would technically allow a plan operation
+    # to update state versions. This should be scoped to
+    # only allow 'apply', 'destroy', and 'import' operations
+    allow! if is_run_for_workspace?
     check_team_access('can-create-state-versions')
   end
 

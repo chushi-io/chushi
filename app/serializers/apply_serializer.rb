@@ -10,7 +10,7 @@ class ApplySerializer < ApplicationSerializer
   end
 
   attribute :log_read_url do |object|
-    encrypt_upload_url({ id: object.id, class: object.class.name, file: 'logs' })
+    encrypt_storage_url({ id: object.id, class: object.class.name, filename: 'logs' })
   end
 
   attribute :status

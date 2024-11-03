@@ -25,6 +25,7 @@ class Workspace < ApplicationRecord
 
   belongs_to :current_configuration_version, class_name: 'ConfigurationVersion', optional: true
   belongs_to :current_state_version, class_name: 'StateVersion', optional: true
+  belongs_to :current_run, class_name: 'Run', optional: true
 
   belongs_to :agent_pool, optional: true
 

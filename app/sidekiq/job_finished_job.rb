@@ -8,11 +8,12 @@ class JobFinishedJob
     if @job.operation == 'plan'
       if @job.status == 'completed'
         @job.run.plan.update(status: 'finished')
-        if @job.run.plan_only
-          @job.run.update(status: 'planned_and_finished')
-        else
-          @job.run.update(status: 'planned_and_saved')
-        end
+        @job.run.update(status: 'planned_and_finished') if @job.run.plan_only
+        # Leaving this here for now. But we're most likely going
+        # to want to set planned_and_saved after the ProcessPlanJob
+        # finishes, recording the expected changes
+        # else
+        #   @job.run.update(status: 'planned_and_saved')
       else
         @job.run.plan.update(status: 'errored')
         @job.run.update(status: 'errored')
@@ -21,6 +22,7 @@ class JobFinishedJob
       if @job.status == 'completed'
         @job.run.apply.update(status: 'finished')
         @job.run.update(status: 'applied')
+        RunAppliedJob.perform_async(@job.run.id)
       else
         @job.run.apply.update(status: 'errored')
         @job.run.update(status: 'errored')
