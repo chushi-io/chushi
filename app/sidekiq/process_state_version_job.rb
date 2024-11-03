@@ -5,7 +5,7 @@ class ProcessStateVersionJob
 
   def perform(*args)
     @version = StateVersion.find(args.first)
-    unless @version.json_state_file.attached?
+    unless @version.state_json_file.attached?
       Rails.logger.debug 'State version has not been uploaded'
       raise ActiveRecord::RecordNotFound
     end
@@ -14,39 +14,38 @@ class ProcessStateVersionJob
       return
     end
 
-    @version.json_state_file.open do |tempfile|
-      # Parse all of the outputs
-      @parsed_json = ActiveSupport::JSON.decode(File.read(tempfile))
-      if @parsed_json['values'].key?('outputs')
-        @parsed_json['values']['outputs'].each do |key, output|
-          @output = @version.state_version_outputs.find_by(name: key)
-          if @output
-            # We need to also update state versions?
-          else
-            output_type = output['type']
-            output_type = output['type'].to_json if output_type.is_a?(Array)
+    @parsed_json = ActiveSupport::JSON.decode(
+      Vault::Rails.decrypt('transit', 'chushi_storage_contents', @version.state_json_file.read)
+    )
+    if @parsed_json['values'].key?('outputs')
+      @parsed_json['values']['outputs'].each do |key, output|
+        @output = @version.state_version_outputs.find_by(name: key)
+        if @output
+          # We need to also update state versions?
+        else
+          output_type = output['type']
+          output_type = output['type'].to_json if output_type.is_a?(Array)
 
-            value = output['value'].to_json
-            value = output['value'] if %w[string number].include?(output_type)
-            @output = @version.state_version_outputs.create(
-              sensitive: output['sensitive'],
-              name: key,
-              output_type:,
-              value:
-            )
-          end
+          value = output['value'].to_json
+          value = output['value'] if %w[string number].include?(output_type)
+          @output = @version.state_version_outputs.create(
+            sensitive: output['sensitive'],
+            name: key,
+            output_type:,
+            value:
+          )
         end
       end
-
-      # Parse resources / modules
-      @modules = {
-        root: Hash.new(0)
-      }
-      @providers = {}
-      @resources = []
-
-      process_module(@parsed_json['values']['root_module'], 'root')
     end
+
+    # Parse resources / modules
+    @modules = {
+      root: Hash.new(0)
+    }
+    @providers = {}
+    @resources = []
+
+    process_module(@parsed_json['values']['root_module'], 'root')
 
     @version.update(
       resources_processed: true,

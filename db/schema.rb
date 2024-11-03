@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_30_014110) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_03_013105) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -886,8 +886,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_30_014110) do
     t.boolean "queue_all_runs"
     t.uuid "project_id"
     t.uuid "current_configuration_version_id"
+    t.uuid "current_run_id"
     t.index ["agent_pool_id"], name: "index_workspaces_on_agent_id"
     t.index ["current_configuration_version_id"], name: "index_workspaces_on_current_configuration_version_id"
+    t.index ["current_run_id"], name: "index_workspaces_on_current_run_id"
     t.index ["current_state_version_id"], name: "index_workspaces_on_current_state_version_id"
     t.index ["external_id"], name: "index_workspaces_on_external_id", unique: true
     t.index ["organization_id", "name"], name: "index_workspaces_on_organization_id_and_name", unique: true
@@ -973,6 +975,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_30_014110) do
   add_foreign_key "workspaces", "configuration_versions", column: "current_configuration_version_id"
   add_foreign_key "workspaces", "organizations"
   add_foreign_key "workspaces", "projects"
+  add_foreign_key "workspaces", "runs", column: "current_run_id"
   add_foreign_key "workspaces", "state_versions", column: "current_state_version_id"
   add_foreign_key "workspaces", "vcs_connections"
 end

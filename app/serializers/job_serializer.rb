@@ -58,6 +58,14 @@ class JobSerializer < ApplicationSerializer
     encrypt_upload_url(options)
   end
 
+  # - hosted-plan-download-url # For downloading the binary plan file
+  link :hosted_plan_download_url, if: proc { |record, _params|
+    record.operation == 'apply' && %w[running pending].include?(record.status)
+  } do |object|
+    options = { id: object.run.plan.id, class: object.run.plan.class.name, filename: 'tfplan' }
+    encrypt_storage_url(options)
+  end
+
   # - hosted-structured-json-upload-url # For uploading the structured output
   link :hosted_structured_json_upload_url, if: proc { |record, _params|
     record.operation == 'plan' && %w[running pending].include?(record.status)

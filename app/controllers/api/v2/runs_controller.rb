@@ -70,8 +70,9 @@ module Api
       end
 
       def apply
-        authorize! @run, to: :can_apply
-        @run.update(status: 'apply_queued')
+        authorize! @run.workspace, to: :can_queue_apply?
+        @run.update(status: 'confirmed')
+        RunConfirmedJob.perform_async(@run.id)
         render json: ::RunSerializer.new(@run, {}).serializable_hash
       end
 

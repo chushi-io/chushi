@@ -55,6 +55,10 @@ class WorkspaceSerializer < ApplicationSerializer
     record.current_state_version.present?
   }, serializer: StateVersionSerializer, id_method_name: :external_id, &:current_state_version
 
+  has_one :current_run, if: proc { |record|
+    record.current_run.present?
+  }, serializer: StateVersionSerializer, id_method_name: :external_id, &:current_run
+
   has_one :current_configuration_version, if: proc { |record|
     record.current_configuration_version.present?
   }, serializer: ConfigurationVersionSerializer, id_method_name: :external_id, &:current_configuration_version

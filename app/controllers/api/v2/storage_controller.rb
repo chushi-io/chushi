@@ -148,6 +148,10 @@ module Api
           head :bad_request and return
         end
         @plan.save!
+
+        if @object['filename'] == 'redacted.json'
+          ProcessPlanJob.perform_async(@plan.id)
+        end
         head :created
       end
 
@@ -198,12 +202,16 @@ module Api
       end
 
       def read_logs
-        # NOTE: To satisfy the CLI, we return no_content
-        # regardless of wether the file exists or not
         head :no_content and return if @plan.logs.blank?
 
         contents = decrypt(@plan.logs)
-        render body: contents, layout: false
+        if params[:limit] && params[:offset]
+          start = params[:offset].to_i
+          end_index = params[:offset].to_i + params[:limit].to_i
+          render body: contents[start..end_index], layout: false
+        else
+          render body: contents, layout: false
+        end
       end
 
       def get_uploaded_file(path)
