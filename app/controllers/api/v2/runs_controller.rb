@@ -20,24 +20,33 @@ module Api
         # We don't handle runs for local workspaces
         render json: nil, status: :bad_request and return if @workspace.execution_mode == 'local'
 
-        if run_params['plan_only']
+        if run_params['save_plan'] == false
           authorize! @workspace, to: :can_queue_run?
         else
           authorize! @workspace, to: :can_queue_apply?
         end
 
         @run = @workspace.organization.runs.new(run_params)
+        @run.workspace = @workspace
+
         @run.configuration_version = if run_params['configuration_version_id']
                                        ConfigurationVersion.find_by(external_id: run_params['configuration_version_id'])
                                      else
                                        @workspace.current_configuration_version
                                      end
-        @run.workspace = @workspace
+
+        if @run.message.nil?
+          user_agent = request.headers['User-Agent']
+          if user_agent.start_with?('OpenTofu')
+            @run.message = "Triggered by CLI"
+          end
+        end
 
         begin
           RunCreator.call(@run)
           render json: ::RunSerializer.new(@run, {}).serializable_hash, status: :created
-        rescue StandardError
+        rescue StandardError => error
+          Rails.logger.error error
           render json: nil, status: :internal_server_error
         end
       end
@@ -100,13 +109,22 @@ module Api
       end
 
       def run_params
-        map_params([
-                     'plan-only',
-                     :message,
-                     :workspace,
-                     'is-destroy',
-                     'configuration-version'
-                   ])
+        map_params(%i[
+          allow-empty-apply
+          allow-config-generation
+          auto-apply
+          debugging-mode
+          is-destroy
+          message
+          refresh
+          refresh-only
+          replace-addrs
+          target-addrs
+          plan-only
+          save-plan
+          workspace
+          configuration-version
+        ])
       end
     end
   end

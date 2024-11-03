@@ -13,12 +13,14 @@ class RunCreator < ApplicationService
 
   def call
     ActiveRecord::Base.transaction do
+
+
       @plan = @run.organization.plans.create!(
         execution_mode: @run.workspace.execution_mode,
         status: 'pending'
       )
       @run.plan = @plan
-      unless @run.plan_only
+      if @run.plan_only == false || @run.save_plan
         @apply = @run.organization.applies.create!(
           execution_mode: @run.workspace.execution_mode
         )
@@ -90,7 +92,6 @@ class RunCreator < ApplicationService
       # If the configuration version was created already
       # we can create the job. If it wasn't, kick off the
       # job to create a configuration version instead
-      Rails.logger.debug @run.configuration_version
       if @run.configuration_version.present?
         RunCreatedJob.perform_async(@run.id)
       elsif @run.configuration_version.nil?

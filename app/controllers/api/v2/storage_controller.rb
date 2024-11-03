@@ -10,7 +10,6 @@ module Api
 
       before_action :load_storage_object
       def show
-        Rails.logger.debug @object.to_json
         case @object['class']
         when 'StateVersion'
           read_state_version
@@ -20,6 +19,9 @@ module Api
           read_module_version
         when 'ProviderVersionPlatform'
           read_provider_version
+        when 'Apply'
+          puts "reading apply file"
+          read_apply_file
         else
           head :bad_request
         end
@@ -35,6 +37,8 @@ module Api
           upload_state_version
         when 'Plan'
           upload_plan_files
+        when 'Apply'
+          upload_apply_files
         when 'RegistryModuleVersion'
           upload_module_version
         when 'ProviderVersionPlatform'
@@ -155,6 +159,18 @@ module Api
         head :created
       end
 
+      def upload_apply_files
+        @apply = Apply.find(@object['id'])
+        file = get_uploaded_file(@object['id'])
+        case @object['filename']
+        when 'logs'
+          @apply.logs = file
+        else
+          head :bad_request and return
+        end
+        @apply.save!
+      end
+
       def read_plan_file
         @plan = Plan.find(@object['id'])
         case @object['filename']
@@ -165,9 +181,20 @@ module Api
         when 'tfplan'
           read_tfplan
         when 'logs'
-          read_logs
+          read_logs(@plan.logs)
         when 'redacted.json'
           read_redacted_json
+        else
+          head :bad_request
+        end
+      end
+
+      def read_apply_file
+        @apply = Apply.find(@object['id'])
+
+        case @object['filename']
+        when 'logs'
+          read_logs(@apply.logs)
         else
           head :bad_request
         end
@@ -201,10 +228,10 @@ module Api
         render body: contents, layout: false
       end
 
-      def read_logs
-        head :no_content and return if @plan.logs.blank?
+      def read_logs(obj)
+        head :no_content and return unless obj.present?
 
-        contents = decrypt(@plan.logs)
+        contents = decrypt(obj)
         if params[:limit] && params[:offset]
           start = params[:offset].to_i
           end_index = params[:offset].to_i + params[:limit].to_i

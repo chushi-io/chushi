@@ -12,11 +12,7 @@ class ProcessPlanJob
       Vault::Rails.decrypt('transit', 'chushi_storage_contents', @plan.redacted_json.read)
     )
 
-    if @parsed_json['resource_changes'].length == 0
-      @plan.update(has_changes: false)
-      @plan.run.update(has_changes: false, status: 'planned_and_finished')
-      return
-    end
+    has_changes = false
 
     additions = 0
     changes = 0
@@ -38,17 +34,30 @@ class ProcessPlanJob
     # 	ActionDelete Action = "delete"
     @parsed_json['resource_changes'].each do |change|
       actions = change['change']['actions']
+      # Not accounted for here is "no-op"?
       if actions.include?('create')
         additions += 1
-      elsif actions.incldue?('update')
+        has_changes = true
+      elsif actions.include?('update')
         changes += 1
+        has_changes = true
       elsif actions.include?('delete')
         destructions += 1
+        has_changes = true
+      elsif actions.include?('no-op')
+        # For now, its a no-op :shrug:
       end
 
       if change['change']['importing']
+        has_changes = true
         imports += 1
       end
+    end
+
+    unless has_changes
+      @plan.update(has_changes: false)
+      @plan.run.update(has_changes: false, status: 'planned_and_finished')
+      return
     end
 
     update_attrs = {
