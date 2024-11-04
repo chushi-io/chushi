@@ -1,0 +1,23 @@
+{
+  "run": {
+    "workspace": {
+      "auto_apply": true
+    }
+  },
+  "plan": {
+    "resource_changes": [
+      {
+        "type": "aws_security_group",
+        "change": {
+          "after": {
+            "ingress": [{
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            }]
+          }
+        }
+      }
+    ]
+  }
+}

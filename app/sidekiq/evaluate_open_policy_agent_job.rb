@@ -22,6 +22,8 @@ class EvaluateOpenPolicyAgentJob
                                  input:
                                })
       Rails.logger.debug response
+
+      HTTParty.post("#{Chushi.opa.endpoint}/")
     end
 
     # Do something
