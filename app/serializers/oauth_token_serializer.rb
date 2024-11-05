@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OauthTokenSerializer < ApplicationSerializer
   set_type 'oauth-tokens'
 

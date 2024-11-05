@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OauthClient < ApplicationRecord
   before_create :set_auth_identifier
 
