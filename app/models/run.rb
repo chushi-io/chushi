@@ -18,4 +18,19 @@ class Run < ApplicationRecord
   }
 
   before_create -> { generate_id('run') }
+
+  def has_task_stage(stage)
+    task_stages.find { |task_stage| task_stage.stage == stage }
+  end
+
+  def is_confirmable?
+    return false unless status == 'planned_and_saved'
+
+    if workspace.vcs_connection.present?
+      # This should be updated to support VCS connections
+      return false
+    end
+
+    true
+  end
 end

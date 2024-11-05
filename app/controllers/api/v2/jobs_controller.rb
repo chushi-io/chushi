@@ -22,6 +22,7 @@ module Api
                 .select('DISTINCT ON (workspace_id) *')
                 .where(agent_pool_id: params[:id])
                 .where(locked: false)
+                .where(status: 'pending')
                 .order(workspace_id: :asc, created_at: :desc)
                 .limit(10)
         render json: ::JobSerializer.new(@jobs, {}).serializable_hash
