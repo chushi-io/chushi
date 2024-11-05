@@ -62,5 +62,13 @@ class ProcessPlanJob
       has_changes: true,
       status: 'planned_and_saved'
     )
+
+    if @plan.run.is_confirmable? && @plan.run.auto_apply
+      Rails.logger.debug 'auto applying run'
+      @plan.run.update(status: 'confirmed')
+      RunConfirmedJob.perform_async(@plan.run.id)
+    else
+      Rails.logger.debug 'run is not confirmable, or auto apply not set'
+    end
   end
 end
