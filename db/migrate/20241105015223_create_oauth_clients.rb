@@ -1,7 +1,7 @@
 class CreateOauthClients < ActiveRecord::Migration[7.1]
   def change
     create_table :oauth_clients, id: :uuid do |t|
-      t.string :external_id
+      t.string :external_id, index: { unique: true }
 
       t.string :connect_path
       t.string :service_provider

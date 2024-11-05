@@ -20,5 +20,6 @@ class OauthClientSerializer < ApplicationSerializer
   attribute :organization_scoped
 
   belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
+  has_many :oauth_tokens, serializer: OauthTokenSerializer, id_method_name: :external_id, &:oauth_tokens
 
 end

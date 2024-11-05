@@ -5,6 +5,7 @@ class OauthClient < ApplicationRecord
   vault_lazy_decrypt!
 
   belongs_to :organization
+  has_many :oauth_tokens
 
   vault_attribute :secret
   vault_attribute :private_key
