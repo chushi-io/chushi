@@ -19,7 +19,8 @@ class WellKnownController < ApplicationController
     render json: {
       client: application.uid,
       authority: "https://#{Chushi.domain}",
-      redirect_uri: application.redirect_uri
+      redirect_uri: application.redirect_uri,
+      github_setup_url: "https://github.com/apps/#{Chushi.github.application.name}/installations/new"
     }
   end
 end
