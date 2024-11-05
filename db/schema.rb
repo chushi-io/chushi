@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_03_183224) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_05_015223) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -231,6 +231,29 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_03_183224) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
+  end
+
+  create_table "oauth_clients", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.string "connect_path"
+    t.string "service_provider"
+    t.string "service_provider_display_name"
+    t.string "name"
+    t.string "auth_identifier"
+    t.string "http_url"
+    t.string "api_url"
+    t.string "key"
+    t.string "secret_encrypted"
+    t.string "rsa_public_key"
+    t.string "private_key_encrypted"
+    t.string "oauth_token_string_encrypted"
+    t.boolean "organization_scoped"
+    t.uuid "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["auth_identifier"], name: "index_oauth_clients_on_auth_identifier", unique: true
+    t.index ["external_id"], name: "index_oauth_clients_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_oauth_clients_on_organization_id"
   end
 
   create_table "oauth_openid_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -915,6 +938,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_03_183224) do
   add_foreign_key "notification_delivery_responses", "notification_configurations"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "oauth_clients", "organizations"
   add_foreign_key "oauth_openid_requests", "oauth_access_grants", column: "access_grant_id", on_delete: :cascade
   add_foreign_key "organization_memberships", "organizations"
   add_foreign_key "organization_memberships", "users"

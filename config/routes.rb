@@ -75,6 +75,9 @@ Rails.application.routes.draw do
         post 'organization-memberships', action: :create, controller: :organization_memberships
         get 'organization-memberships', action: :index, controller: :organization_memberships
 
+        post 'oauth-clients', action: :create, controller: :oauth_clients
+        get 'oauth-clients', action: :index, controller: :oauth_clients
+
         post :workspaces, action: :create, controller: :workspaces
 
         get 'ssh-keys', action: :index, controller: :ssh_keys
@@ -193,6 +196,13 @@ Rails.application.routes.draw do
           get 'jobs', action: :index, controller: :jobs
         end
       end
+
+      resources :oauth_clients, path: 'oauth-clients', except: %i[index create] do
+        member do
+          get 'oauth-tokens', action: :index, controller: :oauth_tokens
+        end
+      end
+      resources :oauth_tokens, path: 'oauth-tokens', except: %i[index create]
 
       resources :policies, except: %i[index create] do
         member do

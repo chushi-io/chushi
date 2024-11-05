@@ -11,3 +11,7 @@ storage:
     policies: ""
     providers: ""
     state_versions: ""
+
+github:
+  application:
+    name:
