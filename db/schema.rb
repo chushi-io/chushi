@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_05_015223) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_05_023639) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_05_015223) do
     t.text "logs"
     t.index ["external_id"], name: "index_applies_on_external_id", unique: true
     t.index ["organization_id"], name: "index_applies_on_organization_id"
+  end
+
+  create_table "cloud_providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "organization_id"
+    t.string "cloud"
+    t.string "name"
+    t.string "display_name"
+    t.string "credential_id"
+    t.string "credential_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_cloud_providers_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_cloud_providers_on_organization_id"
   end
 
   create_table "configuration_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -260,6 +274,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_05_015223) do
     t.uuid "access_grant_id", null: false
     t.string "nonce", null: false
     t.index ["access_grant_id"], name: "index_oauth_openid_requests_on_access_grant_id"
+  end
+
+  create_table "oauth_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.string "service_provider_user"
+    t.boolean "has_ssh_key"
+    t.uuid "oauth_client_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_oauth_tokens_on_external_id", unique: true
+    t.index ["oauth_client_id"], name: "index_oauth_tokens_on_oauth_client_id"
   end
 
   create_table "organization_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -927,6 +952,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_05_015223) do
   add_foreign_key "agent_pools", "organizations"
   add_foreign_key "agents", "agent_pools"
   add_foreign_key "applies", "organizations"
+  add_foreign_key "cloud_providers", "organizations"
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
   add_foreign_key "jobs", "agent_pools"
@@ -940,6 +966,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_05_015223) do
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_clients", "organizations"
   add_foreign_key "oauth_openid_requests", "oauth_access_grants", column: "access_grant_id", on_delete: :cascade
+  add_foreign_key "oauth_tokens", "oauth_clients"
   add_foreign_key "organization_memberships", "organizations"
   add_foreign_key "organization_memberships", "users"
   add_foreign_key "organization_users", "organizations"
