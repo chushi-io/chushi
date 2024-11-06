@@ -57,6 +57,9 @@ Rails.application.routes.draw do
         get 'agent-pools', action: :index, controller: 'agents'
         post 'agent-pools', action: :create, controller: 'agents'
 
+        get 'cloud-providers', action: :index, controller: :cloud_providers
+        post 'cloud-providers', action: :create, controller: :cloud_providers
+
         get 'tasks', action: :index, controller: 'run_tasks'
         post 'tasks', action: :create, controller: 'run_tasks'
 
@@ -99,7 +102,6 @@ Rails.application.routes.draw do
                                                                       controller: :modules
         delete 'registry-modules/private/:namespace/:name/:provider/:version', action: :destroy,
                                                                                controller: :module_versions
-
         # Routes for registry providers
         get 'registry-providers', action: :index, controller: :providers
         post 'registry-providers', action: :create, controller: :providers
@@ -202,8 +204,9 @@ Rails.application.routes.draw do
           get 'oauth-tokens', action: :index, controller: :oauth_tokens
         end
       end
-      resources :oauth_tokens, path: 'oauth-tokens', except: %i[index create]
 
+      resources :oauth_tokens, path: 'oauth-tokens', except: %i[index create]
+      resources :cloud_providers, path: 'cloud-providers', except: %i[index create]
       resources :policies, except: %i[index create] do
         member do
           put 'upload', action: :upload

@@ -37,6 +37,10 @@ class OrganizationPolicy < ApplicationPolicy
     is_organization_token || in_owners_team?(record)
   end
 
+  def can_manage_cloud_providers?
+    is_organization_token || in_owners_team?(record)
+  end
+
   # We only allow admin organization members
   # or the organization owner
   # to create teams

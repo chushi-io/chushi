@@ -25,6 +25,7 @@ class Organization < ApplicationRecord
   has_many :variable_sets
   has_many :ssh_keys
   has_many :oauth_clients
+  has_many :cloud_providers
 
   has_many :registry_modules
   has_many :providers
