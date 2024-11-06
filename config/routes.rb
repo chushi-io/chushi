@@ -207,6 +207,7 @@ Rails.application.routes.draw do
 
       resources :oauth_tokens, path: 'oauth-tokens', except: %i[index create]
       resources :cloud_providers, path: 'cloud-providers', except: %i[index create]
+      resources :virtual_networks, path: 'virtual-networks', except: %i[index create]
       resources :policies, except: %i[index create] do
         member do
           put 'upload', action: :upload

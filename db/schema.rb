@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_05_023639) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_06_031815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -837,6 +837,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_05_023639) do
     t.index ["organization_id"], name: "index_vcs_connections_on_organization_id"
   end
 
+  create_table "virtual_networks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "organization_id"
+    t.string "cloud"
+    t.string "region"
+    t.string "cidr_block"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_virtual_networks_on_external_id", unique: true
+    t.index ["organization_id"], name: "index_virtual_networks_on_organization_id"
+  end
+
   create_table "workspace_policy_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "workspace_id"
     t.uuid "policy_set_id"
@@ -1014,6 +1026,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_05_023639) do
   add_foreign_key "variables", "variable_sets"
   add_foreign_key "variables", "workspaces"
   add_foreign_key "vcs_connections", "organizations"
+  add_foreign_key "virtual_networks", "organizations"
   add_foreign_key "workspace_policy_sets", "policy_sets"
   add_foreign_key "workspace_policy_sets", "workspaces"
   add_foreign_key "workspace_resources", "organizations"
