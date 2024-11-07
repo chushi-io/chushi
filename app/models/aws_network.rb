@@ -1,0 +1,2 @@
+class AwsNetwork < ApplicationRecord
+end
