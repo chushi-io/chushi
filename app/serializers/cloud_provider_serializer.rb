@@ -16,4 +16,6 @@ class CloudProviderSerializer < ApplicationSerializer
   attribute :gcp_service_account_email
 
   attribute :created_at
+
+  belongs_to :organization, serializer: OrganizationSerializer, id_method_name: :name, &:organization
 end
