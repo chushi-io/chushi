@@ -27,6 +27,7 @@ gem 'jsonapi-serializer', '~> 2.2'
 
 # Cloud SDKs
 gem 'aws-sdk-s3', '~> 1'
+gem 'aws-sdk-ec2', '~> 1'
 
 # Authentication / Authorization
 gem 'action_policy'

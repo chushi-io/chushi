@@ -27,6 +27,8 @@ class Organization < ApplicationRecord
   has_many :oauth_clients
   has_many :cloud_providers
 
+  has_many :virtual_networks
+
   has_many :registry_modules
   has_many :providers
 

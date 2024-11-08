@@ -9,6 +9,8 @@ class CreateVirtualNetworks < ActiveRecord::Migration[7.1]
       t.string :region
       t.string :cidr_block
 
+      t.belongs_to :network_attachable, polymorphic: true, type: :uuid
+
       t.timestamps
     end
   end

@@ -2,11 +2,15 @@ class CreateAwsNetworks < ActiveRecord::Migration[7.1]
   def change
     create_table :aws_networks, id: :uuid do |t|
       t.string :external_id, index: { unique: true }
+
       t.references :cloud_provider, foreign_key: true, type: :uuid
 
       t.string :name
       t.string :region
       t.string :cidr_block
+      t.string :status
+      t.string :vpc_id
+      t.string :vpc_arn
 
       t.timestamps
     end

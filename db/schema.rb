@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_06_031815) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_07_022309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_06_031815) do
     t.text "logs"
     t.index ["external_id"], name: "index_applies_on_external_id", unique: true
     t.index ["organization_id"], name: "index_applies_on_organization_id"
+  end
+
+  create_table "aws_networks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "external_id"
+    t.uuid "cloud_provider_id"
+    t.string "name"
+    t.string "region"
+    t.string "cidr_block"
+    t.string "status"
+    t.string "vpc_id"
+    t.string "vpc_arn"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cloud_provider_id"], name: "index_aws_networks_on_cloud_provider_id"
+    t.index ["external_id"], name: "index_aws_networks_on_external_id", unique: true
   end
 
   create_table "cloud_providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -840,12 +855,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_06_031815) do
   create_table "virtual_networks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "external_id"
     t.uuid "organization_id"
+    t.string "name"
     t.string "cloud"
     t.string "region"
     t.string "cidr_block"
+    t.string "network_attachable_type"
+    t.uuid "network_attachable_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["external_id"], name: "index_virtual_networks_on_external_id", unique: true
+    t.index ["network_attachable_type", "network_attachable_id"], name: "index_virtual_networks_on_network_attachable"
     t.index ["organization_id"], name: "index_virtual_networks_on_organization_id"
   end
 
@@ -964,6 +983,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_06_031815) do
   add_foreign_key "agent_pools", "organizations"
   add_foreign_key "agents", "agent_pools"
   add_foreign_key "applies", "organizations"
+  add_foreign_key "aws_networks", "cloud_providers"
   add_foreign_key "cloud_providers", "organizations"
   add_foreign_key "configuration_versions", "organizations"
   add_foreign_key "configuration_versions", "workspaces"
