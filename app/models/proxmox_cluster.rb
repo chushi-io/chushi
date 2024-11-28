@@ -1,0 +1,2 @@
+class ProxmoxCluster < ApplicationRecord
+end

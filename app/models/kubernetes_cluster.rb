@@ -1,0 +1,2 @@
+class KubernetesCluster < ApplicationRecord
+end
